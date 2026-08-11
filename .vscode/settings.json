@@ -1,4 +1,11 @@
 {
+	"files.associations": {
+		"bun.lock": "jsonc"
+	},
+	"cssVariables.lookupFiles": [
+		"**/*.css",
+		"node_modules/@mantine/core/styles.css"
+	],
 	"css.validate": false,
 	"less.validate": false,
 	"scss.validate": false,

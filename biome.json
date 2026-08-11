@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/src/routeTree.gen.ts", "!**/public"]
+		"includes": ["**", "!**/src/routeTree.gen.ts", "!**/public", "!**/cdk.out"]
 	},
 	"formatter": {
 		"enabled": true,
@@ -20,14 +20,18 @@
 			"complexity": {
 				"useArrowFunction": "error"
 			},
+			"correctness": {
+				"noNestedComponentDefinitions": "error",
+				"noReactPropAssignments": "error",
+				"useUniqueElementIds": "error"
+			},
+			"performance": {
+				"noJsxPropsBind": "error"
+			},
 			"nursery": {
 				"useExplicitReturnType": "error",
-				"useSortedClasses": {
-					"level": "warn",
-					"options": {
-						"functions": ["cn", "cva", "clsx"]
-					}
-				}
+				"noFloatingPromises": "error",
+				"noMisusedPromises": "error"
 			}
 		}
 	},
@@ -37,9 +41,6 @@
 		}
 	},
 	"css": {
-		"parser": {
-			"tailwindDirectives": true
-		},
 		"linter": {
 			"enabled": true
 		}
@@ -53,18 +54,29 @@
 					"options": {
 						"sortBareImports": true,
 						"groups": [
-							{ "kind": "!bare", "source": [":BUN:", ":NODE:"] },
+							{
+								"kind": "!bare",
+								"source": [":BUN:", ":NODE:"]
+							},
 							":BLANK_LINE:",
 							{
 								"kind": "!bare",
 								"source": [":PACKAGE_WITH_PROTOCOL:", ":PACKAGE:"]
 							},
 							":BLANK_LINE:",
-							{ "kind": "!bare", "source": ":ALIAS:" },
+							{
+								"kind": "!bare",
+								"source": ":ALIAS:"
+							},
 							":BLANK_LINE:",
-							{ "kind": "!bare", "source": ":PATH:" },
+							{
+								"kind": "!bare",
+								"source": ":PATH:"
+							},
 							":BLANK_LINE:",
-							{ "kind": "bare" }
+							{
+								"kind": "bare"
+							}
 						]
 					}
 				}
