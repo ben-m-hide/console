@@ -7,8 +7,23 @@ updates:
     groups:
       dev-dependencies:
         dependency-type: "development"
+        # Exactly-pinned packages get their own individual PR — that's the
+        # whole point of pinning them (see CONTRIBUTING.md's Dependency
+        # pinning policy): a nursery-tier Biome rule change, or a large new
+        # dependency surface with no `bun audit` allowlist, should land as
+        # its own reviewable diff, not bundled into an unrelated weekly PR.
+        exclude-patterns:
+          - "@biomejs/biome"
+          - "aws-cdk"
+          - "aws-cdk-lib"
+          - "constructs"
+          - "@playwright/test"
       production-dependencies:
         dependency-type: "production"
+        exclude-patterns:
+          - "hono"
+          - "@hono/zod-openapi"
+          - "@scalar/hono-api-reference"
 
   - package-ecosystem: "github-actions"
     directory: "/"
