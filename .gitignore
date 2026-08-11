@@ -31,6 +31,10 @@ src/routeTree.gen.ts
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
+
+# Claude Code personal/local overrides — .claude/CLAUDE.md and future
+# rules/skills/commands/settings.json are project-shared, committed.
+.claude/settings.local.json
 .idea
 .DS_Store
 *.suo

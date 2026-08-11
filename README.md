@@ -99,6 +99,8 @@ bunx cdk synth                     # synthesize the CDK hosting stack (see infra
 
 Dev workflow notes are in [`CONTRIBUTING.md`](./CONTRIBUTING.md); vulnerability reporting is in [`SECURITY.md`](./SECURITY.md). No `CODEOWNERS` or PR/issue templates — those earn their keep with more than one contributor, and this is currently solo.
 
+[`.claude/CLAUDE.md`](./.claude/CLAUDE.md) is a project-level instructions file for Claude Code — hand-written, not `/init`-generated, kept short by linking to this README/`CONTRIBUTING.md`/`docs/adr/` instead of restating them. `./CLAUDE.md` and `./.claude/CLAUDE.md` load identically; `.claude/` was chosen to group it with whatever rules/skills/commands/settings join it later (see `TODO.md`) rather than leaving those scattered at the repo root. `infra/` and `packages/api/` don't have their own yet (per-directory `CLAUDE.md` files load only on demand when Claude reads there) — split them out if either area's guidance would otherwise bloat the root file.
+
 Task tracking is [`TODO.md`](./TODO.md) — the [todo-md](https://github.com/todo-md/todo-md) standard, chosen over GitHub Issues to keep task tracking in the repo alongside everything else here (ADRs, decisions), rather than the first thing living outside it.
 
 ## License

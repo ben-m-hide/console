@@ -25,8 +25,8 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 
 ## Tooling / project setup
 
-- [ ] Project-level `CLAUDE.md` (split off as its own task, not forgotten)
 - [ ] Push to a real GitHub remote — there is currently none (`git remote -v` is empty), so CI has never actually executed on GitHub's runners; every "CI passes" claim so far is from reproducing the exact command sequence locally, not a real run
+- [ ] Populate `.claude/` over time as real needs come up — agents, commands, skills, `settings.json`, and per-directory `CLAUDE.md` for `infra/`/`packages/api/` (see README's Contributing/security section for the trigger on that last one). Nothing pre-built; add each only when there's an actual repeated task it would serve.
 
 ## Follow-up from adversarial review (2026-08-10)
 
@@ -86,6 +86,7 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 - [x] `release-please` for automated per-package CHANGELOG/versioning from existing Conventional Commits
 - [x] `SECURITY.md`, `CONTRIBUTING.md`
 - [x] This file
+- [x] Project-level `CLAUDE.md` — researched Claude Code's actual CLAUDE.md/monorepo docs first (not guessed), hand-written rather than `/init`-generated, kept under 200 lines by linking to README/CONTRIBUTING/ADRs instead of duplicating them
 
 ## Fixes from adversarial review (2026-08-10)
 
