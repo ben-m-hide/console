@@ -1,11 +1,11 @@
 ---
 name: run-console
-description: Build, run, and screenshot the console-next frontend (the Vite/React SPA at the repo root). Use when asked to start the console, take a screenshot of its UI, or verify it renders.
+description: Build, run, and screenshot the console-next frontend (the Vite/React SPA in apps/web). Use when asked to start the console, take a screenshot of its UI, or verify it renders.
 ---
 
 Driven via the real Playwright Test suite in `packages/e2e/` — not a bespoke script. Playwright's own `webServer` config starts the Vite dev server, waits for it to be ready, runs the test, and shuts the server down afterward; there's no manual background-launch/poll/kill needed.
 
-This is the repo root (the frontend is the root package, not a `packages/console/` — see `docs/adr/0008-hono-rest-openapi-backend.md` for why). A sibling `run-api` skill inside `packages/api/.claude/skills/` covers the backend. `packages/e2e/` is a third workspace package, holding only the Playwright Test suite (see `docs/adr/` for why it's separate from the root rather than living alongside the app it tests).
+This is `apps/web` — its own Bun workspace package (see `docs/adr/0011-apps-and-packages-workspace-restructure.md`; it used to be the root package, see `docs/adr/0008-hono-rest-openapi-backend.md` for the original reasoning that ADR 0011 supersedes). A sibling `run-api` skill inside `apps/api/.claude/skills/` covers the backend. `packages/e2e/` is a third workspace package, holding only the Playwright Test suite (see `docs/adr/0009` for why it's separate rather than living alongside the app it tests).
 
 ## Prerequisites / Setup
 
@@ -16,7 +16,7 @@ bunx playwright install chromium   # one-time; downloads to ~/Library/Caches/ms-
 
 ## Build
 
-None. `bun run dev` (invoked by Playwright's `webServer` config) serves the frontend directly.
+None. `bun run dev` (invoked by Playwright's `webServer` config, run from the repo root — it delegates to `apps/web` via Bun's `--filter`) serves the frontend directly.
 
 ## Run (agent path)
 

@@ -1,11 +1,11 @@
 ---
 name: run-api
-description: Build, run, and smoke-test the console-next backend (packages/api, a Hono REST API). Use when asked to start the API, run its smoke test, verify it's up, or check /health, /doc, or /reference.
+description: Build, run, and smoke-test the console-next backend (apps/api, a Hono REST API). Use when asked to start the API, run its smoke test, verify it's up, or check /health, /doc, or /reference.
 ---
 
 Hono API, no separate build step (Bun runs the TypeScript directly). Drive it via `.claude/skills/run-api/smoke.sh` — launches the dev server in the background, waits for readiness, hits every route, shuts down cleanly.
 
-All paths below are relative to `packages/api/` (this unit — a sibling `run-console` skill covers the frontend at the repo root).
+All paths below are relative to `apps/api/` (this unit — a sibling `run-console` skill covers the frontend at the repo root).
 
 ## Prerequisites / Setup
 
@@ -18,7 +18,7 @@ None. `bun run dev` runs `src/index.ts` directly.
 ## Run (agent path)
 
 ```bash
-cd packages/api
+cd apps/api
 ./.claude/skills/run-api/smoke.sh
 ```
 
@@ -37,7 +37,7 @@ kill $PID                             # confirmed to actually free the port — 
 
 ## Run (human path)
 
-`bun run dev` (from `packages/api/`) — same command, just don't background it. Ctrl-C to stop.
+`bun run dev` (from `apps/api/`) — same command, just don't background it. Ctrl-C to stop.
 
 ## Test
 

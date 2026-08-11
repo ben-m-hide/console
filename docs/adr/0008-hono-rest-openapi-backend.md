@@ -39,6 +39,8 @@ A hand-written-spec-first workflow was considered — it pairs naturally with **
 
 Decided against moving `src/` into a `packages/console/` to "properly" symmetrize the monorepo. A Bun workspace root doesn't need to be dependency-free, and every path that just went green after the ADR 0007 work — `vite.config.ts`'s alias, three tsconfigs plus the `infra` project reference, `biome.json` includes, `vitest` `include`, the bundlesize globs, `cdk.json`'s `app` path, README, ADRs 0001–0007 — would need touching for zero functional gain. The frontend stays the root package indefinitely; this is the seam ADR 0007 flagged ("the monorepo-seam note") and it's now resolved as: **workspace for the API, root stays the frontend**, not a symmetric package split.
 
+> **Addendum (superseded):** this specific sub-decision — the frontend staying at the root instead of becoming its own workspace package — is reversed by `docs/adr/0011-apps-and-packages-workspace-restructure.md`. The cost/benefit calculus above was accurate for its time (one backend package, one spike route); it changed once `apps/ingestion` and `packages/shared` entered the plan and the `apps/`-for-deployables / `packages/`-for-shared-libraries convention was confirmed against real docs rather than assumed. Left as-written above rather than edited, so the original reasoning stays on record. The REST/OpenAPI-over-tRPC and Hono-over-Express/Fastify/NestJS decisions elsewhere in this ADR are untouched by that reversal.
+
 ## What was actually built
 
 - `packages/api/package.json` — `hono` and `@hono/zod-openapi` pinned exactly (no `^`), same reasoning as the CDK pin in ADR 0007: a new, large-ish dependency surface with no `bun audit` allowlist mechanism shouldn't float.

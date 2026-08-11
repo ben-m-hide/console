@@ -5,9 +5,14 @@
 			"package-name": "console-next",
 			"changelog-path": "CHANGELOG.md"
 		},
-		"packages/api": {
+		"apps/api": {
 			"release-type": "node",
 			"package-name": "@console-next/api",
+			"changelog-path": "CHANGELOG.md"
+		},
+		"apps/web": {
+			"release-type": "node",
+			"package-name": "@console-next/web",
 			"changelog-path": "CHANGELOG.md"
 		}
 	}

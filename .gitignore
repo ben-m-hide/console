@@ -24,7 +24,7 @@ packages/e2e/playwright-report
 packages/e2e/blob-report
 
 # TanStack Router generated file + plugin cache
-src/routeTree.gen.ts
+apps/web/src/routeTree.gen.ts
 .tanstack
 
 # Env files

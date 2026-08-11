@@ -5,8 +5,8 @@ This is a private, solo learning project (see [`LICENSE`](./LICENSE)) — this d
 ## Setup
 
 ```sh
-bun install    # installs the whole workspace (root + packages/api + packages/e2e)
-bun run dev    # frontend dev server
+bun install    # installs the whole workspace (apps/web + apps/api + packages/e2e)
+bun run dev    # frontend dev server (delegates to apps/web)
 ```
 
 See the [README](./README.md#commands) for the full command list, and [`docs/adr/`](./docs/adr/README.md) for why things are built the way they are — read the relevant ADR before changing a decision it documents, not after.
@@ -30,12 +30,12 @@ Only write an ADR (`docs/adr/NNNN-slug.md`) when a decision is hard to reverse, 
 
 ## Adding a new workspace package
 
-Bun workspaces (`"workspaces": ["packages/*"]` in the root `package.json`) — the frontend is deliberately **not** one of them, it's the root package (see `docs/adr/0008-hono-rest-openapi-backend.md` for why). A new package needs:
+Bun workspaces (`"workspaces": ["apps/*", "packages/*"]` in the root `package.json`). `apps/<name>` for a new deployable (a service with its own runtime target — mirrors `apps/web`, `apps/api`); `packages/<name>` for a shared internal library with no runtime of its own (see `docs/adr/0011-apps-and-packages-workspace-restructure.md` for the convention, and why the frontend moved off the root package to get here). A new package needs:
 
 - Its own `package.json` and `tsconfig.json`.
 - A project reference added to the root `tsconfig.json`'s `references` array — otherwise `tsc -b --noEmit` silently skips it. (This bit us before, in a different form: the removed `.nvmrc`/`engines.node` pin was decorative for the same underlying reason — a declaration nothing actually checks.)
 - An entry in `release-please-config.json` / `.release-please-manifest.json` if it should get its own versioned changelog.
-- `exactOptionalPropertyTypes`: try leaving it on first (it's on by default in every `tsconfig.app.json`-style config here) and only scope it off if a third-party library's own types don't satisfy it — checked, not assumed, for both `infra/` (had to turn it off, `aws-cdk-lib`'s types) and `packages/api` (didn't, Hono's types are clean).
+- `exactOptionalPropertyTypes`: try leaving it on first (it's on by default in every `tsconfig.app.json`-style config here) and only scope it off if a third-party library's own types don't satisfy it — checked, not assumed, for both `infra/` (had to turn it off, `aws-cdk-lib`'s types) and `apps/api` (didn't, Hono's types are clean).
 
 ## Dependency pinning policy
 

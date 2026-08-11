@@ -8,8 +8,8 @@ Full rationale for every non-obvious choice below lives in [`docs/adr/`](./docs/
 
 Bun workspace monorepo. TypeScript 7, strictest config, everywhere except `infra/` (see below).
 
-- **Root package** (frontend): Vite 8 + React 19 + TanStack Router (file-based, `src/routes/`) + Mantine (UI) + TanStack Query/Form + Zustand + Zod.
-- **`packages/api/`** (own workspace package): Hono 4 + `@hono/zod-openapi` — REST + OpenAPI, not tRPC. Spike stage: `/health`, `/doc`, `/reference` only.
+- **`apps/web/`**: Vite 8 + React 19 + TanStack Router (file-based, `src/routes/`) + Mantine (UI) + TanStack Query/Form + Zustand + Zod. See `docs/adr/0011-apps-and-packages-workspace-restructure.md` for why the frontend is its own workspace package, not the root.
+- **`apps/api/`**: Hono 4 + `@hono/zod-openapi` — REST + OpenAPI, not tRPC. Spike stage: `/health`, `/doc`, `/reference` only.
 - **`infra/`** (shares root `package.json`, not a workspace package): AWS CDK (TypeScript) — S3 + CloudFront. Synthesized, **not deployed**.
 - **Quality**: Biome (lint/format/import-order, everything except Markdown) + Prettier (Markdown only) + Vitest/RTL/axe-core + `bun audit`.
 - **Docs**: `README.md` (stack/commands/known quirks), `CONTRIBUTING.md` (dev workflow, pinning policy), `docs/adr/` (decisions), `TODO.md` (todo-md standard — action list, not rationale).
@@ -22,7 +22,7 @@ bunx vitest run <path>              # single test file
 bun run format:md / format:md:check # Markdown only — Biome doesn't cover it yet
 bun audit --audit-level=high
 bunx cdk synth                      # infra/ — never bootstrap/deploy, see Guardrails
-cd packages/api && bun run dev      # backend dev server
+cd apps/api && bun run dev          # backend dev server
 ```
 
 `bun run typecheck`/`build` run `codegen` (`tsr generate`) first — `src/routeTree.gen.ts` is gitignored and generated; without this they fail on a clean checkout (this bit us once, see `docs/adr/`).
