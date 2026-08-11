@@ -29,6 +29,13 @@ export class HostingStack extends Stack {
 		// (verified empirically — see docs/adr/0007-aws-s3-cloudfront-hosting.md).
 		// A strict policy needs a per-request nonce via a CloudFront Function,
 		// deferred until this is worth the extra edge-compute complexity.
+		//
+		// `connect-src 'self'` is explicit, not redundant with default-src: it's
+		// a deliberate placeholder that fails safe (blocks) until the API's real
+		// origin exists (see docs/adr/0008-hono-rest-openapi-backend.md) — without
+		// it, connect-src silently falls back to default-src and this line item
+		// would be invisible instead of a recorded, deliberate gap. Update this to
+		// the API's actual origin once the Lambda-vs-Fargate/domain decision lands.
 		const securityHeaders = new ResponseHeadersPolicy(
 			this,
 			"SecurityHeadersPolicy",
@@ -36,7 +43,7 @@ export class HostingStack extends Stack {
 				securityHeadersBehavior: {
 					contentSecurityPolicy: {
 						contentSecurityPolicy:
-							"default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+							"default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
 						override: true,
 					},
 					frameOptions: {
