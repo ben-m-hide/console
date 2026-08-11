@@ -34,7 +34,6 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 ## Testing
 
 - [ ] Real E2E coverage in `packages/e2e/` beyond the one smoke test — add flow coverage once a real interactive feature exists (see ADR 0009), and a cross-package test once the frontend actually calls the backend
-- [ ] Wire `packages/e2e` into CI — no CI step runs it at all yet, not even the existing smoke test (pre-existing gap, unrelated to PROJECT.md)
 
 ## Tooling / project setup
 
@@ -103,6 +102,10 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 - [x] `.claude/skills/new-adr` and `.claude/skills/new-workspace-package` — codify `CONTRIBUTING.md`'s ADR-writing and workspace-package checklists as invocable skills, researched against Claude Code's actual skills docs (rules vs. skills vs. subagents, `.claude/commands/` now merged into skills) rather than guessed
 - [x] `.claude/skills/run-console` and `packages/api/.claude/skills/run-api` via `/run-skill-generator` — both actually launched, driven, and verified (not paraphrased): the frontend originally via a bespoke Playwright screenshot driver (`chromium-cli` unavailable here, used the generator's own documented fallback), the backend via a `curl` smoke script. Found and documented a real gotcha in the process — two processes can both "successfully" listen on port 3000 (broad `*:3000` vs. loopback-only `[::1]:3000`) with no bind error, silently answering requests from the wrong one. Pulled the deferred Playwright dependency forward deliberately (confirmed with you first) rather than adding it silently.
 - [x] `packages/e2e` as its own workspace package (ADR 0009) — moved off the root package.json, swapped the bare `playwright` library for the real `@playwright/test` runner, replaced the hand-rolled background-launch/poll/kill sequence with Playwright's own `webServer` config, rewrote `run-console` to point at the real suite instead of the bespoke driver (deleted). Verified passing via `bunx playwright test`, screenshot actually looked at, not just trusted.
+
+## E2E in CI (2026-08-11)
+
+- [x] Wired `packages/e2e` into CI — added a root `e2e` script (`bun run --filter ./packages/e2e test`, matching the existing `dev`/`build`/`test` delegation pattern) and two steps to `ci.yml` (`bunx playwright install --with-deps chromium`, then `bun run e2e`). Verified by actually running it locally the same way CI will (`CI=1 bun run e2e`), not just adding the YAML.
 
 ## Remote (2026-08-11)
 

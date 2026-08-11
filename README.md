@@ -71,6 +71,8 @@ bun run test:coverage              # vitest run --coverage — same scope as abo
 bun run lint                       # biome check — whole workspace (apps/web, apps/api, infra/), file-tree-based, not workspace-filtered
 bun run lint:fix                   # biome check --write
 bun run typecheck                  # tsc -b --noEmit — whole workspace, via project references (apps/web, apps/api, packages/e2e, infra)
+bunx playwright install chromium   # one-time browser binary download, not part of bun install
+bun run e2e                        # playwright test — delegates to packages/e2e; also runs in CI now
 
 cd apps/api && bun run dev         # backend dev server (bun --watch)
 bunx cdk synth                     # synthesize the CDK hosting stack (see infra/)
