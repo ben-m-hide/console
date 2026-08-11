@@ -4,6 +4,32 @@
   "workspaces": {
     "": {
       "name": "console-next",
+      "devDependencies": {
+        "@biomejs/biome": "2.5.7",
+        "@commitlint/cli": "^21.2.1",
+        "@commitlint/config-conventional": "^21.2.0",
+        "@types/node": "^24.13.3",
+        "aws-cdk": "2.1135.1",
+        "aws-cdk-lib": "2.263.0",
+        "constructs": "10.8.1",
+        "lefthook": "^2.1.10",
+        "prettier": "^3.9.6",
+        "typescript": "^7.0.2",
+      },
+    },
+    "apps/api": {
+      "name": "@console-next/api",
+      "version": "0.0.0",
+      "dependencies": {
+        "@hono/zod-openapi": "1.5.2",
+        "@scalar/hono-api-reference": "0.11.13",
+        "hono": "4.13.1",
+        "zod": "^4.4.3",
+      },
+    },
+    "apps/web": {
+      "name": "@console-next/web",
+      "version": "0.0.0",
       "dependencies": {
         "@fontsource-variable/geist": "^5.3.0",
         "@mantine/core": "^9.5.1",
@@ -17,9 +43,6 @@
         "zustand": "^5.0.14",
       },
       "devDependencies": {
-        "@biomejs/biome": "2.5.7",
-        "@commitlint/cli": "^21.2.1",
-        "@commitlint/config-conventional": "^21.2.0",
         "@tanstack/devtools-vite": "^0.8.3",
         "@tanstack/react-devtools": "^0.10.9",
         "@tanstack/react-form-devtools": "^0.2.33",
@@ -30,35 +53,18 @@
         "@testing-library/jest-dom": "^7.0.0",
         "@testing-library/react": "^16.3.2",
         "@testing-library/user-event": "^14.6.3",
-        "@types/node": "^24.13.3",
         "@types/react": "^19.2.17",
         "@types/react-dom": "^19.2.3",
         "@vitejs/plugin-react": "^6.0.4",
         "@vitest/coverage-v8": "^4.1.10",
-        "aws-cdk": "2.1135.1",
-        "aws-cdk-lib": "2.263.0",
         "axe-core": "^4.13.0",
-        "constructs": "10.8.1",
         "jsdom": "^30.0.1",
-        "lefthook": "^2.1.10",
         "postcss": "^8.5.26",
         "postcss-preset-mantine": "^1.18.0",
         "postcss-simple-vars": "^7.0.1",
-        "prettier": "^3.9.6",
-        "typescript": "^7.0.2",
         "vite": "^8.2.0",
         "vite-plugin-bundlesize": "^0.3.0",
         "vitest": "^4.1.10",
-      },
-    },
-    "packages/api": {
-      "name": "@console-next/api",
-      "version": "0.0.0",
-      "dependencies": {
-        "@hono/zod-openapi": "1.5.2",
-        "@scalar/hono-api-reference": "0.11.13",
-        "hono": "4.13.1",
-        "zod": "^4.4.3",
       },
     },
     "packages/e2e": {
@@ -180,9 +186,11 @@
 
     "@commitlint/types": ["@commitlint/types@21.2.0", "", { "dependencies": { "conventional-commits-parser": "^7.0.0", "picocolors": "^1.1.1" } }, "sha512-7zVFCDB2reMvJH5dmbKnOQPjZEvjdJTH8jc0U/PIPU1r3/+vf5pD1HlfitV2MWsWXrvu7u39iY1lyLUPOaN0Gw=="],
 
-    "@console-next/api": ["@console-next/api@workspace:packages/api"],
+    "@console-next/api": ["@console-next/api@workspace:apps/api"],
 
     "@console-next/e2e": ["@console-next/e2e@workspace:packages/e2e"],
+
+    "@console-next/web": ["@console-next/web@workspace:apps/web"],
 
     "@conventional-changelog/git-client": ["@conventional-changelog/git-client@3.1.1", "", { "dependencies": { "@simple-libs/child-process-utils": "^2.0.0", "@simple-libs/stream-utils": "^2.0.0", "semver": "^7.5.2" }, "peerDependencies": { "conventional-commits-filter": "^6.0.1", "conventional-commits-parser": "^7.1.2" }, "optionalPeers": ["conventional-commits-filter", "conventional-commits-parser"] }, "sha512-w/q+UIVdWQMgXlziPIYfPlyDud+H8kcvSCzDQQoc/gid7yZzb6eNfAkNN4UlEcS2cVVh924jevsOIb36d0In2g=="],
 

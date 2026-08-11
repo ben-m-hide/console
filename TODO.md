@@ -4,9 +4,20 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 
 ## Backend
 
-- [ ] Pick the backend's first real feature/domain (m3ter-flavored toy domain vs. arbitrary — still open, see ADR 0008)
-- [ ] Wire up a test setup for `packages/api` once there's real behavior worth testing (`node` environment, not the root's `jsdom`)
-- [ ] Decide backend deploy runtime target: Lambda + API Gateway vs. Fargate/ECS (see ADR 0008) — blocked on having an AWS account
+- [ ] Wire up a test setup for `apps/api` once there's real behavior worth testing (`node` environment, not `apps/web`'s `jsdom`)
+- [ ] Sign up for Render (API + scheduled ingestion job) and Neon (Postgres) — see ADR 0010
+- [ ] Add `apps/ingestion` and `packages/shared` as new Bun workspace members once the football-analytics build starts — see ADR 0011 for the `apps/` (deployables) vs `packages/` (shared libraries) convention
+- [ ] Migrate backend compute from Render to AWS Lambda/Fargate + EventBridge once an AWS account is confirmed and approved (see ADR 0010) — update `connect-src` again at that point
+
+## Football analytics domain (see `PROJECT.md`, ADR 0010)
+
+- [ ] Confirm the football-analytics domain as the backend's first real feature (schema, ingestion job, API surface) rather than leaving it open per ADR 0008
+- [ ] Decide ingestion deploy shape — same Render image/different entrypoint vs. a separate service — deliberately deferred to build time (PROJECT.md §10), not decided now
+- [ ] Define the `/players/compare` percentile baseline explicitly when built: same position + competition + season, minimum 450 minutes played (PROJECT.md §4)
+- [ ] Don't display team logos or player photos — Sportmonks' terms require separately-sourced rights for those; use text/initials/placeholder icons instead (PROJECT.md §9)
+- [ ] Add `SPORTMONKS_API_KEY` to `.env.example` once `packages/ingestion` exists
+- [ ] Add basic rate limiting on public API endpoints (e.g. `hono-rate-limiter`) once real routes exist (PROJECT.md §9)
+- [ ] Confirm whether Sportmonks exposes a delta/"updated since" fixture-fetch endpoint before building the ingestion job — fall back to a rolling-window re-fetch (e.g. last 14 days) if not (PROJECT.md §3)
 
 ## Deployment
 
@@ -14,6 +25,7 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 - [ ] `cdk bootstrap` + first real deploy of the hosting stack (see ADR 0007)
 - [ ] OIDC-federated IAM role for GitHub Actions (no long-lived keys) + a CI deploy job
 - [ ] Sourcemap strip/upload strategy, tied to error tracking setup
+- [ ] Build the backend CD pipeline: Docker build, `drizzle-kit migrate` as an explicit pipeline step, deploy to Render (PROJECT.md §8) — not blocked by the AWS-account guardrail, can land independently of frontend CD
 
 ## Observability
 
@@ -22,16 +34,17 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 ## Testing
 
 - [ ] Real E2E coverage in `packages/e2e/` beyond the one smoke test — add flow coverage once a real interactive feature exists (see ADR 0009), and a cross-package test once the frontend actually calls the backend
+- [ ] Wire `packages/e2e` into CI — no CI step runs it at all yet, not even the existing smoke test (pre-existing gap, unrelated to PROJECT.md)
 
 ## Tooling / project setup
 
 - [ ] Push to a real GitHub remote — there is currently none (`git remote -v` is empty), so CI has never actually executed on GitHub's runners; every "CI passes" claim so far is from reproducing the exact command sequence locally, not a real run
 - [ ] Run `/verify` yourself — bundled, `disable-model-invocation: true`, so I can't invoke it; typing it directly records the real lint/typecheck/test/build/audit recipe into `.claude/skills/verify/`, replacing the guesswork-prone bundled default
-- [ ] Populate `.claude/` further as real needs come up — `settings.json`, subagents, per-directory `CLAUDE.md`/path-scoped rules for `infra/`/`packages/api/` (see README's Contributing/security section for the trigger on the latter). Nothing pre-built beyond what's already there; add each only when there's an actual repeated task it would serve.
+- [ ] Populate `.claude/` further as real needs come up — `settings.json`, subagents, per-directory `CLAUDE.md`/path-scoped rules for `infra/`/`apps/web/`/`apps/api/` (see README's Contributing/security section for the trigger on the latter). Nothing pre-built beyond what's already there; add each only when there's an actual repeated task it would serve.
 
 ## Follow-up from adversarial review (2026-08-10)
 
-- [ ] Set `connect-src` to the API's actual origin once the Lambda-vs-Fargate/domain decision lands — currently an explicit `'self'` placeholder (see ADR 0007/0008 cross-reference)
+- [ ] Set `connect-src` to the API's actual origin once it's deployed to Render — currently an explicit `'self'` placeholder (see ADR 0007/0008 cross-reference); will need updating again on the later AWS migration (ADR 0010)
 
 # BACKLOG
 
@@ -91,6 +104,10 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 - [x] `.claude/skills/new-adr` and `.claude/skills/new-workspace-package` — codify `CONTRIBUTING.md`'s ADR-writing and workspace-package checklists as invocable skills, researched against Claude Code's actual skills docs (rules vs. skills vs. subagents, `.claude/commands/` now merged into skills) rather than guessed
 - [x] `.claude/skills/run-console` and `packages/api/.claude/skills/run-api` via `/run-skill-generator` — both actually launched, driven, and verified (not paraphrased): the frontend originally via a bespoke Playwright screenshot driver (`chromium-cli` unavailable here, used the generator's own documented fallback), the backend via a `curl` smoke script. Found and documented a real gotcha in the process — two processes can both "successfully" listen on port 3000 (broad `*:3000` vs. loopback-only `[::1]:3000`) with no bind error, silently answering requests from the wrong one. Pulled the deferred Playwright dependency forward deliberately (confirmed with you first) rather than adding it silently.
 - [x] `packages/e2e` as its own workspace package (ADR 0009) — moved off the root package.json, swapped the bare `playwright` library for the real `@playwright/test` runner, replaced the hand-rolled background-launch/poll/kill sequence with Playwright's own `webServer` config, rewrote `run-console` to point at the real suite instead of the bespoke driver (deleted). Verified passing via `bunx playwright test`, screenshot actually looked at, not just trusted.
+
+## Workspace restructure (2026-08-11)
+
+- [x] Moved the frontend from the workspace root into `apps/web`, and `packages/api` into `apps/api` (ADR 0011, supersedes ADR 0008's original rejection of this) — new `apps/web/package.json`/`tsconfig.json`, root `package.json`/`tsconfig.json` slimmed to workspace-root/tooling/infra-deps only, root scripts delegate to `apps/web` via Bun's `--filter`. Fixed every concrete consequence found tracing the config graph: `.gitignore`'s path-anchored `routeTree.gen.ts` entry, `.vscode/settings.json`'s Mantine CSS lookup path, `release-please` manifest/config path rename plus a new `apps/web` entry, and moved `run-console` to `apps/web/.claude/skills/` to match `run-api`'s colocation. Verified via the full pipeline plus `packages/e2e`'s Playwright suite and `cdk synth`.
 
 ## Fixes from adversarial review (2026-08-11)
 

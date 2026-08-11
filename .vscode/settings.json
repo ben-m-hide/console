@@ -4,7 +4,7 @@
 	},
 	"cssVariables.lookupFiles": [
 		"**/*.css",
-		"node_modules/@mantine/core/styles.css"
+		"apps/web/node_modules/@mantine/core/styles.css"
 	],
 	"css.validate": false,
 	"less.validate": false,

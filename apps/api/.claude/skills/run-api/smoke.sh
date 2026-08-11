@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Launches the Hono API in the background, waits for readiness, hits every
 # route, checks a 404 falls through correctly, then shuts it down cleanly.
-# Run from packages/api/ (or pass PORT to avoid colliding with anything
+# Run from apps/api/ (or pass PORT to avoid colliding with anything
 # already on 3000 — see Gotchas in SKILL.md).
 set -euo pipefail
 
