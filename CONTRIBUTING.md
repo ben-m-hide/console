@@ -5,7 +5,7 @@ This is a private, solo learning project (see [`LICENSE`](./LICENSE)) — this d
 ## Setup
 
 ```sh
-bun install    # installs the whole workspace (root + packages/api)
+bun install    # installs the whole workspace (root + packages/api + packages/e2e)
 bun run dev    # frontend dev server
 ```
 

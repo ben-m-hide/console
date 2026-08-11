@@ -21,12 +21,13 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 
 ## Testing
 
-- [ ] Playwright E2E — add once there's a real user flow worth covering
+- [ ] Real E2E coverage in `packages/e2e/` beyond the one smoke test — add flow coverage once a real interactive feature exists (see ADR 0009), and a cross-package test once the frontend actually calls the backend
 
 ## Tooling / project setup
 
 - [ ] Push to a real GitHub remote — there is currently none (`git remote -v` is empty), so CI has never actually executed on GitHub's runners; every "CI passes" claim so far is from reproducing the exact command sequence locally, not a real run
-- [ ] Populate `.claude/` over time as real needs come up — agents, commands, skills, `settings.json`, and per-directory `CLAUDE.md` for `infra/`/`packages/api/` (see README's Contributing/security section for the trigger on that last one). Nothing pre-built; add each only when there's an actual repeated task it would serve.
+- [ ] Run `/verify` yourself — bundled, `disable-model-invocation: true`, so I can't invoke it; typing it directly records the real lint/typecheck/test/build/audit recipe into `.claude/skills/verify/`, replacing the guesswork-prone bundled default
+- [ ] Populate `.claude/` further as real needs come up — `settings.json`, subagents, per-directory `CLAUDE.md`/path-scoped rules for `infra/`/`packages/api/` (see README's Contributing/security section for the trigger on the latter). Nothing pre-built beyond what's already there; add each only when there's an actual repeated task it would serve.
 
 ## Follow-up from adversarial review (2026-08-10)
 
@@ -87,6 +88,9 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 - [x] `SECURITY.md`, `CONTRIBUTING.md`
 - [x] This file
 - [x] Project-level `CLAUDE.md` — researched Claude Code's actual CLAUDE.md/monorepo docs first (not guessed), hand-written rather than `/init`-generated, kept under 200 lines by linking to README/CONTRIBUTING/ADRs instead of duplicating them
+- [x] `.claude/skills/new-adr` and `.claude/skills/new-workspace-package` — codify `CONTRIBUTING.md`'s ADR-writing and workspace-package checklists as invocable skills, researched against Claude Code's actual skills docs (rules vs. skills vs. subagents, `.claude/commands/` now merged into skills) rather than guessed
+- [x] `.claude/skills/run-console` and `packages/api/.claude/skills/run-api` via `/run-skill-generator` — both actually launched, driven, and verified (not paraphrased): the frontend originally via a bespoke Playwright screenshot driver (`chromium-cli` unavailable here, used the generator's own documented fallback), the backend via a `curl` smoke script. Found and documented a real gotcha in the process — two processes can both "successfully" listen on port 3000 (broad `*:3000` vs. loopback-only `[::1]:3000`) with no bind error, silently answering requests from the wrong one. Pulled the deferred Playwright dependency forward deliberately (confirmed with you first) rather than adding it silently.
+- [x] `packages/e2e` as its own workspace package (ADR 0009) — moved off the root package.json, swapped the bare `playwright` library for the real `@playwright/test` runner, replaced the hand-rolled background-launch/poll/kill sequence with Playwright's own `webServer` config, rewrote `run-console` to point at the real suite instead of the bespoke driver (deleted). Verified passing via `bunx playwright test`, screenshot actually looked at, not just trusted.
 
 ## Fixes from adversarial review (2026-08-10)
 

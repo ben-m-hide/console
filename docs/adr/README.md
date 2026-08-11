@@ -12,6 +12,7 @@ One record per significant, hard-to-reverse, non-obvious decision — not every 
 | [0006](./0006-mantine-over-tailwind-shadcn.md)                | Mantine over Tailwind + shadcn/ui + Base UI                            | Accepted (supersedes the original Tailwind + shadcn/ui choice) |
 | [0007](./0007-aws-s3-cloudfront-hosting.md)                   | AWS S3 + CloudFront for hosting, over Cloudflare Pages/Vercel/Netlify  | Accepted — not deployed                                        |
 | [0008](./0008-hono-rest-openapi-backend.md)                   | Hono + REST/OpenAPI backend, as a Bun workspace alongside the frontend | Accepted — spike only, no real feature yet                     |
+| [0009](./0009-e2e-as-own-workspace-package.md)                | E2E tests as their own workspace package, not inside the frontend      | Accepted — one smoke test only                                 |
 
 ## Adding one
 
