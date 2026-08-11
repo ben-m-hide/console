@@ -9,6 +9,7 @@
 		{ "path": "./tsconfig.app.json" },
 		{ "path": "./tsconfig.node.json" },
 		{ "path": "./infra/tsconfig.json" },
-		{ "path": "./packages/api/tsconfig.json" }
+		{ "path": "./packages/api/tsconfig.json" },
+		{ "path": "./packages/e2e/tsconfig.json" }
 	]
 }

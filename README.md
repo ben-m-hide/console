@@ -33,7 +33,8 @@ console-next/
 ├── src/              ← frontend app (this is the root package, not packages/console)
 ├── infra/            ← AWS CDK hosting stack (not a workspace package — shares the root package.json)
 ├── packages/
-│   └── api/          ← Hono backend, its own Bun workspace package
+│   ├── api/          ← Hono backend, its own Bun workspace package
+│   └── e2e/          ← Playwright Test suite, its own Bun workspace package (see ADR 0009)
 └── docs/adr/
 ```
 
@@ -76,7 +77,7 @@ bunx cdk synth                     # synthesize the CDK hosting stack (see infra
 
 ## Deferred (chosen, not yet wired up)
 
-- **E2E:** Playwright — add when there's a real user flow worth covering end-to-end.
+- **E2E:** `packages/e2e` — a third workspace package holding a real Playwright Test suite, separate from both the root frontend and `packages/api` (see `docs/adr/0009-e2e-as-own-workspace-package.md` for why: E2E naturally spans both, unlike a unit test). `bunx playwright install chromium` for the browser binary — a separate ~270MB download, cached outside the repo, not part of `bun install`. Playwright's own `webServer` config manages the dev server's lifecycle — no hand-rolled background-launch/poll/kill script. Currently one smoke test (`tests/smoke.spec.ts`) proving the scaffold renders with zero console errors; add real flow coverage once a real interactive feature exists.
 - **Error tracking** (e.g. Sentry) — zero production observability right now; add before shipping anything real. Bundle source map upload/strip (see Known quirks) belongs here.
 - **Deployment target** — decided: AWS S3 + CloudFront via CDK (see `docs/adr/0007-aws-s3-cloudfront-hosting.md`). SPA-fallback routing and a CSP/security-headers policy are built into `infra/`; a per-request nonce for a _stricter_ CSP (dropping `unsafe-inline`) is still deferred, along with the build-time-vs-runtime env var strategy for promoting one build across environments — neither is needed until there's a real deploy pipeline and more than one environment.
 - **Actually deploying** — `cdk bootstrap`/`cdk deploy` haven't run against any AWS account. Needs: a confirmed AWS account, an OIDC-federated IAM role for GitHub Actions (no long-lived keys), a CI deploy job (`push: main` only, its own concurrency group so an in-flight deploy can't be cancelled by the existing lint/test job's `cancel-in-progress`), and the sourcemap-stripping decision from Known quirks resolved at the sync step.
@@ -99,7 +100,14 @@ bunx cdk synth                     # synthesize the CDK hosting stack (see infra
 
 Dev workflow notes are in [`CONTRIBUTING.md`](./CONTRIBUTING.md); vulnerability reporting is in [`SECURITY.md`](./SECURITY.md). No `CODEOWNERS` or PR/issue templates — those earn their keep with more than one contributor, and this is currently solo.
 
-[`.claude/CLAUDE.md`](./.claude/CLAUDE.md) is a project-level instructions file for Claude Code — hand-written, not `/init`-generated, kept short by linking to this README/`CONTRIBUTING.md`/`docs/adr/` instead of restating them. `./CLAUDE.md` and `./.claude/CLAUDE.md` load identically; `.claude/` was chosen to group it with whatever rules/skills/commands/settings join it later (see `TODO.md`) rather than leaving those scattered at the repo root. `infra/` and `packages/api/` don't have their own yet (per-directory `CLAUDE.md` files load only on demand when Claude reads there) — split them out if either area's guidance would otherwise bloat the root file.
+[`.claude/CLAUDE.md`](./.claude/CLAUDE.md) is a project-level instructions file for Claude Code — hand-written, not `/init`-generated, kept short by linking to this README/`CONTRIBUTING.md`/`docs/adr/` instead of restating them. `./CLAUDE.md` and `./.claude/CLAUDE.md` load identically; `.claude/` was chosen to group it with whatever rules/skills/commands/settings join it later (see `TODO.md`) rather than leaving those scattered at the repo root. `infra/` and `packages/api/` don't have their own yet (per-directory `CLAUDE.md` files, or a path-scoped rule in `.claude/rules/`, load only on demand when Claude reads there) — split one out if either area's guidance would otherwise bloat the root file.
+
+Four `.claude/skills/` exist:
+
+- `new-adr` / `new-workspace-package` (repo-root `.claude/skills/`) — lift `CONTRIBUTING.md`'s ADR-writing and workspace-package checklists into invocable `/new-adr`/`/new-workspace-package` commands (custom commands and skills are the same mechanism in current Claude Code).
+- `run-console` (repo-root `.claude/skills/`) and `run-api` (`packages/api/.claude/skills/`, colocated with that unit) — produced by `/run-skill-generator`, one per deployable unit. Each launches its app for real and drives it (`run-console` now delegates to the real `packages/e2e` Playwright Test suite rather than the bespoke driver script it started with; `run-api` uses a `curl`-based smoke script), documenting only commands actually run and verified, not paraphrased from other docs. `run-api` surfaced a real gotcha worth knowing generally: port 3000 can have two listeners at once (broad `*:3000` vs. loopback-only `[::1]:3000`) with no bind error, silently routing requests to the wrong process — see that skill's Gotchas section.
+
+`/verify` (bundled) hasn't been run yet — it requires typing the slash command directly, since it's user-only (`disable-model-invocation: true`).
 
 Task tracking is [`TODO.md`](./TODO.md) — the [todo-md](https://github.com/todo-md/todo-md) standard, chosen over GitHub Issues to keep task tracking in the repo alongside everything else here (ADRs, decisions), rather than the first thing living outside it.
 
