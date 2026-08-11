@@ -1,0 +1,8 @@
+node_modules
+dist
+cdk.out
+coverage
+bundlemeta.json
+
+# release-please generated — don't fight its own formatting
+**/CHANGELOG.md

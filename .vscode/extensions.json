@@ -2,6 +2,7 @@
 	"recommendations": [
 		"biomejs.biome",
 		"vunguyentuan.vscode-postcss",
-		"vunguyentuan.vscode-css-variables"
+		"vunguyentuan.vscode-css-variables",
+		"esbenp.prettier-vscode"
 	]
 }

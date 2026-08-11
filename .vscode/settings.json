@@ -16,5 +16,8 @@
 	},
 	"[typescript][typescriptreact][javascript][javascriptreact][json][jsonc][css]": {
 		"editor.defaultFormatter": "biomejs.biome"
+	},
+	"[markdown]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
 	}
 }
