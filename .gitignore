@@ -11,6 +11,12 @@ node_modules
 dist
 dist-ssr
 *.local
+bundlemeta.json
+coverage
+
+# CDK
+cdk.out
+.cdk.staging
 
 # TanStack Router generated file + plugin cache
 src/routeTree.gen.ts

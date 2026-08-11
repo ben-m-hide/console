@@ -4,8 +4,8 @@ import { createRoot } from "react-dom/client";
 
 import { routeTree } from "./routeTree.gen";
 
+import "@mantine/core/styles.css";
 import "./index.css";
-import "./lib/env";
 
 const router = createRouter({ routeTree });
 

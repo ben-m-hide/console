@@ -1,0 +1,11 @@
+# Mantine over Tailwind + shadcn/ui + Base UI
+
+We replaced the initial Tailwind v4 + shadcn/ui + Base UI styling stack with Mantine (`@mantine/core`, CSS Modules under the hood via `postcss-preset-mantine`). The trigger was the `cva`-based variant definitions in `button.tsx` becoming a maintenance concern — long, easily-broken Tailwind utility-class strings — and a stated preference for a typed, component-prop-driven styling API (the mental model already familiar from MUI/Chakra) over utility-class strings. Mantine was chosen over Chakra UI v3 specifically because Chakra v3 is a ground-up rewrite (Emotion → Panda CSS, component logic → Ark UI) that much of Chakra's own existing user base hasn't migrated to yet; Mantine has no equivalent in-flight rewrite and is on a stable upward adoption trend. TanStack ecosystem fit was investigated and ruled out as a differentiator — TanStack Router/Query/Form are headless by design and integrate identically with either library; an initial claim that Mantine had "the smoothest TanStack integration" via `mantine-react-table` did not survive verification (that package's peer dependency is `@mantine/core@^6.0` against a current Mantine of `v9.5.1`, and hasn't been published since Feb 2025).
+
+This removes Tailwind, `@tailwindcss/vite`, `@base-ui/react`, `class-variance-authority`, `tailwind-merge`, `clsx`, `tw-animate-css`, and `shadcn` (the CLI) entirely. `lucide-react` was also removed during cleanup — it was shadcn's auto-selected icon library, never a deliberate choice, and nothing imported it. Pick an icon set when a component actually needs one.
+
+## Considered Options
+
+- **Chakra UI v3** — rejected: architecturally the more elegant fix for the string-soup problem (typed Panda CSS recipes replace `cva`), but adopting a library mid-rewrite carries real integration risk, similar to the `vitest-axe` staleness this project already hit once.
+- **HeroUI** — rejected: still Tailwind-based under the hood, so it wouldn't have resolved the underlying complaint.
+- **Keep Tailwind + shadcn/ui, just clean up the `cva` strings further** — rejected: the complaint was about the styling model itself (utility-class strings), not the formatting of any one component's variants.
