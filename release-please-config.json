@@ -14,6 +14,16 @@
 			"release-type": "node",
 			"package-name": "@console-next/web",
 			"changelog-path": "CHANGELOG.md"
+		},
+		"apps/ingestion": {
+			"release-type": "node",
+			"package-name": "@console-next/ingestion",
+			"changelog-path": "CHANGELOG.md"
+		},
+		"packages/shared": {
+			"release-type": "node",
+			"package-name": "@console-next/shared",
+			"changelog-path": "CHANGELOG.md"
 		}
 	}
 }

@@ -5,8 +5,6 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 ## Backend
 
 - [ ] Wire up a test setup for `apps/api` once there's real behavior worth testing (`node` environment, not `apps/web`'s `jsdom`)
-- [ ] Sign up for Render (API + scheduled ingestion job) and Neon (Postgres) — see ADR 0010
-- [ ] Add `apps/ingestion` and `packages/shared` as new Bun workspace members once the football-analytics build starts — see ADR 0011 for the `apps/` (deployables) vs `packages/` (shared libraries) convention
 - [ ] Migrate backend compute from Render to AWS Lambda/Fargate + EventBridge once an AWS account is confirmed and approved (see ADR 0010) — update `connect-src` again at that point
 
 ## Football analytics domain (see `PROJECT.md`, ADR 0010)
@@ -15,7 +13,7 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 - [ ] Decide ingestion deploy shape — same Render image/different entrypoint vs. a separate service — deliberately deferred to build time (PROJECT.md §10), not decided now
 - [ ] Define the `/players/compare` percentile baseline explicitly when built: same position + competition + season, minimum 450 minutes played (PROJECT.md §4)
 - [ ] Don't display team logos or player photos — Sportmonks' terms require separately-sourced rights for those; use text/initials/placeholder icons instead (PROJECT.md §9)
-- [ ] Add `SPORTMONKS_API_KEY` to `.env.example` once `packages/ingestion` exists
+- [ ] Add `SPORTMONKS_API_KEY` to `.env.example` once `apps/ingestion` has real Sportmonks integration (Phase 4)
 - [ ] Add basic rate limiting on public API endpoints (e.g. `hono-rate-limiter`) once real routes exist (PROJECT.md §9)
 - [ ] Confirm whether Sportmonks exposes a delta/"updated since" fixture-fetch endpoint before building the ingestion job — fall back to a rolling-window re-fetch (e.g. last 14 days) if not (PROJECT.md §3)
 
@@ -102,6 +100,11 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 - [x] `.claude/skills/new-adr` and `.claude/skills/new-workspace-package` — codify `CONTRIBUTING.md`'s ADR-writing and workspace-package checklists as invocable skills, researched against Claude Code's actual skills docs (rules vs. skills vs. subagents, `.claude/commands/` now merged into skills) rather than guessed
 - [x] `.claude/skills/run-console` and `packages/api/.claude/skills/run-api` via `/run-skill-generator` — both actually launched, driven, and verified (not paraphrased): the frontend originally via a bespoke Playwright screenshot driver (`chromium-cli` unavailable here, used the generator's own documented fallback), the backend via a `curl` smoke script. Found and documented a real gotcha in the process — two processes can both "successfully" listen on port 3000 (broad `*:3000` vs. loopback-only `[::1]:3000`) with no bind error, silently answering requests from the wrong one. Pulled the deferred Playwright dependency forward deliberately (confirmed with you first) rather than adding it silently.
 - [x] `packages/e2e` as its own workspace package (ADR 0009) — moved off the root package.json, swapped the bare `playwright` library for the real `@playwright/test` runner, replaced the hand-rolled background-launch/poll/kill sequence with Playwright's own `webServer` config, rewrote `run-console` to point at the real suite instead of the bespoke driver (deleted). Verified passing via `bunx playwright test`, screenshot actually looked at, not just trusted.
+
+## Football analytics — Phase 0 (2026-08-11)
+
+- [x] Signed up for Render and Neon (ADR 0010) — no service/project configured yet, accounts only
+- [x] Scaffolded `apps/ingestion` (empty deployable, `bun run dev`/`typecheck`) and `packages/shared` (empty library, `export {}` placeholder) as new Bun workspace members, per ADR 0011's `apps/` (deployables) vs `packages/` (shared libraries) convention and PROJECT.md §11 Phase 0. Wired into root `tsconfig.json` references, `release-please-config.json`/`.release-please-manifest.json` (both start at `0.0.0`), and README's Stack/Directory-structure/Commands sections. Verified via the full pipeline (lint, typecheck, test, build, `bun audit`).
 
 ## E2E in CI (2026-08-11)
 

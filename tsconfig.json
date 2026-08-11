@@ -3,7 +3,9 @@
 	"references": [
 		{ "path": "./apps/web/tsconfig.json" },
 		{ "path": "./apps/api/tsconfig.json" },
+		{ "path": "./apps/ingestion/tsconfig.json" },
 		{ "path": "./packages/e2e/tsconfig.json" },
+		{ "path": "./packages/shared/tsconfig.json" },
 		{ "path": "./infra/tsconfig.json" }
 	]
 }

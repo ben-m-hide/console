@@ -1,6 +1,6 @@
 # console-next
 
-Standalone TypeScript + React app, not part of the `m3ter-console-v3` monorepo — see `docs/adr/0002-bun-as-package-manager.md` for why. It is, however, its own small Bun workspace: `apps/web` is the frontend and `apps/api` the backend, with `packages/` reserved for shared internal libraries (see `docs/adr/0011-apps-and-packages-workspace-restructure.md`).
+Standalone TypeScript + React app, not part of the `m3ter-console-v3` monorepo — see `docs/adr/0002-bun-as-package-manager.md` for why. It is, however, its own small Bun workspace: `apps/web` is the frontend, `apps/api` the backend, and `apps/ingestion` a scheduled Sportmonks ingestion job (empty scaffold — see PROJECT.md's phased task list), with `packages/shared` for shared internal libraries (also an empty scaffold right now; see `docs/adr/0011-apps-and-packages-workspace-restructure.md` for the `apps/`-vs-`packages/` convention).
 
 ## Stack
 
@@ -19,7 +19,7 @@ Standalone TypeScript + React app, not part of the `m3ter-console-v3` monorepo �
 - **Accessibility:** `axe-core` run directly against rendered components in tests (see `-index-page.test.tsx`) — not the `vitest-axe` wrapper, which is unmaintained for Vitest 4's type system (its `declare global { namespace Vi }` augmentation doesn't merge with Vitest 4's `declare module 'vitest'` pattern). Tests assert `results.incomplete` is empty as well as `results.violations` — otherwise a check axe can't evaluate (e.g. `color-contrast`, see Known quirks) silently lands in `incomplete` and the test reports "no violations" while never actually running that check.
 - **Bundle size budget:** `vite-plugin-bundlesize` fails the build if any JS chunk exceeds 150kB gzip (current: ~100kB main, ~9kB routes) — see the caveat below, it does not enforce CSS despite accepting a `**/*.css` glob. This matters more now than it did under Tailwind: Mantine ships full component CSS regardless of what's used, so the CSS bundle is currently ~34kB gzip (vs. ~5kB under Tailwind's purge-to-usage model) and nothing is watching it.
 - **Dependency updates:** Dependabot (`.github/dependabot.yml`) — weekly PRs for `bun` deps (grouped dev/production) and GitHub Actions versions. Every exactly-pinned package (`@biomejs/biome`, `aws-cdk`/`aws-cdk-lib`/`constructs`, `hono`/`@hono/zod-openapi`/`@scalar/hono-api-reference`, `@playwright/test`) is explicitly excluded from its group via `exclude-patterns`, so its bump still gets its own individual PR — a grouped PR would otherwise bundle a pinned package's bump with unrelated ones, defeating the entire reason it's pinned (see CONTRIBUTING.md's Dependency pinning policy). Caught by review — the original config grouped everything with no exclusions.
-- **Releases/changelog:** [release-please](https://github.com/googleapis/release-please) (`.github/workflows/release-please.yml`), not Changesets — fully automated from the Conventional Commits already enforced by commitlint, no extra per-PR authoring step. Configured per-workspace-package (`release-please-config.json`/`.release-please-manifest.json`: `.` for repo-root/infra changes, `apps/web`, `apps/api`), each getting its own `CHANGELOG.md` and version bump on merge. Deliberately **not** publishing anywhere — every package is `"private": true`; this only produces GitHub Releases/tags and changelogs, nothing npm-facing.
+- **Releases/changelog:** [release-please](https://github.com/googleapis/release-please) (`.github/workflows/release-please.yml`), not Changesets — fully automated from the Conventional Commits already enforced by commitlint, no extra per-PR authoring step. Configured per-workspace-package (`release-please-config.json`/`.release-please-manifest.json`: `.` for repo-root/infra changes, `apps/web`, `apps/api`, `apps/ingestion`, `packages/shared`), each getting its own `CHANGELOG.md` and version bump on merge. Deliberately **not** publishing anywhere — every package is `"private": true`; this only produces GitHub Releases/tags and changelogs, nothing npm-facing.
 - **Editor:** `.vscode/settings.json` and `.vscode/extensions.json` are committed (not gitignored) so Biome-as-formatter and native CSS validation (which doesn't understand `postcss-preset-mantine`'s nesting/`$simple-vars` syntax) are consistent for everyone, not just personal config.
 - **Infrastructure (`infra/`):** AWS CDK (TypeScript) — private S3 bucket + CloudFront (Origin Access Control, not the legacy OAI) + a `ResponseHeadersPolicy` (CSP/HSTS/frame-options) + SPA fallback via CloudFront error responses. `bunx cdk synth` verified locally; **not deployed** — no AWS account confirmed, no `cdk bootstrap` run yet. See `docs/adr/0007-aws-s3-cloudfront-hosting.md` for the full reasoning, including why the CSP currently needs `style-src 'unsafe-inline'` (Mantine injects runtime `<style>` tags — verified, not assumed).
 - **Backend (`apps/api`):** [Hono](https://hono.dev), chosen over Express/Fastify/NestJS (see `docs/adr/0008-hono-rest-openapi-backend.md` for the full comparison, including verified — not assumed — npm download/production-adoption numbers). API style is REST + OpenAPI, not tRPC, generated code-first from Zod schemas via `@hono/zod-openapi` — one schema drives runtime validation, the `/doc` OpenAPI document, and (eventually) a generated typed client, so there's one source of truth instead of a hand-written spec that can drift. `hono`, `@hono/zod-openapi`, and `@scalar/hono-api-reference` are pinned exactly, same reasoning as Biome/CDK above. `/reference` mounts a [Scalar](https://scalar.com) API reference UI over the `/doc` OpenAPI document — a human-browsable page instead of raw JSON, for the cost of one route. **Spike only right now**: `GET /health`, `/doc`, `/reference` — no real feature/domain chosen yet, no tests, no deploy runtime target picked (Lambda vs. Fargate/ECS — deliberately deferred, see Deferred below).
@@ -32,16 +32,18 @@ Full rationale for the non-obvious choices is in [`docs/adr/`](./docs/adr/README
 console-next/
 ├── apps/
 │   ├── web/          ← frontend app, its own Bun workspace package
-│   └── api/          ← Hono backend, its own Bun workspace package
+│   ├── api/          ← Hono backend, its own Bun workspace package
+│   └── ingestion/    ← scheduled Sportmonks ingestion job — empty scaffold, see PROJECT.md
 ├── infra/            ← AWS CDK hosting stack (not a workspace package — shares the root package.json)
 ├── packages/
-│   └── e2e/          ← Playwright Test suite, its own Bun workspace package (see ADR 0009)
+│   ├── e2e/          ← Playwright Test suite, its own Bun workspace package (see ADR 0009)
+│   └── shared/       ← shared internal library — empty scaffold, see PROJECT.md
 └── docs/adr/
 ```
 
 `apps/web/src/` is currently flat (`src/{routes,lib,test}`) since there are no real frontend features yet — just the scaffold. There's no `src/hooks/`, `src/stores/`, or `components/ui/` on disk either: empty placeholder directories aren't tracked by git (a fresh clone wouldn't have had them, since git doesn't track empty dirs — the same "decorative declaration" class of issue as the removed `.nvmrc`), and Mantine ships its own pre-built components so there's no owned `ui/` source to keep in the first place (unlike the earlier shadcn/ui setup). `src/hooks/` and `src/stores/` get created for real the moment the first custom hook or Zustand store actually exists — see "Promote to shared space" below — not before.
 
-The frontend and backend live under `apps/`, shared internal libraries (once any exist) under `packages/` — see `docs/adr/0011-apps-and-packages-workspace-restructure.md` for the convention and why it replaced the frontend-as-root-package layout.
+Deployables live under `apps/` (`web`, `api`, `ingestion`), shared internal libraries under `packages/` (`e2e`, `shared`) — see `docs/adr/0011-apps-and-packages-workspace-restructure.md` for the convention and why it replaced the frontend-as-root-package layout.
 
 **Colocate inside the route, not in a parallel `features/` tree.** TanStack Router's file-based routing already gives colocation for free: prefix a file or folder with `-` and the router excludes it from the route tree while still letting you import it normally.
 
@@ -63,14 +65,14 @@ Sources: [TanStack Router — Routing Concepts](https://tanstack.com/router/late
 ## Commands
 
 ```sh
-bun install                        # installs the whole workspace (apps/web, apps/api, packages/e2e)
+bun install                        # installs the whole workspace (apps/web, apps/api, apps/ingestion, packages/e2e, packages/shared)
 bun run dev                        # frontend dev server — delegates to apps/web (bun run --filter ./apps/web dev)
 bun run build                      # frontend typecheck (apps/web's own tsconfig) + production build — delegates to apps/web
 bun run test                       # vitest run — frontend only; apps/api has no tests yet — delegates to apps/web
 bun run test:coverage              # vitest run --coverage — same scope as above
 bun run lint                       # biome check — whole workspace (apps/web, apps/api, infra/), file-tree-based, not workspace-filtered
 bun run lint:fix                   # biome check --write
-bun run typecheck                  # tsc -b --noEmit — whole workspace, via project references (apps/web, apps/api, packages/e2e, infra)
+bun run typecheck                  # tsc -b --noEmit — whole workspace, via project references (apps/web, apps/api, apps/ingestion, packages/e2e, packages/shared, infra)
 bunx playwright install chromium   # one-time browser binary download, not part of bun install
 bun run e2e                        # playwright test — delegates to packages/e2e; also runs in CI now
 
@@ -88,7 +90,7 @@ Root `package.json` no longer holds the frontend's own scripts directly — `dev
 - **Actually deploying** — `cdk bootstrap`/`cdk deploy` haven't run against any AWS account. Needs: a confirmed AWS account, an OIDC-federated IAM role for GitHub Actions (no long-lived keys), a CI deploy job (`push: main` only, its own concurrency group so an in-flight deploy can't be cancelled by the existing lint/test job's `cancel-in-progress`), and the sourcemap-stripping decision from Known quirks resolved at the sync step.
 - **Backend runtime target** (`apps/api`) — interim target is **Render** (API + scheduled ingestion job), with a planned migration to AWS Lambda/Fargate once an AWS account is confirmed and approved (see `docs/adr/0010-render-and-neon-for-backend-hosting.md`). Routes are written as plain Hono handlers so this migration defers cleanly — the same code runs unchanged under Bun locally, on Render, or on Lambda via `hono/aws-lambda` (see `docs/adr/0008-hono-rest-openapi-backend.md`).
 - **Backend test setup** (`apps/api`) — no test runner wired up yet; `bun run test` at the root only covers the frontend (`jsdom`). Needs a `node`-environment Vitest config (either a `test.projects` entry in the root config, or its own standalone one) once there's real behavior worth testing — not added yet because there are zero test files to run.
-- **Backend first feature/domain and database** — no real domain chosen yet in code; a football-analytics platform (Sportmonks ingestion, Postgres via Drizzle on Neon, match-report/player-comparison API) is the current direction under discussion, not yet scaffolded. See `docs/adr/0010-render-and-neon-for-backend-hosting.md` for the hosting side of that decision.
+- **Backend first feature/domain and database** — a football-analytics platform (Sportmonks ingestion, Postgres via Drizzle on Neon, match-report/player-comparison API) is the current direction (`PROJECT.md`). `apps/ingestion` and `packages/shared` exist as empty workspace-package scaffolds (Phase 0 of `PROJECT.md`'s task list); Neon and Render accounts exist too, but no schema, ingestion logic, or Sportmonks integration yet — see `docs/adr/0010-render-and-neon-for-backend-hosting.md` for the hosting side of that decision.
 
 ## Known quirks
 
