@@ -38,7 +38,6 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 
 ## Tooling / project setup
 
-- [ ] Push to a real GitHub remote — there is currently none (`git remote -v` is empty), so CI has never actually executed on GitHub's runners; every "CI passes" claim so far is from reproducing the exact command sequence locally, not a real run
 - [ ] Run `/verify` yourself — bundled, `disable-model-invocation: true`, so I can't invoke it; typing it directly records the real lint/typecheck/test/build/audit recipe into `.claude/skills/verify/`, replacing the guesswork-prone bundled default
 - [ ] Populate `.claude/` further as real needs come up — `settings.json`, subagents, per-directory `CLAUDE.md`/path-scoped rules for `infra/`/`apps/web/`/`apps/api/` (see README's Contributing/security section for the trigger on the latter). Nothing pre-built beyond what's already there; add each only when there's an actual repeated task it would serve.
 
@@ -104,6 +103,10 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 - [x] `.claude/skills/new-adr` and `.claude/skills/new-workspace-package` — codify `CONTRIBUTING.md`'s ADR-writing and workspace-package checklists as invocable skills, researched against Claude Code's actual skills docs (rules vs. skills vs. subagents, `.claude/commands/` now merged into skills) rather than guessed
 - [x] `.claude/skills/run-console` and `packages/api/.claude/skills/run-api` via `/run-skill-generator` — both actually launched, driven, and verified (not paraphrased): the frontend originally via a bespoke Playwright screenshot driver (`chromium-cli` unavailable here, used the generator's own documented fallback), the backend via a `curl` smoke script. Found and documented a real gotcha in the process — two processes can both "successfully" listen on port 3000 (broad `*:3000` vs. loopback-only `[::1]:3000`) with no bind error, silently answering requests from the wrong one. Pulled the deferred Playwright dependency forward deliberately (confirmed with you first) rather than adding it silently.
 - [x] `packages/e2e` as its own workspace package (ADR 0009) — moved off the root package.json, swapped the bare `playwright` library for the real `@playwright/test` runner, replaced the hand-rolled background-launch/poll/kill sequence with Playwright's own `webServer` config, rewrote `run-console` to point at the real suite instead of the bespoke driver (deleted). Verified passing via `bunx playwright test`, screenshot actually looked at, not just trusted.
+
+## Remote (2026-08-11)
+
+- [x] Pushed to a real GitHub remote — `github.com/ben-m-hide/console`, over a dedicated personal SSH key + host alias (this is a work laptop otherwise signed into a company GitHub via `gh`/HTTPS); rewrote existing local commit authors from the work git identity to the personal one first, since that history predated the remote and hadn't been pushed anywhere yet. CI now runs for real on GitHub's runners instead of only being reproduced locally.
 
 ## Workspace restructure (2026-08-11)
 
