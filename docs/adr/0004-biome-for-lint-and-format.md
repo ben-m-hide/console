@@ -1,0 +1,3 @@
+# Biome for linting, formatting, and import ordering
+
+We chose Biome over ESLint+Prettier and over the Oxc toolchain (oxlint+oxfmt) that the sibling `m3ter-console-v3` repo is mid-migration to. For a from-scratch project with no legacy ESLint plugin dependencies to preserve, Biome's single Rust binary and single config file win on speed and simplicity; the smaller plugin ecosystem is the accepted trade-off. Biome's `assist.actions.source.organizeImports` is enabled, giving automatic import ordering on format. If console-next is ever merged into the `m3ter-console-v3` monorepo, reconsider matching its Oxc-based toolchain instead.

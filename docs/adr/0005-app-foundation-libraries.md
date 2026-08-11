@@ -1,0 +1,3 @@
+# App foundation libraries: Zustand, TanStack Query, TanStack Form, Zod
+
+For the foundational state/data/forms layer we picked TanStack Query v5 for server state (no credible challenger, strongest sentiment in the 2025 State of React survey), Zustand v5 for client state (adoption rose from 28% to 50% over 2023-25), and TanStack Form v1 with Zod v4 for forms/validation via Standard Schema. TanStack Form was chosen over React Hook Form deliberately — RHF has the deeper ecosystem today, but TanStack Form's first-party Standard Schema support and consistency with the rest of the already-adopted TanStack stack (Router, Query) outweighed that for a new project. Standard Schema means swapping Zod for Valibot/ArkType later is low-cost if needed.

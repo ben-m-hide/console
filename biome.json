@@ -1,0 +1,74 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.5.7/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignoreUnknown": false,
+		"includes": ["**", "!**/src/routeTree.gen.ts", "!**/public"]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+			"complexity": {
+				"useArrowFunction": "error"
+			},
+			"nursery": {
+				"useExplicitReturnType": "error",
+				"useSortedClasses": {
+					"level": "warn",
+					"options": {
+						"functions": ["cn", "cva", "clsx"]
+					}
+				}
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double"
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		},
+		"linter": {
+			"enabled": true
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": {
+					"level": "on",
+					"options": {
+						"sortBareImports": true,
+						"groups": [
+							{ "kind": "!bare", "source": [":BUN:", ":NODE:"] },
+							":BLANK_LINE:",
+							{
+								"kind": "!bare",
+								"source": [":PACKAGE_WITH_PROTOCOL:", ":PACKAGE:"]
+							},
+							":BLANK_LINE:",
+							{ "kind": "!bare", "source": ":ALIAS:" },
+							":BLANK_LINE:",
+							{ "kind": "!bare", "source": ":PATH:" },
+							":BLANK_LINE:",
+							{ "kind": "bare" }
+						]
+					}
+				}
+			}
+		}
+	}
+}
