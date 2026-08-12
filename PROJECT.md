@@ -200,6 +200,7 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 - Frontend styling approach (Tailwind vs Chakra vs custom)
 - Exact ingestion schedule interval
 - Whether `apps/ingestion` deploys as its own Render service or a scheduled command within `apps/api`'s image
+- **Phase 1 schema assumptions, unconfirmed — reconcile against the Drizzle schema in Phase 2:** `id`/`sportmonksId`/FK fields as `number().int().positive()` (serial-style); field names camelCase (Drizzle's usual camelCase-JS/snake_case-DB mapping); dates as ISO strings (`z.iso.date()`/`z.iso.datetime()` — these are JSON-boundary schemas, not raw DB row shapes); `type`/`status`/`outcome`/`bodyPart`/`situation`/`position` as plain `string()`, not enums (no confirmed value list yet); `player_season_stats` per-90 fields assumed to be `goalsPer90`/`assistsPer90`/`xgPer90`/`xaPer90` (the 4 base stats §2 names) since the exact list isn't spelled out there
 
 ---
 
@@ -220,6 +221,7 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 
 - [ ] Create Neon project + a local-dev branch
 - [ ] Write Drizzle schema definitions matching §2, including `UNIQUE` constraints on all `sportmonks_id`/`sportmonks_event_id` columns and the `CHECK` constraints on `match_events` by type
+- [ ] Reconcile Phase 1's unconfirmed schema assumptions (§10) against the Drizzle schema: ID types, camelCase field naming, ISO-string dates vs DB date types, `type`/`status`/enum-shaped string fields, `player_season_stats` per-90 field names
 - [ ] Add indexes: `match_events(fixture_id)`, `match_events(fixture_id, type)`, `ball_positions(fixture_id)`, `player_season_stats(player_id, season_id)`
 - [ ] Generate and run initial migration
 - [ ] Seed a small manual dataset (1–2 fixtures worth) for early development before ingestion is built
