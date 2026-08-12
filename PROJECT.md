@@ -207,9 +207,9 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 
 ### Phase 0 — Repo alignment
 
-- [ ] Confirm workspace tooling: align root `package.json` on Bun workspaces (adjust if boilerplate already assumes Yarn)
-- [ ] Scaffold `apps/ingestion` and `packages/shared` directories
-- [ ] Set up shared TS config / lint config referenced by all apps
+- [x] Confirm workspace tooling: align root `package.json` on Bun workspaces (adjust if boilerplate already assumes Yarn) — done, root `package.json` uses Bun's native `workspaces` field (`apps/*`, `packages/*`)
+- [x] Scaffold `apps/ingestion` and `packages/shared` directories — done, both have `package.json`/`tsconfig.json`; contents are still stubs (`export {}` / a placeholder log), real implementation is Phase 1/4
+- [x] Set up shared TS config / lint config referenced by all apps — done, root `tsconfig.json` references both packages, `bun run typecheck`/`lint` pass clean across the workspace
 
 ### Phase 1 — Shared schemas
 
