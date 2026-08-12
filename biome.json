@@ -45,6 +45,16 @@
 			"enabled": true
 		}
 	},
+	"overrides": [
+		{
+			"includes": ["**/bun.lock"],
+			"json": {
+				"parser": {
+					"allowTrailingCommas": true
+				}
+			}
+		}
+	],
 	"assist": {
 		"enabled": true,
 		"actions": {

@@ -24,6 +24,11 @@
 			"release-type": "node",
 			"package-name": "@console-next/shared",
 			"changelog-path": "CHANGELOG.md"
+		},
+		"packages/db": {
+			"release-type": "node",
+			"package-name": "@console-next/db",
+			"changelog-path": "CHANGELOG.md"
 		}
 	}
 }
