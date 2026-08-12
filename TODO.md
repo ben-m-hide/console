@@ -16,6 +16,9 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 - [ ] Add `SPORTMONKS_API_KEY` to `.env.example` once `apps/ingestion` has real Sportmonks integration (Phase 4)
 - [ ] Add basic rate limiting on public API endpoints (e.g. `hono-rate-limiter`) once real routes exist (PROJECT.md §9)
 - [ ] Confirm whether Sportmonks exposes a delta/"updated since" fixture-fetch endpoint before building the ingestion job — fall back to a rolling-window re-fetch (e.g. last 14 days) if not (PROJECT.md §3)
+- [ ] Run `packages/db`'s generated migration once a Neon project exists (`bun run db:migrate` from `packages/db`, needs `DATABASE_URL` set)
+- [ ] Wire `packages/db`'s `createDb()` into `apps/api` and `apps/ingestion`, and add `DATABASE_URL` to both apps' `.env.example` at that point (PROJECT.md §7)
+- [ ] Add `CHECK` constraints to `match_events` scoping `outcome`/`body_part`/`situation` by `type`, once Phase 4's Sportmonks API client surfaces the real `type`/`sub_type_id` values (deliberately not guessed — see ADR 0012, PROJECT.md §11 Phase 2)
 
 ## Deployment
 
@@ -133,3 +136,10 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 - [x] Pinned every GitHub Action to a commit SHA (`actions/checkout`, `oven-sh/setup-bun`, `actions/cache`, `googleapis/release-please-action`) with the resolved version as a trailing comment — CI was the one place the project's own stated pinning policy (`CONTRIBUTING.md`) wasn't applied to itself. Added `permissions: contents: read` to `ci.yml` (least privilege; it had none before).
 - [x] Removed the empty, untracked `src/hooks/`/`src/stores/` directories and corrected the README's directory diagram — git doesn't track empty dirs, so they wouldn't have existed on a fresh clone despite being listed.
 - [x] Verified (didn't just accept) `setup-bun@v2`'s `packageManager`-field auto-detection claim against its own README — confirmed real, one reviewer sub-claim that didn't hold up.
+
+## Football analytics — Phase 1 & 2 schema (2026-08-12)
+
+- [x] Phase 1: Zod schemas + inferred types for all 8 entities in `packages/shared/src/schemas/`, barrel-exported (one file per entity, plus a `schemas/index.ts` barrel — see the barrel-export feedback note).
+- [x] Phase 2: Drizzle schema for all 10 tables in a new `packages/db` workspace package (not in the original `PROJECT.md` plan — see ADR 0012 for why it's its own package and why `drizzle-orm/bun-sql` over `@neondatabase/serverless`), plus a generated initial migration (`packages/db/drizzle/0000_*.sql`, no live DB needed for `drizzle-kit generate`). Not yet run — no Neon project exists — and not yet wired into `apps/api`/`apps/ingestion`.
+- [x] Per-directory `.claude/CLAUDE.md` for `apps/ingestion`, `packages/shared`, `packages/e2e`, `infra` (later followed by `packages/db`) — factual/current-state only, no invented skills.
+- [x] Fixed Biome parsing `bun.lock` as strict JSON (VS Code's `files.associations` already set it to `jsonc` for the editor, but Biome's own LSP parses by its own extension-based rules independently) — added a `biome.json` `overrides` entry (`json.parser.allowTrailingCommas: true` scoped to `**/bun.lock`), verified against the file's actual content (17 real trailing commas, confirmed via multiline grep) rather than assumed.

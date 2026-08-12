@@ -15,7 +15,8 @@ Assumes: existing boilerplate already has a Vite+React app and a basic Hono API 
 │   ├── api/                 # existing Hono boilerplate
 │   └── ingestion/           # new — Bun script, scheduled on Render
 ├── packages/
-│   └── shared/               # new — Zod schemas + inferred types, used by api/web/ingestion
+│   ├── shared/               # new — Zod schemas + inferred types, used by api/web/ingestion
+│   └── db/                   # new — Drizzle schema + client, used by api/ingestion only (see ADR 0012)
 ├── package.json               # workspace root
 ├── Dockerfile                 # for apps/api (see §5)
 └── .github/workflows/         # CI/CD
@@ -28,6 +29,11 @@ Assumes: existing boilerplate already has a Vite+React app and a basic Hono API 
 - Zod schemas for every entity (competition, team, player, fixture, match event, stats)
 - Inferred TS types from those schemas (`z.infer<typeof PlayerSchema>`)
 - Used by `apps/api` for request/response validation, by `apps/ingestion` to validate normalized data before writing to the DB, and by `apps/web` for typed API responses
+
+**`packages/db` contains** (added during Phase 2, not in the original plan — see `docs/adr/0012-packages-db-and-bun-sql-driver.md`):
+
+- The Drizzle schema for every table in §2, plus a `createDb(connectionString)` client factory using `drizzle-orm/bun-sql` (Bun's native Postgres client, not `@neondatabase/serverless` — Render, this project's host, is a serverful long-running process, not edge/serverless)
+- Used by `apps/api` and `apps/ingestion` only — deliberately **not** `apps/web`, so a Postgres driver never reaches the browser bundle
 
 ---
 
@@ -220,10 +226,10 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 ### Phase 2 — Database
 
 - [ ] Create Neon project + a local-dev branch
-- [ ] Write Drizzle schema definitions matching §2, including `UNIQUE` constraints on all `sportmonks_id`/`sportmonks_event_id` columns and the `CHECK` constraints on `match_events` by type
-- [ ] Reconcile Phase 1's unconfirmed schema assumptions (§10) against the Drizzle schema: ID types, camelCase field naming, ISO-string dates vs DB date types, `type`/`status`/enum-shaped string fields, `player_season_stats` per-90 field names
-- [ ] Add indexes: `match_events(fixture_id)`, `match_events(fixture_id, type)`, `ball_positions(fixture_id)`, `player_season_stats(player_id, season_id)`
-- [ ] Generate and run initial migration
+- [x] Write Drizzle schema definitions matching §2, including `UNIQUE` constraints on all `sportmonks_id`/`sportmonks_event_id` columns — done 2026-08-12, `packages/db/src/schema/`, see ADR 0012. **`CHECK` constraints on `match_events` by type deliberately not implemented** — the reasoning (§2) was written against the now-dropped `x`/`y`/`xg` columns; encoding it for the surviving `outcome`/`body_part`/`situation` columns needs Sportmonks' real `type` enum values, unconfirmed anywhere in this codebase. Revisit in Phase 4. Also extended `UNIQUE(sportmonks_id)` to `seasons` and `ball_positions`, which this paragraph's original list omitted — treated as a gap in the list, not a deliberate exclusion (see the schema files' inline comments).
+- [x] Reconcile Phase 1's unconfirmed schema assumptions (§10) against the Drizzle schema — done 2026-08-12: ID types (`number().int().positive()`) confirmed correct — Drizzle uses `integer().generatedAlwaysAsIdentity()`, still a plain integer; camelCase field naming confirmed correct — Drizzle's `casing: "snake_case"` config maps it to the DB automatically; ISO-string dates need no change (Zod schemas validate the JSON boundary, Drizzle's `timestamp`/`date` types handle the DB boundary — different layers, not a conflict); `type`/`status`/etc. remain plain strings — still no confirmed enum values (see above); `player_season_stats` per-90 field names (`goalsPer90`/`assistsPer90`/`xgPer90`/`xaPer90`) carried through unchanged.
+- [x] Add indexes: `match_events(fixture_id)`, `match_events(fixture_id, type)`, `ball_positions(fixture_id)`, `player_season_stats(player_id, season_id)` — done 2026-08-12 alongside the schema (see above), listing separately since this item named them explicitly
+- [x] Generate initial migration — done 2026-08-12, `packages/db/drizzle/0000_*.sql` (`drizzle-kit generate` needs no live DB connection). **Not yet run** — blocked on the Neon project above.
 - [ ] Seed a small manual dataset (1–2 fixtures worth) for early development before ingestion is built
 
 ### Phase 3 — Sportmonks trial verification
