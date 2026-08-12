@@ -32,11 +32,13 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 ## Testing
 
 - [ ] Real E2E coverage in `packages/e2e/` beyond the one smoke test — add flow coverage once a real interactive feature exists (see ADR 0009), and a cross-package test once the frontend actually calls the backend
+- [ ] Test coverage reports with deltas as a CI PR comment — coverage % plus the diff vs. the base branch, not just the local `test:coverage` HTML report (e.g. `davelosert/vitest-coverage-report-action`, which needs `@vitest/coverage-v8`'s `json-summary` reporter enabled). Tool choice not decided, just the capability. Needs `pull-requests: write` scoped to just that step (current `ci.yml` is `contents: read` only) and the action pinned to a commit SHA like every other CI action (`CONTRIBUTING.md`'s pinning policy). Related to the existing `coverage.thresholds` BACKLOG item below but distinct — visibility, not enforcement.
 
 ## Tooling / project setup
 
 - [ ] Run `/verify` yourself — bundled, `disable-model-invocation: true`, so I can't invoke it; typing it directly records the real lint/typecheck/test/build/audit recipe into `.claude/skills/verify/`, replacing the guesswork-prone bundled default
-- [ ] Populate `.claude/` further as real needs come up — `settings.json`, subagents, per-directory `CLAUDE.md`/path-scoped rules for `infra/`/`apps/web/`/`apps/api/` (see README's Contributing/security section for the trigger on the latter). Nothing pre-built beyond what's already there; add each only when there's an actual repeated task it would serve.
+- [ ] Populate `.claude/` further as real needs come up — `settings.json`, hooks, subagents, commands (skills and commands are the same mechanism in current Claude Code — see README), path-scoped rules, and per-directory `CLAUDE.md`/skills for `infra/`, `apps/ingestion/`, and `packages/shared/` (which don't have any yet, unlike `apps/web`'s `run-console` and `apps/api`'s `run-api` — see README's Contributing/security section for the trigger). Nothing pre-built beyond what's already there; add each only when there's an actual repeated task it would serve, not speculatively.
+- [ ] Bundle-size PR comments in CI — post a size-diff comment on PRs instead of only failing silently past the budget (`vite-plugin-bundlesize` already enforces the 150kB gzip limit but doesn't report deltas). Candidate actions exist (e.g. `NejcZdovc/bundle-size-diff`, or a Vite-specific one) but not evaluated/chosen yet. Same `pull-requests: write` + commit-SHA-pinning requirements as the coverage-delta item above.
 
 ## Follow-up from adversarial review (2026-08-10)
 
