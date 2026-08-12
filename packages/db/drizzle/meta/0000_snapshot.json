@@ -1,5 +1,5 @@
 {
-	"id": "671ef12d-384c-4412-90d2-28a51ed66370",
+	"id": "f779b51c-7397-4816-b73b-dae6d1624822",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -857,6 +857,12 @@
 						"cycle": false
 					}
 				},
+				"sportmonks_id": {
+					"name": "sportmonks_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
 				"player_id": {
 					"name": "player_id",
 					"type": "integer",
@@ -925,7 +931,13 @@
 				}
 			},
 			"compositePrimaryKeys": {},
-			"uniqueConstraints": {},
+			"uniqueConstraints": {
+				"squad_memberships_sportmonksId_unique": {
+					"name": "squad_memberships_sportmonksId_unique",
+					"nullsNotDistinct": false,
+					"columns": ["sportmonks_id"]
+				}
+			},
 			"policies": {},
 			"checkConstraints": {},
 			"isRLSEnabled": false
