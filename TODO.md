@@ -37,7 +37,8 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 ## Tooling / project setup
 
 - [ ] Run `/verify` yourself — bundled, `disable-model-invocation: true`, so I can't invoke it; typing it directly records the real lint/typecheck/test/build/audit recipe into `.claude/skills/verify/`, replacing the guesswork-prone bundled default
-- [ ] Populate `.claude/` further as real needs come up — `settings.json`, hooks, subagents, commands (skills and commands are the same mechanism in current Claude Code — see README), path-scoped rules, and per-directory `CLAUDE.md`/skills for `infra/`, `apps/ingestion/`, and `packages/shared/` (which don't have any yet, unlike `apps/web`'s `run-console` and `apps/api`'s `run-api` — see README's Contributing/security section for the trigger). Nothing pre-built beyond what's already there; add each only when there's an actual repeated task it would serve, not speculatively.
+- [x] Per-directory `CLAUDE.md` for `infra/`, `apps/ingestion/`, `packages/shared/`, and `packages/e2e/` — done 2026-08-12, factual/current-state only (purpose, real commands, real quirks), no invented skills.
+- [ ] Populate `.claude/` further as real needs come up — `settings.json`, hooks, subagents, commands (skills and commands are the same mechanism in current Claude Code — see README), path-scoped rules. Nothing pre-built beyond what's already there; add each only when there's an actual repeated task it would serve, not speculatively.
 - [ ] Bundle-size PR comments in CI — post a size-diff comment on PRs instead of only failing silently past the budget (`vite-plugin-bundlesize` already enforces the 150kB gzip limit but doesn't report deltas). Candidate actions exist (e.g. `NejcZdovc/bundle-size-diff`, or a Vite-specific one) but not evaluated/chosen yet. Same `pull-requests: write` + commit-SHA-pinning requirements as the coverage-delta item above.
 
 ## Follow-up from adversarial review (2026-08-10)
