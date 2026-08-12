@@ -75,7 +75,7 @@ Assumes: existing boilerplate already has a Vite+React app and a basic Hono API 
 
 **Unverified assumption, flagged for Phase 3:** step 2 above assumes Sportmonks exposes a way to fetch only fixtures new or updated since your last run. This hasn't actually been confirmed. It matters because match stats are sometimes corrected after full-time (VAR review, data-quality passes) — if there's no delta/updated-since endpoint, "only fetch new fixtures" will silently miss those corrections. Fallback if it doesn't exist: re-fetch a rolling window (e.g. the last 14 days of fixtures) on every run instead of trying to track deltas yourself.
 
-**Rate limits:** Sportmonks plans have a request budget. Batch fixture/event fetches sensibly (don't loop one request per event when a bulk endpoint exists), and handle `429` responses with actual backoff-and-retry rather than just logging — a run that silently drops data because it got rate-limited partway through is worse than a run that's slower but complete.
+**Rate limits (verified against `docs.sportmonks.com/v3/api/rate-limit`, 2026-08-11):** limits are per-**entity** (resource type — Fixture, Team, etc.), not per-endpoint, and reset 1 hour after the first request in that window (rolling, not a fixed clock hour). `GET /fixtures/123?include=participants;events;statistics` counts as **one** request regardless of how many includes are chained — use `include=` aggressively instead of separate calls per related resource; Sportmonks' own docs claim 50–80% request-volume reduction from this alone. Every successful response carries a `rate_limit` object (`remaining`, `resets_in_seconds`, `requested_entity`) — throttle proactively off that instead of only reacting to `429`s. On a `429`, honor a `retry_after` field in the response body if present, exponential backoff otherwise; a run that silently drops data because it got rate-limited partway through is worse than a run that's slower but complete. Hitting the limit on one entity doesn't block others (a `429` on `fixtures` still allows `teams` calls), which matters for how the per-fixture transaction loop in step 3 above should keep making progress rather than stalling entirely.
 
 **Scheduling:** Render's scheduled job feature, running on an interval sensible for how "current" you need the data (e.g. every few hours during active match days, less often otherwise — doesn't need to be real-time given the earlier decision to skip live tracking).
 
@@ -222,16 +222,17 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 
 - [ ] Sign up for Sportmonks 14-day trial
 - [ ] Confirm event-coordinate data (`location_x/y`, `pass_end_x/y`) is returned for your target leagues on the plan tier you intend to pay for
-- [ ] Confirm which plan/add-on is required for xG
+- [x] Confirm which plan/add-on is required for xG — verified against `sportmonks.com/football-api/plans-pricing/` (2026-08-11): xG & Pressure Index is a separate add-on (€29/mo, €24/mo billed yearly) on top of a base plan, not bundled into any tier by default. Going with Starter (€29/mo, 5 leagues, 2,000 calls/entity/hour) + the add-on, ~~€58/mo (~~€48/mo yearly). Still unconfirmed: whether the 14-day trial covers the add-on itself, not just the base plan.
 - [ ] Confirm whether a delta/"updated since" fixture-fetch capability exists — if not, plan on the rolling-window fallback (§3)
 - [ ] Confirm Sportmonks' documented pitch coordinate convention (aspect ratio, normalization range) before building any SVG pitch component against it
 
 ### Phase 4 — Ingestion job
 
-- [ ] Build Sportmonks API client (typed, using `packages/shared` schemas to validate responses)
+- [ ] Build Sportmonks API client (typed, using `packages/shared` schemas to validate responses). Base URL `https://api.sportmonks.com/api/v3/football/...`; authenticate via the `Authorization` header, not the `?api_token=` query param — same rate limit either way, but a query-param token is far more likely to leak into logs/proxies/browser history than a header. Docs also explicitly warn never to expose the token to a frontend; not a risk here since `apps/ingestion` calls Sportmonks server-side only.
 - [ ] Write normalization functions: Sportmonks response shape → internal schema shape
 - [ ] Write upsert logic (fixtures, match_events, keyed on Sportmonks IDs), wrapped per-fixture in a transaction
-- [ ] Add 429 backoff/retry handling to the Sportmonks client
+- [ ] Add rate-limit handling to the Sportmonks client: track the `rate_limit` object (`remaining`/`resets_in_seconds`/`requested_entity`) from each response to throttle proactively per-entity, and on `429` honor `retry_after` if present or exponential backoff otherwise (see §3 for specifics)
+- [ ] Use `include=` to combine related-resource fetches into single requests rather than separate calls per entity (§3) — the main lever for staying inside the hourly budget
 - [ ] Write `player_season_stats` aggregation step (keyed on player+team+season, not player+season)
 - [ ] Wire up `ingestion_runs` audit logging, including `fixtures_processed`/`fixtures_failed`
 - [ ] Unit test normalization logic (Vitest)
