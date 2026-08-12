@@ -81,6 +81,9 @@
     "packages/shared": {
       "name": "@console-next/shared",
       "version": "0.0.0",
+      "dependencies": {
+        "zod": "^4.4.3",
+      },
     },
   },
   "packages": {
