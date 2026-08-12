@@ -213,8 +213,8 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 
 ### Phase 1 — Shared schemas
 
-- [ ] Define Zod schemas in `packages/shared` for: competition, season, team, player, fixture, match event, ball position, player season stats
-- [ ] Export inferred types alongside each schema
+- [x] Define Zod schemas in `packages/shared` for: competition, season, team, player, fixture, match event, ball position, player season stats — one file per entity under `src/schemas/`, barrel-exported from `src/index.ts`
+- [x] Export inferred types alongside each schema — `z.infer` per schema, colocated in the same file
 
 ### Phase 2 — Database
 
