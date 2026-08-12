@@ -7,7 +7,7 @@ CREATE TABLE "ball_positions" (
 	"timer" double precision NOT NULL,
 	"x" double precision NOT NULL,
 	"y" double precision NOT NULL,
-	CONSTRAINT "ball_positions_sportmonks_id_unique" UNIQUE("sportmonks_id")
+	CONSTRAINT "ball_positions_sportmonksId_unique" UNIQUE("sportmonks_id")
 );
 --> statement-breakpoint
 CREATE TABLE "competitions" (
@@ -16,7 +16,7 @@ CREATE TABLE "competitions" (
 	"name" text NOT NULL,
 	"country" text NOT NULL,
 	"tier" integer NOT NULL,
-	CONSTRAINT "competitions_sportmonks_id_unique" UNIQUE("sportmonks_id")
+	CONSTRAINT "competitions_sportmonksId_unique" UNIQUE("sportmonks_id")
 );
 --> statement-breakpoint
 CREATE TABLE "fixtures" (
@@ -29,7 +29,7 @@ CREATE TABLE "fixtures" (
 	"status" text NOT NULL,
 	"home_score" integer,
 	"away_score" integer,
-	CONSTRAINT "fixtures_sportmonks_id_unique" UNIQUE("sportmonks_id")
+	CONSTRAINT "fixtures_sportmonksId_unique" UNIQUE("sportmonks_id")
 );
 --> statement-breakpoint
 CREATE TABLE "ingestion_runs" (
@@ -55,7 +55,7 @@ CREATE TABLE "match_events" (
 	"outcome" text,
 	"body_part" text,
 	"situation" text,
-	CONSTRAINT "match_events_sportmonks_event_id_unique" UNIQUE("sportmonks_event_id")
+	CONSTRAINT "match_events_sportmonksEventId_unique" UNIQUE("sportmonks_event_id")
 );
 --> statement-breakpoint
 CREATE TABLE "players" (
@@ -65,7 +65,7 @@ CREATE TABLE "players" (
 	"date_of_birth" date NOT NULL,
 	"nationality" text NOT NULL,
 	"position" text NOT NULL,
-	CONSTRAINT "players_sportmonks_id_unique" UNIQUE("sportmonks_id")
+	CONSTRAINT "players_sportmonksId_unique" UNIQUE("sportmonks_id")
 );
 --> statement-breakpoint
 CREATE TABLE "player_season_stats" (
@@ -82,7 +82,7 @@ CREATE TABLE "player_season_stats" (
 	"assists_per90" double precision NOT NULL,
 	"xg_per90" double precision NOT NULL,
 	"xa_per90" double precision NOT NULL,
-	CONSTRAINT "player_season_stats_player_id_team_id_season_id_unique" UNIQUE("player_id","team_id","season_id")
+	CONSTRAINT "player_season_stats_playerId_teamId_seasonId_unique" UNIQUE("player_id","team_id","season_id")
 );
 --> statement-breakpoint
 CREATE TABLE "seasons" (
@@ -93,7 +93,7 @@ CREATE TABLE "seasons" (
 	"start_date" date NOT NULL,
 	"end_date" date NOT NULL,
 	"is_current" boolean NOT NULL,
-	CONSTRAINT "seasons_sportmonks_id_unique" UNIQUE("sportmonks_id")
+	CONSTRAINT "seasons_sportmonksId_unique" UNIQUE("sportmonks_id")
 );
 --> statement-breakpoint
 CREATE TABLE "squad_memberships" (
@@ -112,7 +112,7 @@ CREATE TABLE "teams" (
 	"name" text NOT NULL,
 	"short_name" text NOT NULL,
 	"logo_url" text,
-	CONSTRAINT "teams_sportmonks_id_unique" UNIQUE("sportmonks_id")
+	CONSTRAINT "teams_sportmonksId_unique" UNIQUE("sportmonks_id")
 );
 --> statement-breakpoint
 ALTER TABLE "ball_positions" ADD CONSTRAINT "ball_positions_fixture_id_fixtures_id_fk" FOREIGN KEY ("fixture_id") REFERENCES "public"."fixtures"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -131,7 +131,7 @@ ALTER TABLE "seasons" ADD CONSTRAINT "seasons_competition_id_competitions_id_fk"
 ALTER TABLE "squad_memberships" ADD CONSTRAINT "squad_memberships_player_id_players_id_fk" FOREIGN KEY ("player_id") REFERENCES "public"."players"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "squad_memberships" ADD CONSTRAINT "squad_memberships_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "squad_memberships" ADD CONSTRAINT "squad_memberships_season_id_seasons_id_fk" FOREIGN KEY ("season_id") REFERENCES "public"."seasons"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-CREATE INDEX "ball_positions_fixture_id_idx" ON "ball_positions" USING btree ("fixture_id");--> statement-breakpoint
-CREATE INDEX "match_events_fixture_id_idx" ON "match_events" USING btree ("fixture_id");--> statement-breakpoint
-CREATE INDEX "match_events_fixture_id_type_idx" ON "match_events" USING btree ("fixture_id","type");--> statement-breakpoint
-CREATE INDEX "player_season_stats_player_id_season_id_idx" ON "player_season_stats" USING btree ("player_id","season_id");
+CREATE INDEX "ball_positions_fixture_id_index" ON "ball_positions" USING btree ("fixture_id");--> statement-breakpoint
+CREATE INDEX "match_events_fixture_id_index" ON "match_events" USING btree ("fixture_id");--> statement-breakpoint
+CREATE INDEX "match_events_fixture_id_type_index" ON "match_events" USING btree ("fixture_id","type");--> statement-breakpoint
+CREATE INDEX "player_season_stats_player_id_season_id_index" ON "player_season_stats" USING btree ("player_id","season_id");

@@ -10,7 +10,7 @@ export const seasons = pgTable("seasons", {
 	// unique here anyway: §3's upsert strategy depends on every Sportmonks-keyed
 	// entity being unique-constrained, and there's no stated reason seasons
 	// would be exempt — treating the omission as a gap, not a deliberate call.
-	sportmonksId: integer().notNull().unique("seasons_sportmonks_id_unique"),
+	sportmonksId: integer().notNull().unique(),
 	competitionId: integer()
 		.notNull()
 		.references(() => competitions.id),

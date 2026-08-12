@@ -36,14 +36,7 @@ export const playerSeasonStats = pgTable(
 	(table) => [
 		// §2: keyed on (player, team, season), not (player, season) alone — a
 		// mid-season transfer gets one row per stint, not an overwritten/merged one.
-		unique("player_season_stats_player_id_team_id_season_id_unique").on(
-			table.playerId,
-			table.teamId,
-			table.seasonId,
-		),
-		index("player_season_stats_player_id_season_id_idx").on(
-			table.playerId,
-			table.seasonId,
-		),
+		unique().on(table.playerId, table.teamId, table.seasonId),
+		index().on(table.playerId, table.seasonId),
 	],
 );

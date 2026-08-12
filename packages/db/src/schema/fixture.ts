@@ -5,7 +5,7 @@ import { teams } from "./team.ts";
 
 export const fixtures = pgTable("fixtures", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),
-	sportmonksId: integer().notNull().unique("fixtures_sportmonks_id_unique"),
+	sportmonksId: integer().notNull().unique(),
 	seasonId: integer()
 		.notNull()
 		.references(() => seasons.id),

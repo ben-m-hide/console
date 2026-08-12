@@ -14,13 +14,11 @@ export const ballPositions = pgTable(
 		// Sportmonks ID, not a blind insert" idempotency rule applies here too:
 		// re-running ingestion for an already-ingested fixture must upsert each
 		// point, not duplicate 900+ rows per re-run.
-		sportmonksId: integer()
-			.notNull()
-			.unique("ball_positions_sportmonks_id_unique"),
+		sportmonksId: integer().notNull().unique(),
 		periodId: integer().notNull(),
 		timer: doublePrecision().notNull(),
 		x: doublePrecision().notNull(),
 		y: doublePrecision().notNull(),
 	},
-	(table) => [index("ball_positions_fixture_id_idx").on(table.fixtureId)],
+	(table) => [index().on(table.fixtureId)],
 );

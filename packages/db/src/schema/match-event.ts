@@ -18,9 +18,7 @@ export const matchEvents = pgTable(
 		fixtureId: integer()
 			.notNull()
 			.references(() => fixtures.id),
-		sportmonksEventId: integer()
-			.notNull()
-			.unique("match_events_sportmonks_event_id_unique"),
+		sportmonksEventId: integer().notNull().unique(),
 		type: text().notNull(),
 		playerId: integer()
 			.notNull()
@@ -32,7 +30,7 @@ export const matchEvents = pgTable(
 		situation: text(),
 	},
 	(table) => [
-		index("match_events_fixture_id_idx").on(table.fixtureId),
-		index("match_events_fixture_id_type_idx").on(table.fixtureId, table.type),
+		index().on(table.fixtureId),
+		index().on(table.fixtureId, table.type),
 	],
 );
