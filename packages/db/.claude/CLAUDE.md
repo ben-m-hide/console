@@ -22,5 +22,5 @@ One file per table under `src/schema/`, barrel-exported from `src/schema/index.t
 
 - No Neon project exists yet — the generated migration (`drizzle/0000_*.sql`) hasn't run anywhere.
 - `CHECK` constraints on `match_events` scoping `outcome`/`body_part`/`situation` by `type` are deliberately not implemented — Sportmonks' real `type` enum values aren't confirmed anywhere in this codebase yet. See the inline comment in `src/schema/match-event.ts` and ADR 0012.
-- `UNIQUE(sportmonks_id)` on `seasons` and `ball_positions` goes beyond what `PROJECT.md` §2's constraints paragraph literally lists — treated as a gap in that paragraph, not a deliberate exclusion. See the inline comments in those schema files.
+- **Before wiring `createDb()` into `apps/api`/`apps/ingestion`: pass the pooled connection string (`-pooler` hostname suffix), not the direct one** — `drizzle.config.ts` uses direct (correct, migrations need it); `createDb()` needs pooled. See the comment in `src/client.ts` and ADR 0012's "Consequences" section for why (Neon's own docs, plus Scale to Zero cold-start latency on `apps/ingestion`'s every-few-hours cadence — no retry/reconnect handling exists yet either).
 - Nothing calls `createDb()` yet — `apps/api`/`apps/ingestion` wiring is still open (`TODO.md`).
