@@ -98,12 +98,14 @@ CREATE TABLE "seasons" (
 --> statement-breakpoint
 CREATE TABLE "squad_memberships" (
 	"id" integer PRIMARY KEY GENERATED ALWAYS AS IDENTITY (sequence name "squad_memberships_id_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),
+	"sportmonks_id" integer NOT NULL,
 	"player_id" integer NOT NULL,
 	"team_id" integer NOT NULL,
 	"season_id" integer NOT NULL,
 	"shirt_number" integer,
 	"joined_at" timestamp with time zone NOT NULL,
-	"left_at" timestamp with time zone
+	"left_at" timestamp with time zone,
+	CONSTRAINT "squad_memberships_sportmonksId_unique" UNIQUE("sportmonks_id")
 );
 --> statement-breakpoint
 CREATE TABLE "teams" (

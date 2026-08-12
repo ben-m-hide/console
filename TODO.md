@@ -17,8 +17,9 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 - [ ] Add basic rate limiting on public API endpoints (e.g. `hono-rate-limiter`) once real routes exist (PROJECT.md §9)
 - [ ] Confirm whether Sportmonks exposes a delta/"updated since" fixture-fetch endpoint before building the ingestion job — fall back to a rolling-window re-fetch (e.g. last 14 days) if not (PROJECT.md §3)
 - [ ] Run `packages/db`'s generated migration once a Neon project exists (`bun run db:migrate` from `packages/db`, needs `DATABASE_URL` set)
-- [ ] Wire `packages/db`'s `createDb()` into `apps/api` and `apps/ingestion`, and add `DATABASE_URL` to both apps' `.env.example` at that point (PROJECT.md §7)
+- [ ] **Before** wiring `createDb()` in (item above): confirm the pooled connection string works end-to-end, and decide on cold-start tolerance — `apps/ingestion` runs every few hours (§3), so it will hit a suspended Neon compute (Scale to Zero, 5min idle) on nearly every run. No retry/reconnect handling exists yet. Confirmed against Neon's own docs, not guessed — see ADR 0012's "Consequences" section. Add `DATABASE_URL` to both apps' `.env.example` once wired (PROJECT.md §7)
 - [ ] Add `CHECK` constraints to `match_events` scoping `outcome`/`body_part`/`situation` by `type`, once Phase 4's Sportmonks API client surfaces the real `type`/`sub_type_id` values (deliberately not guessed — see ADR 0012, PROJECT.md §11 Phase 2)
+- [ ] Do a thin vertical slice before further schema/API elaboration — Phase 4's real Sportmonks client is exactly that; §2/§5 have already needed two "Correction, Phase 3" reversals against reality, a sign the design is running ahead of what's been verified against a real API call. Don't speculate further on Phase 5's API contract until Phase 4 has one real row in the DB.
 
 ## Deployment
 
@@ -34,7 +35,9 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 
 ## Testing
 
+- [ ] **`packages/shared` has zero tests** — no Vitest config exists for it at all (root `test` script only filters `apps/web`). Worth doing _before_ `apps/api`'s equivalent gap (already tracked above): these Zod schemas are explicitly the trust boundary (`PROJECT.md` §1 — validates ingested Sportmonks data before DB writes), higher-value to test first than a still-empty API. Needs its own small `node`-environment Vitest setup, same shape as the still-open `apps/api` test-setup item.
 - [ ] Real E2E coverage in `packages/e2e/` beyond the one smoke test — add flow coverage once a real interactive feature exists (see ADR 0009), and a cross-package test once the frontend actually calls the backend
+- [ ] No integration testing exists across any layer yet — CDK is `synth`-only, the API has a `curl` smoke test only, `packages/db`'s schema is verified via `drizzle-kit generate` only (no live DB), and the frontend has never made a real request to the API (`connect-src` is still a `'self'` placeholder). Expected at this stage, not a bug — but CORS, connection-string format, and Zod/DB schema drift are all still ahead, undiscovered, right at the point the wiring items above actually connect these pieces. Worth deliberately testing each new connection point as it's wired, not just trusting each layer's isolated verification.
 - [ ] Test coverage reports with deltas as a CI PR comment — coverage % plus the diff vs. the base branch, not just the local `test:coverage` HTML report (e.g. `davelosert/vitest-coverage-report-action`, which needs `@vitest/coverage-v8`'s `json-summary` reporter enabled). Tool choice not decided, just the capability. Needs `pull-requests: write` scoped to just that step (current `ci.yml` is `contents: read` only) and the action pinned to a commit SHA like every other CI action (`CONTRIBUTING.md`'s pinning policy). Related to the existing `coverage.thresholds` BACKLOG item below but distinct — visibility, not enforcement.
 
 ## Tooling / project setup
@@ -53,7 +56,7 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 
 - [ ] Stricter CSP via a CloudFront Function nonce, dropping `style-src 'unsafe-inline'` (currently needed for Mantine's runtime styles — see ADR 0007)
 - [ ] Custom domain + ACM + Route53 for CloudFront (confirmed non-breaking to add later, just not needed yet)
-- [ ] `bun audit` allowlist for an unfixable advisory — blocked on Bun tooling (no `.auditignore`-equivalent exists yet)
+- [ ] `bun audit` allowlist for an unfixable advisory — blocked on Bun tooling (no `.auditignore`-equivalent exists yet). Related, needs a decision not a fix: `--audit-level=high` in CI has no escape hatch until the item above exists, so any new unfixable high/critical advisory anywhere in this stack's transitive tree (Mantine, TanStack, CDK, Playwright, Drizzle) blocks every PR indefinitely, unrelated to the change. Worth deciding whether `--audit-level=critical` is the safer default until the allowlist mechanism exists — a real severity-vs-availability trade-off, not something to change silently.
 - [ ] Coverage thresholds (`coverage.thresholds`) once there's enough real code for a number to mean something
 - [ ] API docs UI beyond Scalar (e.g. a generated typed client from the OpenAPI spec) — no consumer for one yet
 
