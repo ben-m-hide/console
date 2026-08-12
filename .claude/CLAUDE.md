@@ -52,7 +52,7 @@ cd apps/api && bun run dev          # backend dev server
 
 ## Simplicity first
 
-Before writing code, stop at the first rung that holds: (1) does this need to exist? [YAGNI] → (2) does an existing util/hook/component already do it? → (3) does the language/stdlib/platform do it natively? → (4) does an installed dependency do it? → (5) can it be one line? → (6) only then, the minimum code that works.
+Before writing code, stop at the first rung that holds: (1) does this need to exist? [YAGNI] → (2) does an existing util/hook/component already do it? [DRY] → (3) does the language/stdlib/platform do it natively? → (4) does an installed dependency do it? → (5) can it be one line? → (6) only then, the minimum code that works [KISS].
 
 Default answer to "should I add this?" is no — make the case first. No speculative features, no single-use abstractions, no impossible-scenario error handling. Never on the chopping block: trust-boundary validation, data loss, security, accessibility, type safety. Prefer deleting over adding.
 
@@ -64,10 +64,14 @@ Touch only what the request requires. Don't refactor or "improve" adjacent unbro
 
 Turn vague tasks into verifiable ones before starting: "fix the bug" → reproduce it first, then fix, then re-verify the reproduction is gone (this is exactly how every bug in this project has actually been fixed — reproduced locally before and after, never assumed). For multi-step work, state a brief plan with a verification step per item.
 
+## Planning
+
+Plans: extremely concise — sacrifice grammar for concision. Before listing a question, try answering it by exploring the codebase — only list what exploration can't resolve. End with an "Unresolved questions" list (omit if none), each with your recommended answer. Self-critique before presenting: surface concerns/risks in the plan and mitigations. Do not implement until both of us have reviewed and approved the plan.
+
 ## Known gotchas
 
 Full list with reasoning lives in `README.md`'s **Known quirks** section and `docs/adr/`. Highlights: Bun workspace installs don't hoist to root `node_modules`; `axe-core`'s `color-contrast` is deliberately disabled in tests (jsdom has no layout engine); the CSP needs `style-src 'unsafe-inline'` for Mantine's runtime styles and `connect-src` is a deliberate placeholder, not the API's real origin yet; `bun audit` has no allowlist for an unfixable advisory. No custom client wrappers exist yet (no `apiClient`-style abstraction) — this project is small enough that none has been needed.
 
 ## Responses
 
-Terse by default — expand only to surface a tradeoff/risk, or when explicitly asked.
+Extremely concise — sacrifice grammar for concision. Simplest explanation first; expand only when asked or to surface a tradeoff/risk.
