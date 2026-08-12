@@ -9,11 +9,6 @@ export const ballPositions = pgTable(
 		fixtureId: integer()
 			.notNull()
 			.references(() => fixtures.id),
-		// Not named in §2's "Constraints required" paragraph (same gap as
-		// seasons — see the comment there), but §3's "every upsert keyed on the
-		// Sportmonks ID, not a blind insert" idempotency rule applies here too:
-		// re-running ingestion for an already-ingested fixture must upsert each
-		// point, not duplicate 900+ rows per re-run.
 		sportmonksId: integer().notNull().unique(),
 		periodId: integer().notNull(),
 		timer: doublePrecision().notNull(),
