@@ -18,12 +18,14 @@ updates:
           - "aws-cdk-lib"
           - "constructs"
           - "@playwright/test"
+          - "drizzle-kit"
       production-dependencies:
         dependency-type: "production"
         exclude-patterns:
           - "hono"
           - "@hono/zod-openapi"
           - "@scalar/hono-api-reference"
+          - "drizzle-orm"
 
   - package-ecosystem: "github-actions"
     directory: "/"
