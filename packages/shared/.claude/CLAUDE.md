@@ -1,6 +1,6 @@
 # packages/shared
 
-Zod schemas + inferred types (`z.infer`) for the core domain entities: competition, season, team, player, fixture, match event, ball position, player season stats. Consumed by `apps/api` (request/response validation), `apps/ingestion` (validating normalized data before DB writes), and `apps/web` (typed API responses) — see `PROJECT.md` §1.
+Zod schemas + inferred types (`z.infer`) for the core domain entities: competition, season, team, player, fixture, match event, ball position, player season stats. Intended for `apps/api` (request/response validation), `apps/ingestion` (validating normalized data before DB writes), and `apps/web` (typed API responses) — see `PROJECT.md` §1 — but not wired into any of them yet; nothing in the repo imports `@console-next/shared` today.
 
 Root `.claude/CLAUDE.md` rules (stack, coding standards, guardrails) apply here unmodified — this file only adds what's specific to this package.
 
