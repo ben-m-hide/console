@@ -6,7 +6,7 @@ Accepted — infrastructure code written and `cdk synth` verified locally. **Not
 
 ## Context
 
-The project ships as a static SPA (see ADR 0001) and needs somewhere to actually run. This was a genuinely open, unconstrained choice — no existing AWS account, no company infra convention to slot into (confirmed explicitly, not assumed from the sibling `m3ter-console-v3` repo).
+The project ships as a static SPA (see ADR 0001) and needs somewhere to actually run. This was a genuinely open, unconstrained choice — no existing AWS account, no infra convention to slot into.
 
 ## Decision
 
@@ -15,7 +15,7 @@ The project ships as a static SPA (see ADR 0001) and needs somewhere to actually
 Cloudflare Pages/Vercel/Netlify are legitimate, objectively simpler choices for a static SPA — they handle SPA fallback, TLS, and CDN caching close to zero-config. AWS was chosen anyway because:
 
 - The undifferentiated setup those platforms hide (CDN cache invalidation, edge-level SPA fallback, a CSP/security-headers policy, cert/DNS wiring) is exactly the kind of thing worth understanding directly rather than delegating to a platform, given this project doubles as a place to build current AWS/IaC practice.
-- Given the company context (m3ter, a billing/SaaS platform), AWS-specific experience is more likely to transfer directly to real infra than a Vercel/Cloudflare-specific setup would.
+- AWS-specific experience is more broadly transferable to real-world infra than a Vercel/Cloudflare-specific setup would be.
 - It forces doing IAM/OIDC properly for CI (no long-lived AWS keys in GitHub Actions) from day one rather than retrofitting it later.
 
 **IaC: AWS CDK (TypeScript)**, over Terraform or a manual console-first setup. Reasoning: same language as the app (no context-switch to HCL), and CDK's `aws-cloudfront-origins` module has a purpose-built, current (OAC, not the legacy OAI) construct for exactly this S3+CloudFront pattern. Terraform is the more universally-transferable, cross-cloud skill, and was the closer runner-up — revisit if a second cloud or a Terraform-standardized team ever enters the picture.
@@ -43,7 +43,7 @@ Cloudflare Pages/Vercel/Netlify are legitimate, objectively simpler choices for 
 
 ## Considered and rejected
 
-- **Cloudflare Pages** — simplest option, native SPA fallback and preview deploys, generous free tier. Rejected: less transferable to the company's likely AWS-based real infra, and intentionally trades away the learning value of the underlying CDN/edge concepts.
+- **Cloudflare Pages** — simplest option, native SPA fallback and preview deploys, generous free tier. Rejected: less transferable to real-world AWS-based infra, and intentionally trades away the learning value of the underlying CDN/edge concepts.
 - **Vercel** — excellent DX, but its zero-config model is most differentiated for Next.js-style frameworks; for a plain Vite SPA it's not meaningfully better than Cloudflare Pages, and carries the same AWS-transferability gap.
 - **AWS Amplify Hosting** — a managed layer over S3/CloudFront that also handles SPA fallback and headers with less code. Rejected for the same reason raw S3+CloudFront was chosen over Cloudflare Pages: the point here is to learn the underlying primitives, not have AWS's own abstraction hide them too.
 - **Terraform** — the stronger choice for cross-cloud/team-portable IaC skill, lost to CDK on same-language convenience for this specific, single-cloud, single-developer-context project. Revisit if either of those constraints changes.
