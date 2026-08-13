@@ -1,0 +1,29 @@
+name: Dependency Review
+
+on:
+  pull_request:
+
+concurrency:
+  group: dependency-review-${{ github.head_ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          # Match bun audit's existing threshold (ci.yml uses --audit-level=high)
+          # rather than the action's own low default.
+          fail-on-severity: high
+          # bun audit checks the whole lockfile regardless of dev/prod — match
+          # that here instead of the action's runtime-only default.
+          fail-on-scopes: runtime, development
+          # Only comment when there's an actual finding, not on every PR.
+          comment-summary-in-pr: on-failure
