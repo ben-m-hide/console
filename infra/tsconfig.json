@@ -1,29 +1,14 @@
 {
+	"extends": "../tsconfig.base.json",
 	"compilerOptions": {
 		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.infra.tsbuildinfo",
-		"target": "es2023",
 		"lib": ["ES2023"],
 		"types": ["node"],
-		"skipLibCheck": true,
 
-		/* Bundler mode */
-		"module": "esnext",
-		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": true,
-		"verbatimModuleSyntax": true,
-		"moduleDetection": "force",
-		"noEmit": true,
-
-		/* Strictest — exactOptionalPropertyTypes deliberately omitted here:
-		   aws-cdk-lib's own .d.ts (e.g. Bucket vs IBucket's `isWebsite`) isn't
-		   authored against it and fails to satisfy it, unrelated to our code. */
-		"strict": true,
-		"noUncheckedIndexedAccess": true,
-		"noImplicitOverride": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"erasableSyntaxOnly": true,
-		"noFallthroughCasesInSwitch": true
+		// Deliberately overrides the base's exactOptionalPropertyTypes: true —
+		// aws-cdk-lib's own .d.ts (e.g. Bucket vs IBucket's `isWebsite`) isn't
+		// authored against it and fails to satisfy it, unrelated to our code.
+		"exactOptionalPropertyTypes": false
 	},
 	"include": ["."]
 }

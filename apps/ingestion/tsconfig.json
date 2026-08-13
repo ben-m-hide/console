@@ -1,28 +1,9 @@
 {
+	"extends": "../../tsconfig.base.json",
 	"compilerOptions": {
 		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.ingestion.tsbuildinfo",
-		"target": "es2023",
 		"lib": ["ES2023"],
-		"types": ["node"],
-		"skipLibCheck": true,
-
-		/* Bundler mode */
-		"module": "esnext",
-		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": true,
-		"verbatimModuleSyntax": true,
-		"moduleDetection": "force",
-		"noEmit": true,
-
-		/* Strictest */
-		"strict": true,
-		"noUncheckedIndexedAccess": true,
-		"exactOptionalPropertyTypes": true,
-		"noImplicitOverride": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"erasableSyntaxOnly": true,
-		"noFallthroughCasesInSwitch": true
+		"types": ["node"]
 	},
 	"include": ["src"]
 }
