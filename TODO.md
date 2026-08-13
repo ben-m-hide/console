@@ -52,6 +52,7 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 
 # BACKLOG
 
+- [ ] Give `apps/web/src/lib/query-client.ts`'s `QueryClient` a construction seam (`createQueryClient()` factory instead of a module-level singleton) — third candidate from the 2026-08-13 architecture review, rated "Worth exploring" not "Strong": only one adapter exists today (`-index-page.test.tsx` already routes around it, wrapping just `MantineProvider`, not `QueryClientProvider`), so the seam is hypothetical until a component actually calls `useQuery`. Worth doing at that point, not necessarily before.
 - [ ] Generate Zod schemas for `squad_memberships`/`ingestion_runs` too (currently Drizzle-only, no JSON-boundary validation need today) — revisit if either ever needs one; see ADR 0013's Consequences
 - [ ] Stricter CSP via a CloudFront Function nonce, dropping `style-src 'unsafe-inline'` (currently needed for Mantine's runtime styles — see ADR 0007)
 - [ ] Custom domain + ACM + Route53 for CloudFront (confirmed non-breaking to add later, just not needed yet)
