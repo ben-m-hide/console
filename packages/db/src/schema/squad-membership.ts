@@ -1,8 +1,8 @@
 import { integer, pgTable, timestamp } from "drizzle-orm/pg-core";
 
-import { players } from "./player.ts";
-import { seasons } from "./season.ts";
-import { teams } from "./team.ts";
+import { players } from "./player";
+import { seasons } from "./season";
+import { teams } from "./team";
 
 export const squadMemberships = pgTable("squad_memberships", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),

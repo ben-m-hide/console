@@ -1,7 +1,7 @@
 import { integer, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
-import { competitions } from "./competition.ts";
-import { seasons } from "./season.ts";
+import { competitions } from "./competition";
+import { seasons } from "./season";
 
 // Unlike match_events.type/fixtures.status (Sportmonks-sourced, unconfirmed —
 // see match-event.ts), these values are our own application's, explicitly
