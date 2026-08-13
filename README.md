@@ -1,6 +1,6 @@
 # console-next
 
-Standalone TypeScript + React app, not part of the `m3ter-console-v3` monorepo — see `docs/adr/0002-bun-as-package-manager.md` for why. It is, however, its own small Bun workspace: `apps/web` is the frontend, `apps/api` the backend, and `apps/ingestion` a scheduled Sportmonks ingestion job (empty scaffold — see PROJECT.md's phased task list), with `packages/shared` (Zod schemas) and `packages/db` (Drizzle schema/client, see `docs/adr/0012-packages-db-and-bun-sql-driver.md`) as shared internal libraries — see `docs/adr/0011-apps-and-packages-workspace-restructure.md` for the `apps/`-vs-`packages/` convention.
+Standalone TypeScript + React app. It is its own small Bun workspace: `apps/web` is the frontend, `apps/api` the backend, and `apps/ingestion` a scheduled Sportmonks ingestion job (empty scaffold — see PROJECT.md's phased task list), with `packages/shared` (Zod schemas) and `packages/db` (Drizzle schema/client, see `docs/adr/0012-packages-db-and-bun-sql-driver.md`) as shared internal libraries — see `docs/adr/0011-apps-and-packages-workspace-restructure.md` for the `apps/`-vs-`packages/` convention.
 
 ## Stack
 
