@@ -16,6 +16,7 @@ One record per significant, hard-to-reverse, non-obvious decision — not every 
 | [0010](./0010-render-and-neon-for-backend-hosting.md)         | Render + Neon for backend hosting, deferring the AWS migration                        | Accepted — decision only, nothing built yet                    |
 | [0011](./0011-apps-and-packages-workspace-restructure.md)     | `apps/*` + `packages/*` workspace restructure, supersedes ADR 0008                    | Accepted — executed in full                                    |
 | [0012](./0012-packages-db-and-bun-sql-driver.md)              | `packages/db` as its own package, `drizzle-orm/bun-sql` over Neon's serverless driver | Accepted — schema + migration built, not yet wired up or run   |
+| [0013](./0013-generate-shared-schemas-from-drizzle.md)        | Generate `packages/shared`'s Zod schemas from `packages/db`'s Drizzle tables          | Accepted — built                                               |
 
 ## Adding one
 

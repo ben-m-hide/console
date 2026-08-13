@@ -4,9 +4,18 @@
 	"version": "1.0.0",
 	"type": "module",
 	"scripts": {
-		"typecheck": "tsc -b --noEmit"
+		"codegen": "bun run scripts/generate-schemas.ts",
+		"typecheck": "tsc -b --noEmit",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"dependencies": {
 		"zod": "^4.4.3"
+	},
+	"devDependencies": {
+		"@console-next/db": "workspace:*",
+		"@types/bun": "^1.3.14",
+		"drizzle-orm": "0.45.2",
+		"vitest": "^4.1.10"
 	}
 }

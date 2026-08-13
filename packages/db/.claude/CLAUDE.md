@@ -1,6 +1,8 @@
 # packages/db
 
-Drizzle schema (all 10 tables from `PROJECT.md` §2) + a `createDb(connectionString)` Postgres client, for Neon. Consumed by `apps/api` and `apps/ingestion` only — deliberately **not** `apps/web`, so a Postgres driver never reaches the browser bundle. See `docs/adr/0012-packages-db-and-bun-sql-driver.md` for why this is its own package and why the driver is `drizzle-orm/bun-sql` (Bun's native `SQL` client) rather than `@neondatabase/serverless`.
+Drizzle schema (all 10 tables from `PROJECT.md` §2) + a `createDb(connectionString)` Postgres client, for Neon. Consumed at **runtime** by `apps/api` and `apps/ingestion` only — deliberately **not** `apps/web`, so a Postgres driver never reaches the browser bundle. See `docs/adr/0012-packages-db-and-bun-sql-driver.md` for why this is its own package and why the driver is `drizzle-orm/bun-sql` (Bun's native `SQL` client) rather than `@neondatabase/serverless`.
+
+`packages/shared` also has a **devDependency** on this package (via `package.json`'s `exports` field, added for exactly this) — codegen-time only, to derive its Zod schemas from these tables. Never a runtime import, never reaches `apps/web`'s bundle. See `docs/adr/0013-generate-shared-schemas-from-drizzle.md`.
 
 Root `.claude/CLAUDE.md` rules (stack, coding standards, guardrails) apply here unmodified — this file only adds what's specific to this package.
 
@@ -12,7 +14,7 @@ bun run db:generate   # drizzle-kit generate — no live DB connection needed
 bun run db:migrate    # drizzle-kit migrate — needs DATABASE_URL set
 ```
 
-No test target yet — same as `packages/shared`.
+No test target yet.
 
 ## Structure
 

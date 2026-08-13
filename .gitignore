@@ -27,6 +27,9 @@ packages/e2e/blob-report
 apps/web/src/routeTree.gen.ts
 .tanstack
 
+# packages/shared schemas derived from packages/db's Drizzle tables
+packages/shared/src/schemas/*.gen.ts
+
 # Env files
 .env
 .env.*
