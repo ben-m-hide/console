@@ -1,6 +1,6 @@
 import { doublePrecision, index, integer, pgTable } from "drizzle-orm/pg-core";
 
-import { fixtures } from "./fixture.ts";
+import { fixtures } from "./fixture";
 
 export const ballPositions = pgTable(
 	"ball_positions",

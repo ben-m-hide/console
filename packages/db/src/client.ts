@@ -2,7 +2,7 @@ import type { SQL } from "bun";
 
 import { type BunSQLDatabase, drizzle } from "drizzle-orm/bun-sql";
 
-import * as schema from "./schema/index.ts";
+import * as schema from "./schema/index";
 
 // connectionString must be Neon's POOLED string (the "-pooler" hostname
 // suffix), not the direct one — see ADR 0012. Direct is for drizzle-kit

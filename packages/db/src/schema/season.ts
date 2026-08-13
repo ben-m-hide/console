@@ -1,6 +1,6 @@
 import { boolean, date, integer, pgTable, text } from "drizzle-orm/pg-core";
 
-import { competitions } from "./competition.ts";
+import { competitions } from "./competition";
 
 export const seasons = pgTable("seasons", {
 	id: integer().primaryKey().generatedAlwaysAsIdentity(),

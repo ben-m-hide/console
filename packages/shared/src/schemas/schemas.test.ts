@@ -3,7 +3,7 @@ import {
 	CompetitionSchema,
 	PlayerSeasonStatsSchema,
 	TeamSchema,
-} from "./index.ts";
+} from "./index";
 
 describe("TeamSchema (generated, mechanical mapping)", () => {
 	it("parses a valid team", () => {

@@ -6,9 +6,9 @@ import {
 	unique,
 } from "drizzle-orm/pg-core";
 
-import { players } from "./player.ts";
-import { seasons } from "./season.ts";
-import { teams } from "./team.ts";
+import { players } from "./player";
+import { seasons } from "./season";
+import { teams } from "./team";
 
 export const playerSeasonStats = pgTable(
 	"player_season_stats",

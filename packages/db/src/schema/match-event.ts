@@ -1,7 +1,7 @@
 import { index, integer, pgTable, text } from "drizzle-orm/pg-core";
 
-import { fixtures } from "./fixture.ts";
-import { players } from "./player.ts";
+import { fixtures } from "./fixture";
+import { players } from "./player";
 
 // PROJECT.md §2/§11 Phase 2 call for CHECK constraints scoping `outcome`/
 // `bodyPart`/`situation` per `type` (the wide-table trade-off's DB-level
