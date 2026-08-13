@@ -1,6 +1,6 @@
 # TODO
 
-Task tracking for console-next, following the [todo-md](https://github.com/todo-md/todo-md) standard: `- [ ]` open, `- [x]` done, `- [-]` declined. See `docs/adr/` and `README.md` for the reasoning behind any item — this file is the action list, not the rationale.
+Task tracking for console-next, following the [todo-md](https://github.com/todo-md/todo-md) standard: `- [ ]` open, `- [x]` done, `- [-]` declined. See `docs/adr/` and `README.md` for the reasoning behind any item — this file is the action list, not the rationale. Claude Code tooling/meta tasks (skills, settings, hooks) are tracked separately in [`.claude/TODO.md`](.claude/TODO.md) — this file is product/repo tasks only.
 
 ## Backend
 
@@ -42,9 +42,6 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 
 ## Tooling / project setup
 
-- [ ] Run `/verify` yourself — bundled, `disable-model-invocation: true`, so I can't invoke it; typing it directly records the real lint/typecheck/test/build/audit recipe into `.claude/skills/verify/`, replacing the guesswork-prone bundled default
-- [x] Per-directory `CLAUDE.md` for `infra/`, `apps/ingestion/`, `packages/shared/`, and `packages/e2e/` — done 2026-08-12, factual/current-state only (purpose, real commands, real quirks), no invented skills.
-- [ ] Populate `.claude/` further as real needs come up — `settings.json`, hooks, subagents, commands (skills and commands are the same mechanism in current Claude Code — see README), path-scoped rules. Nothing pre-built beyond what's already there; add each only when there's an actual repeated task it would serve, not speculatively.
 - [x] Bundle-size PR comments in CI — done 2026-08-13, new `.github/workflows/bundle-size.yml` using `preactjs/compressed-size-action` (verified via GitHub's API before adding: actively maintained, 654 stars, auto-detects Bun from the lockfile, default file pattern `**/dist/**/*.{js,mjs,cjs}` matches `apps/web/dist/` with no customization needed, reuses the existing `bun run build` script unmodified). Kept as its own workflow rather than a step in `ci.yml`, same reasoning as `release-please.yml` being separate — it needs `pull-requests: write` to post/update the comment, and `ci.yml`'s `contents: read` shouldn't be broadened just for one step. Pinned to the release commit SHA (`f322c295d...` = `v2.10.0`), YAML verified to actually parse.
 - [x] Set up a workflow from GitHub's security/code-scanning template picker — done 2026-08-13, `.github/workflows/dependency-review.yml` using `actions/dependency-review-action` (verified via GitHub's API before adding: official `actions/` org, actively maintained, pushed the same day). **CodeQL was already active** (confirmed via the browser 2026-08-13: "Default setup", recent scan) so this fills the actual gap instead — diffs a PR's dependency changes specifically and fails on a newly-introduced known-vulnerable package, which `bun audit` doesn't do (that only checks the current lockfile state, not what a given PR changed). Configured `fail-on-severity: high` and `fail-on-scopes: runtime, development` to match `bun audit --audit-level=high`'s existing threshold rather than the action's own looser defaults (`low` severity, `runtime`-only scope). Kept as its own workflow, same `pull-requests: write` reasoning as `bundle-size.yml`. Pinned to the release commit SHA, YAML verified to parse.
 
