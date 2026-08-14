@@ -18,7 +18,7 @@
 		"format:md": "prettier --write '**/*.md'",
 		"format:md:check": "prettier --check '**/*.md'",
 		"typecheck": "bun run codegen && tsc -b --noEmit",
-		"test": "bun run --filter ./apps/web test && bun run --filter ./packages/shared test && bun run --filter ./apps/ingestion test",
+		"test": "bun run --filter ./apps/web test && bun run --filter ./packages/shared test && bun run --filter ./apps/ingestion test && bun run --filter ./apps/api test",
 		"test:watch": "bun run --filter ./apps/web test:watch",
 		"test:coverage": "bun run --filter ./apps/web test:coverage",
 		"e2e": "bun run --filter ./packages/e2e test",

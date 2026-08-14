@@ -43,7 +43,7 @@ kill $PID                                        # confirmed to actually free th
 
 ## Test
 
-No test suite exists yet for this package (deliberate — see `docs/adr/0008-hono-rest-openapi-backend.md`; add one when there's real behavior worth testing, then update this section).
+`bun run test` (Vitest, `node` environment — see `vitest.config.ts`) covers pure logic only: `build-player-compare-entries.ts` (percentile calc, mid-season-transfer resolution, missing-player detection) and `middleware/error-handler.ts` (error/404/validation envelopes, driven via Hono's own `app.request()` against throwaway test apps). The DB-touching parts of both routes (the actual `db.select()` calls) are **not** unit tested — same split as `apps/ingestion`'s `normalize-*.ts` (tested) vs `ingest-*.ts` (verified manually against real data) — see `docs/plans/2026-08-14-api-vitest-setup.md`. Runtime verification of the full routes (including the DB layer) is this skill's `smoke.sh`/manual `curl` path above, not the test suite.
 
 ## Gotchas
 

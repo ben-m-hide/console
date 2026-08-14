@@ -5,12 +5,12 @@ import { and, eq, gte, inArray } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 
 import { db } from "../db";
-
-// PROJECT.md §4's recommended default: same position, same competition
-// (implied by seasonId — a season belongs to exactly one competition), same
-// season, minimum 450 minutes played (~5 full matches) — small samples make
-// percentiles meaningless.
-const MINIMUM_MINUTES_FOR_PEER_GROUP = 450;
+import type { PeerStats } from "./build-player-compare-entries";
+import {
+	buildCompareEntries,
+	MINIMUM_MINUTES_FOR_PEER_GROUP,
+	resolvePlayerRows,
+} from "./build-player-compare-entries";
 
 const PlayerCompareStatsSchema = z
 	.object({
@@ -88,22 +88,6 @@ export const playersCompareRoute = createRoute({
 	},
 });
 
-interface PeerStats {
-	goalsPer90: number;
-	assistsPer90: number;
-	xgPer90: number;
-}
-
-const percentileOf = (
-	value: number,
-	peerValues: Array<number>,
-): number | null =>
-	peerValues.length > 0
-		? (peerValues.filter((peerValue) => peerValue < value).length /
-				peerValues.length) *
-			100
-		: null;
-
 export const registerPlayersCompareRoute = (app: OpenAPIHono): void => {
 	app.openapi(playersCompareRoute, async (c) => {
 		const { ids, season } = c.req.valid("query");
@@ -134,19 +118,9 @@ export const registerPlayersCompareRoute = (app: OpenAPIHono): void => {
 				),
 			);
 
-		// A mid-season transfer gives a player two rows for the same season (one
-		// per team, per player_season_stats' own unique(playerId, teamId,
-		// seasonId)) — compare against their stint with the most minutes.
-		const rowByPlayerId = new Map<number, (typeof requestedRows)[number]>();
-		for (const row of requestedRows) {
-			const existing = rowByPlayerId.get(row.playerId);
-			if (!existing || row.minutesPlayed > existing.minutesPlayed) {
-				rowByPlayerId.set(row.playerId, row);
-			}
-		}
-
-		const missingPlayerIds = playerIds.filter(
-			(playerId) => !rowByPlayerId.has(playerId),
+		const { rowByPlayerId, missingPlayerIds } = resolvePlayerRows(
+			playerIds,
+			requestedRows,
 		);
 		if (missingPlayerIds.length > 0) {
 			throw new HTTPException(404, {
@@ -180,44 +154,12 @@ export const registerPlayersCompareRoute = (app: OpenAPIHono): void => {
 			peersByPosition.set(position, peers);
 		}
 
-		const entries = playerIds.map((playerId) => {
-			// biome-ignore lint/style/noNonNullAssertion: missingPlayerIds already threw above
-			const row = rowByPlayerId.get(playerId)!;
-			// biome-ignore lint/style/noNonNullAssertion: every row's position was collected into positions above
-			const peers = peersByPosition.get(row.position)!;
-
-			return {
-				playerId: row.playerId,
-				name: row.name,
-				position: row.position,
-				team: row.team,
-				seasonId,
-				stats: {
-					minutesPlayed: row.minutesPlayed,
-					goals: row.goals,
-					assists: row.assists,
-					xg: row.xg,
-					goalsPer90: row.goalsPer90,
-					assistsPer90: row.assistsPer90,
-					xgPer90: row.xgPer90,
-				},
-				percentiles: {
-					goalsPer90: percentileOf(
-						row.goalsPer90,
-						peers.map((peer) => peer.goalsPer90),
-					),
-					assistsPer90: percentileOf(
-						row.assistsPer90,
-						peers.map((peer) => peer.assistsPer90),
-					),
-					xgPer90: percentileOf(
-						row.xgPer90,
-						peers.map((peer) => peer.xgPer90),
-					),
-				},
-				peerGroupSize: peers.length,
-			};
-		});
+		const entries = buildCompareEntries(
+			playerIds,
+			seasonId,
+			rowByPlayerId,
+			peersByPosition,
+		);
 
 		return c.json(entries);
 	});

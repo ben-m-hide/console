@@ -29,6 +29,9 @@
         "hono": "4.13.1",
         "zod": "^4.4.3",
       },
+      "devDependencies": {
+        "vitest": "^4.1.10",
+      },
     },
     "apps/ingestion": {
       "name": "@console-next/ingestion",
