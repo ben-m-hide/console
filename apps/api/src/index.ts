@@ -2,7 +2,7 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
 import { cors } from "hono/cors";
 
-import { errorHandler } from "./middleware/error-handler";
+import { errorHandler, notFoundHandler } from "./middleware/error-handler";
 import { registerCompetitionsRoute } from "./routes/competitions";
 
 const HealthResponseSchema = z
@@ -31,6 +31,7 @@ app.use(
 	cors({ origin: process.env.API_CORS_ORIGIN ?? "http://localhost:5173" }),
 );
 app.onError(errorHandler);
+app.notFound(notFoundHandler);
 
 app.openapi(healthRoute, (c) => c.json({ status: "ok" as const }));
 registerCompetitionsRoute(app);

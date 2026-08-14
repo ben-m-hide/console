@@ -1,4 +1,4 @@
-import type { ErrorHandler } from "hono";
+import type { ErrorHandler, NotFoundHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 
 // PROJECT.md §9: every error response uses this envelope, not Hono's raw
@@ -16,3 +16,6 @@ export const errorHandler: ErrorHandler = (err, c) => {
 		500,
 	);
 };
+
+export const notFoundHandler: NotFoundHandler = (c) =>
+	c.json({ error: { code: 404, message: "Not Found" } }, 404);
