@@ -51,25 +51,13 @@ describe("TeamSchema (generated, mechanical mapping)", () => {
 	});
 });
 
-describe("CompetitionSchema.tier (positive override — not derivable from Drizzle alone)", () => {
-	it("rejects a zero tier", () => {
+describe("CompetitionSchema (generated, mechanical mapping)", () => {
+	it("parses a valid competition", () => {
 		const result = CompetitionSchema.safeParse({
 			id: 1,
 			sportmonksId: 100,
 			name: "Premier League",
 			country: "England",
-			tier: 0,
-		});
-		expect(result.success).toBe(false);
-	});
-
-	it("accepts a positive tier", () => {
-		const result = CompetitionSchema.safeParse({
-			id: 1,
-			sportmonksId: 100,
-			name: "Premier League",
-			country: "England",
-			tier: 1,
 		});
 		expect(result.success).toBe(true);
 	});

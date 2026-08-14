@@ -5,5 +5,4 @@ export const competitions = pgTable("competitions", {
 	sportmonksId: integer().notNull().unique(),
 	name: text().notNull(),
 	country: text().notNull(),
-	tier: integer().notNull(),
 });

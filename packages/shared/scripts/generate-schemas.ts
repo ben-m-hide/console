@@ -35,7 +35,6 @@ interface EntityConfig {
 // apply its override to some future unrelated entity.
 type Bound = "positive" | "unbounded";
 const OVERRIDES: Record<string, Record<string, Bound>> = {
-	competition: { tier: "positive" },
 	"ball-position": { x: "unbounded", y: "unbounded" },
 };
 
