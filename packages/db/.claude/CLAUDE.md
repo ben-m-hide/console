@@ -20,6 +20,8 @@ No test target yet.
 
 One file per table under `src/schema/`, barrel-exported from `src/schema/index.ts`, re-exported from `src/index.ts` alongside `src/client.ts`'s `createDb()`. `drizzle.config.ts` at the package root drives the CLI (`dialect: "postgresql"`, `casing: "snake_case"`).
 
+`createDb()`'s return type exposes `$client` (the raw underlying `Bun.SQL` connection, e.g. `db.$client.end()`) — the leading `$` is Drizzle's own convention for methods/properties that sit outside the normal query-builder surface (`$client`, `$with`, `$count`, `$cache` are all Drizzle APIs, confirmed against the installed `drizzle-orm` package's own type declarations), not something this project introduced or should imitate elsewhere.
+
 ## Open items
 
 - `drizzle-kit`'s CLI (`db:generate`/`db:migrate`) needs a real Postgres driver package installed to connect — `postgres` (postgres.js) is a devDependency for exactly that. Independent of the app's own runtime driver (`drizzle-orm/bun-sql`, ADR 0012) — CLI tooling only, never imported by app code.

@@ -9,7 +9,7 @@ import { fetchSeasons } from "./sportmonks-client";
 export interface IngestSeasonsResult {
 	fetched: number;
 	upserted: number;
-	failed: { id: number; name: string; error: string }[];
+	failed: Array<{ id: number; name: string; error: string }>;
 }
 
 // Depends on competitions already being ingested — seasons.competitionId is
@@ -34,7 +34,7 @@ export const ingestSeasons = async (
 
 	const rawSeasons = await fetchSeasons(token, leagueIds);
 
-	const rows: InsertableSeason[] = [];
+	const rows: Array<InsertableSeason> = [];
 	const failed: IngestSeasonsResult["failed"] = [];
 
 	for (const rawSeason of rawSeasons) {

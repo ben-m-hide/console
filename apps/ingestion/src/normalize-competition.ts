@@ -1,6 +1,6 @@
 import { CompetitionSchema } from "@console-next/shared";
 
-import type { SportmonksLeagueRaw } from "./sportmonks-client";
+import type { SportmonksLeagueRaw } from "./sportmonks-types";
 
 // id is DB-generated (identity column) — omit it from the shape we validate
 // and insert. CompetitionSchema itself always requires it (it validates full

@@ -29,6 +29,7 @@ cd apps/api && bun run dev          # backend dev server
 
 ## Coding standards
 
+- TypeScript conventions Biome can't enforce (explicit naming, inline types, loops vs. array methods, util reuse) live in [`docs/conventions/typescript.md`](../docs/conventions/typescript.md), auto-loaded via `.claude/rules/typescript-conventions.md` when reading a `.ts`/`.tsx` file. Use `.claude/skills/new-convention` to add or change one.
 - Arrow functions over `function`; explicit return types on everything (Biome-enforced, not a style opinion to relitigate).
 - `-`-prefixed files/folders under `src/routes/` are colocated, excluded from the route tree, still importable (e.g. `-index-page.tsx`). Don't export a route's component directly from the route file — breaks `autoCodeSplitting`.
 - Promote code to `src/lib`/`src/hooks` only once a second consumer actually needs it. A `../../../` import is the signal something's in the wrong place.

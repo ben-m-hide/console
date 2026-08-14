@@ -1,3 +1,8 @@
+import type {
+	SportmonksLeagueRaw,
+	SportmonksSeasonRaw,
+} from "./sportmonks-types";
+
 const SPORTMONKS_BASE_URL = "https://api.sportmonks.com/v3/football";
 
 interface SportmonksResponse<T> {
@@ -10,6 +15,7 @@ interface SportmonksResponse<T> {
 // needed the same shape, not before.
 const fetchSportmonks = async <T>(token: string, path: string): Promise<T> => {
 	const response = await fetch(`${SPORTMONKS_BASE_URL}${path}`, {
+		// biome-ignore lint/style/useNamingConvention: literal HTTP header name, not ours to rename
 		headers: { Authorization: token },
 	});
 
@@ -23,27 +29,13 @@ const fetchSportmonks = async <T>(token: string, path: string): Promise<T> => {
 	return body.data;
 };
 
-// Only the fields this app actually reads — Sportmonks' League entity has
-// many more (image_path, category, has_jerseys, ...), not modeled here.
-export interface SportmonksLeagueRaw {
-	id: number;
-	name: string;
-	country?: { name: string } | null;
-}
-
-export const fetchLeagues = (token: string): Promise<SportmonksLeagueRaw[]> =>
-	fetchSportmonks<SportmonksLeagueRaw[]>(token, "/leagues?include=country");
-
-// Only the fields this app actually reads — Sportmonks' Season entity also
-// has finished/pending/tie_breaker_rule_id/etc., not modeled here.
-export interface SportmonksSeasonRaw {
-	id: number;
-	league_id: number;
-	name: string;
-	starting_at: string;
-	ending_at: string;
-	is_current: boolean;
-}
+export const fetchLeagues = (
+	token: string,
+): Promise<Array<SportmonksLeagueRaw>> =>
+	fetchSportmonks<Array<SportmonksLeagueRaw>>(
+		token,
+		"/leagues?include=country",
+	);
 
 // A single filtered call across all target leagues, not one call per league —
 // confirmed against a live call that Sportmonks' /seasons endpoint supports
@@ -51,9 +43,9 @@ export interface SportmonksSeasonRaw {
 // discipline as leagues' include=country (PROJECT.md §3).
 export const fetchSeasons = (
 	token: string,
-	leagueIds: number[],
-): Promise<SportmonksSeasonRaw[]> =>
-	fetchSportmonks<SportmonksSeasonRaw[]>(
+	leagueIds: Array<number>,
+): Promise<Array<SportmonksSeasonRaw>> =>
+	fetchSportmonks<Array<SportmonksSeasonRaw>>(
 		token,
 		`/seasons?filters=leagueIds:${leagueIds.join(",")}`,
 	);

@@ -28,6 +28,20 @@
 			"performance": {
 				"noJsxPropsBind": "error"
 			},
+			"style": {
+				"useConsistentArrayType": {
+					"level": "error",
+					"options": {
+						"syntax": "generic"
+					}
+				},
+				"useNamingConvention": {
+					"level": "error",
+					"options": {
+						"strictCase": false
+					}
+				}
+			},
 			"nursery": {
 				"useExplicitReturnType": "error",
 				"noFloatingPromises": "error",
@@ -82,5 +96,17 @@
 				}
 			}
 		}
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["**/sportmonks-types.ts"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useNamingConvention": "off"
+					}
+				}
+			}
+		}
+	]
 }

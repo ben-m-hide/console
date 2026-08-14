@@ -9,7 +9,7 @@ import { fetchLeagues } from "./sportmonks-client";
 export interface IngestCompetitionsResult {
 	fetched: number;
 	upserted: number;
-	failed: { id: number; name: string; error: string }[];
+	failed: Array<{ id: number; name: string; error: string }>;
 }
 
 // A bad league shouldn't sink the whole run — same per-item failure
@@ -21,7 +21,7 @@ export const ingestCompetitions = async (
 ): Promise<IngestCompetitionsResult> => {
 	const leagues = await fetchLeagues(token);
 
-	const rows: InsertableCompetition[] = [];
+	const rows: Array<InsertableCompetition> = [];
 	const failed: IngestCompetitionsResult["failed"] = [];
 
 	for (const league of leagues) {

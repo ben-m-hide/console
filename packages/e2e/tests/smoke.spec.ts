@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test("renders the homepage with no console errors", async ({
 	page,
 }): Promise<void> => {
-	const consoleErrors: string[] = [];
+	const consoleErrors: Array<string> = [];
 	page.on("console", (msg) => {
 		if (msg.type() === "error") consoleErrors.push(msg.text());
 	});
