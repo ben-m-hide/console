@@ -61,7 +61,9 @@ console-next/
 │   ├── db/           ← Drizzle schema + client (Postgres/Neon), consumed by apps/api + apps/ingestion (see ADR 0012)
 │   ├── e2e/          ← Playwright Test suite, its own Bun workspace package (see ADR 0009)
 │   └── shared/       ← Zod schemas + inferred types for the domain entities
-└── docs/adr/
+└── docs/
+    ├── adr/
+    └── plans/        ← persisted plans for Complex tasks, see .claude/CLAUDE.md's Planning section
 ```
 
 `apps/web/src/` is currently flat (`src/{routes,lib,test}`) since there are no real frontend features yet — just the scaffold. There's no `src/hooks/`, `src/stores/`, or `components/ui/` on disk either: empty placeholder directories aren't tracked by git (a fresh clone wouldn't have had them, since git doesn't track empty dirs — the same "decorative declaration" class of issue as the removed `.nvmrc`), and Mantine ships its own pre-built components so there's no owned `ui/` source to keep in the first place (unlike the earlier shadcn/ui setup). `src/hooks/` and `src/stores/` get created for real the moment the first custom hook or Zustand store actually exists — see "Promote to shared space" below — not before.
