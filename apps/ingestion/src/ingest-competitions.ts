@@ -2,6 +2,7 @@ import type { Db } from "@console-next/db";
 import { competitions } from "@console-next/db/schema";
 import { sql } from "drizzle-orm";
 
+import type { IngestionFailure } from "./ingest-result";
 import type { InsertableCompetition } from "./normalize-competition";
 import { normalizeCompetition } from "./normalize-competition";
 import { fetchLeagues } from "./sportmonks-client";
@@ -9,7 +10,7 @@ import { fetchLeagues } from "./sportmonks-client";
 export interface IngestCompetitionsResult {
 	fetched: number;
 	upserted: number;
-	failed: Array<{ id: number; name: string; error: string }>;
+	failed: Array<IngestionFailure>;
 }
 
 // A bad league shouldn't sink the whole run — same per-item failure
@@ -49,5 +50,10 @@ export const ingestCompetitions = async (
 			});
 	}
 
-	return { fetched: leagues.length, upserted: rows.length, failed };
+	const result: IngestCompetitionsResult = {
+		fetched: leagues.length,
+		upserted: rows.length,
+		failed,
+	};
+	return result;
 };

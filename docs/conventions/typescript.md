@@ -52,6 +52,8 @@ const result: IngestSeasonsResult = {
 return result;
 ```
 
+Exempt: `return Schema.parse({ ... })`. The object literal there is validation _input_, not the returned value — the actual return value is whatever `.parse()` produces, which naming the input literal wouldn't make any more inspectable. Wrapping the call itself (`const result = Schema.parse(...); return result;`) is fine if you want to inspect the validated output, but not required.
+
 ## Array methods for pure transforms; loops stay fine for side effects
 
 Prefer `.map`/`.filter`/`.reduce` when a loop is a pure list-to-list transform. A `for`/`for...of` loop is still the right tool when the body has side effects, needs an early exit, or does per-item error isolation (accumulating into more than one output, e.g. successes vs. failures) — forcing that into `.reduce()` is usually less readable, not more.
