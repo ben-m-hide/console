@@ -1,5 +1,5 @@
 import { normalizeCompetition } from "./normalize-competition";
-import type { SportmonksLeagueRaw } from "./sportmonks-client";
+import type { SportmonksLeagueRaw } from "./sportmonks-types";
 
 // Real captured shape (id 8, https://api.sportmonks.com/v3/football/leagues/8?include=country),
 // trimmed to the fields normalizeCompetition actually reads.

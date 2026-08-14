@@ -1,6 +1,6 @@
 import { SeasonSchema } from "@console-next/shared";
 
-import type { SportmonksSeasonRaw } from "./sportmonks-client";
+import type { SportmonksSeasonRaw } from "./sportmonks-types";
 
 // id is DB-generated (identity column) — see normalize-competition.ts for the
 // same reasoning.
