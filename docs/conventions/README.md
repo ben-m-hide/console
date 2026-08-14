@@ -4,9 +4,9 @@ Conventions that can't be enforced by Biome — grouped by language/domain, one 
 
 Each convention file is also mirrored by a thin trigger in [`.claude/rules/`](../../.claude/rules/) (`paths:` frontmatter matching the relevant file types), so Claude Code loads it automatically when reading a matching file — see [Claude Code's memory docs](https://code.claude.com/docs/en/memory.md#organize-rules-with-claude/rules/).
 
-| File                             | Covers                                                                                                 | Auto-loaded for       |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------- |
-| [typescript.md](./typescript.md) | Naming inline types, explicit/human-readable names, named returns, loops vs. array methods, util reuse | `**/*.ts`, `**/*.tsx` |
+| File                             | Covers                                                                                                                   | Auto-loaded for       |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| [typescript.md](./typescript.md) | Naming inline types, explicit/human-readable names, named returns, loops vs. array methods, util reuse, where types live | `**/*.ts`, `**/*.tsx` |
 
 ## Adding one
 

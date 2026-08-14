@@ -76,6 +76,29 @@ for (const rawSeason of rawSeasons) {
 }
 ```
 
+## Where types live
+
+Same promotion rule as code (see root `CLAUDE.md`'s "Promote code to `src/lib`/`src/hooks` only once a second consumer actually needs it") — apply it to types too, not a separate rule:
+
+1. **Inline, in the file that uses it** — the default. A single-consumer type stays where it's used. It still has to be named per "Name inline object types" above — inline here means "not extracted to its own file," not "unnamed."
+2. **Co-located file within the app, once a second consumer needs it** — extract on the second use, same trigger as any other util. Name the file after what it contains: a concept (`ingest-result.ts` — the shared result shape) or a category (`sportmonks-types.ts` — a pile of raw external API shapes with nothing else in common). Don't force a `-types.ts` suffix onto a file that already has a concept name; use it when the file's only job is holding types with no shared concept of their own.
+3. **`packages/shared`, once a second app needs it** — but only for types derived from the Drizzle schema (`packages/db`) via the generated Zod schemas (see ADR 0013). A cross-app type with no DB backing doesn't have a home yet — that's a real gap, not silently covered by `packages/shared`; revisit when it actually happens instead of guessing now.
+
+```ts
+// Tier 1 — inline, single consumer (normalize-season.ts)
+export type InsertableSeason = ReturnType<typeof InsertableSeasonSchema.parse>;
+
+// Tier 2 — co-located, two consumers within apps/ingestion (ingest-result.ts)
+export interface IngestionFailure {
+  id: number;
+  name: string;
+  error: string;
+}
+
+// Tier 3 — packages/shared, two apps, DB-schema-derived (schemas/competition.gen.ts)
+export type Competition = z.infer<typeof CompetitionSchema>;
+```
+
 ## Check for an existing util before writing one
 
 Before writing logic that looks like it might already exist elsewhere in the repo, search for it first (`rg` for the shape, not just the name). If the same small piece of logic is about to appear a second time, extract it into a shared, tested util instead of duplicating it — don't wait for a third copy.
