@@ -89,11 +89,9 @@ describe("PlayerSeasonStatsSchema (default nonnegative bound for plain numeric c
 			goals: -1,
 			assists: 0,
 			xg: 0,
-			xa: 0,
 			goalsPer90: 0,
 			assistsPer90: 0,
 			xgPer90: 0,
-			xaPer90: 0,
 		});
 		expect(result.success).toBe(false);
 	});
@@ -108,11 +106,9 @@ describe("PlayerSeasonStatsSchema (default nonnegative bound for plain numeric c
 			goals: 0,
 			assists: 0,
 			xg: 0,
-			xa: 0,
 			goalsPer90: 0,
 			assistsPer90: 0,
 			xgPer90: 0,
-			xaPer90: 0,
 		});
 		expect(result.success).toBe(true);
 	});
