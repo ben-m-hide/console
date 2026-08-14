@@ -1,5 +1,7 @@
 import type {
+	SportmonksFixtureRaw,
 	SportmonksLeagueRaw,
+	SportmonksSeasonFixturesRaw,
 	SportmonksSeasonRaw,
 } from "./sportmonks-types";
 
@@ -49,3 +51,21 @@ export const fetchSeasons = (
 		token,
 		`/seasons?filters=leagueIds:${leagueIds.join(",")}`,
 	);
+
+// One request returns the season's full fixture list, each fixture already
+// carrying its teams (participants), score history, and match state — a
+// stronger form of PROJECT.md §3's "combine via include=" than a separate
+// per-entity call. Verified live: date-range filtering
+// (`/fixtures/between/...?filters=fixtureLeagues:...`) returns "no access via
+// your current subscription" (Starter plan) — this season-scoped include
+// avoids that gate entirely, so it's the actual approach, not a workaround.
+export const fetchSeasonFixtures = async (
+	token: string,
+	seasonId: number,
+): Promise<Array<SportmonksFixtureRaw>> => {
+	const season = await fetchSportmonks<SportmonksSeasonFixturesRaw>(
+		token,
+		`/seasons/${seasonId}?include=fixtures.participants;fixtures.scores;fixtures.state`,
+	);
+	return season.fixtures;
+};
