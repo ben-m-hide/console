@@ -18,4 +18,4 @@ Schemas are **generated**, not hand-written — `scripts/generate-schemas.ts` de
 
 ## Open item
 
-`scripts/generate-schemas.ts`'s `OVERRIDES` table (numeric bound strictness — positive/nonnegative/unbounded — isn't derivable from a Drizzle column alone) is manually maintained. Extend it when a new entity/field needs something other than the `.nonnegative()` default; `schemas.test.ts` covers today's two known exceptions (`Competition.tier`, `BallPosition.x`/`y`) as a regression check.
+`scripts/generate-schemas.ts`'s `OVERRIDES` table (numeric bound strictness — positive/nonnegative/unbounded — isn't derivable from a Drizzle column alone) is manually maintained. Extend it when a new entity/field needs something other than the `.nonnegative()` default; `schemas.test.ts` covers today's one known exception (`BallPosition.x`/`y`) as a regression check. (`Competition.tier` was removed 2026-08-14 — no Sportmonks data source, no downstream feature used it; see `PROJECT.md`'s correction note.)
