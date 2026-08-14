@@ -7,6 +7,7 @@ import {
 	notFoundHandler,
 	validationErrorHook,
 } from "./middleware/error-handler";
+import { publicApiRateLimiter } from "./middleware/rate-limiter";
 import { registerCompetitionsRoute } from "./routes/competitions";
 import { registerPlayersCompareRoute } from "./routes/players-compare";
 
@@ -37,6 +38,11 @@ app.use(
 );
 app.onError(errorHandler);
 app.notFound(notFoundHandler);
+
+// Not applied to /api/v1/health — uptime/monitoring checks shouldn't be
+// throttled, unlike the actual data routes below.
+app.use("/api/v1/competitions", publicApiRateLimiter);
+app.use("/api/v1/players/*", publicApiRateLimiter);
 
 app.openapi(healthRoute, (c) => c.json({ status: "ok" as const }));
 registerCompetitionsRoute(app);
