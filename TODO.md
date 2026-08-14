@@ -36,7 +36,7 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 
 ## Observability
 
-- [ ] Error tracking (e.g. Sentry) — zero production observability right now
+- [ ] Error tracking — decided 2026-08-14 (ADR 0014): Sentry's hosted free Developer tier, over self-hosting GlitchTip (adds a 4-container service to maintain for a project with no real users) or GlitchTip's own hosted free tier (viable, but loses the "transferable industry-standard practice" tiebreak — kept as the cheap fallback since it's SDK-compatible). Blocked on a real Sentry account + DSN before SDK wiring can start and be verified (same pattern as Neon/Render) — sign up, then wire `@sentry/react` (`apps/web`) and Sentry's Bun/Hono SDK (`apps/api`), verify a real captured error in the dashboard. Sourcemap strip/upload strategy stays separately deferred (tied to a deploy pipeline neither app has yet), not blocking basic error capture.
 
 ## Testing
 
