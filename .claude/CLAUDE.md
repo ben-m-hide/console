@@ -46,7 +46,7 @@ cd apps/api && bun run dev          # backend dev server
 ## Safety guardrails (project-specific — global git/commit rules still apply)
 
 - **No `cdk bootstrap`/`cdk deploy`, no IAM/OIDC role creation** — `cdk synth` only, until an AWS account is confirmed and explicitly approved (see `docs/adr/0007`, `TODO.md`).
-- No database commands — moot today (no DB exists), applies the moment one does.
+- No database commands without confirming with the user first — a real Neon Postgres DB now exists (`local-dev` branch, since 2026-08-14), so this guardrail is live, not moot.
 - Don't float GitHub Actions versions or remove a commit-SHA pin; don't weaken `permissions:` blocks in `.github/workflows/`.
 - `.env*` files are gitignored (except `.env.example`) — never commit real secrets into one even transiently.
 

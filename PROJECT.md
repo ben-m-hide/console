@@ -160,7 +160,7 @@ All routes live under `/api/v1/...`, not bare `/api/...` — versioning from day
 ## 7. Environment & secrets
 
 - `.env.example` committed at each app root documenting required vars (never commit actual `.env` files)
-- Required vars: `SPORTMONKS_API_KEY`, `DATABASE_URL` (Neon connection string), plus per-app API base URLs
+- Required vars: `SPORTMONKS_TOKEN`, `DATABASE_URL` (Neon connection string), plus per-app API base URLs
 - Local dev: point `DATABASE_URL` at a Neon **branch** created for local development — avoids needing a local Postgres install or Docker for day-to-day coding, and keeps local data isolated from anything else
 
 ---
@@ -229,11 +229,11 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 
 ### Phase 2 — Database
 
-- [ ] Create Neon project + a local-dev branch
+- [x] Create Neon project + a local-dev branch — done 2026-08-14, see `TODO.md`
 - [x] Write Drizzle schema definitions matching §2, including `UNIQUE` constraints on all `sportmonks_id`/`sportmonks_event_id` columns — done 2026-08-12, `packages/db/src/schema/`, see ADR 0012. **`CHECK` constraints on `match_events` by type deliberately not implemented** — the reasoning (§2) was written against the now-dropped `x`/`y`/`xg` columns; encoding it for the surviving `outcome`/`body_part`/`situation` columns needs Sportmonks' real `type` enum values, unconfirmed anywhere in this codebase. Revisit in Phase 4. Also extended `UNIQUE(sportmonks_id)` to `seasons` and `ball_positions`, which this paragraph's original list omitted — treated as a gap in the list, not a deliberate exclusion (see the schema files' inline comments).
 - [x] Reconcile Phase 1's unconfirmed schema assumptions (§10) against the Drizzle schema — done 2026-08-12: ID types (`number().int().positive()`) confirmed correct — Drizzle uses `integer().generatedAlwaysAsIdentity()`, still a plain integer; camelCase field naming confirmed correct — Drizzle's `casing: "snake_case"` config maps it to the DB automatically; ISO-string dates need no change (Zod schemas validate the JSON boundary, Drizzle's `timestamp`/`date` types handle the DB boundary — different layers, not a conflict); `type`/`status`/etc. remain plain strings — still no confirmed enum values (see above); `player_season_stats` per-90 field names (`goalsPer90`/`assistsPer90`/`xgPer90`/`xaPer90`) carried through unchanged.
 - [x] Add indexes: `match_events(fixture_id)`, `match_events(fixture_id, type)`, `ball_positions(fixture_id)`, `player_season_stats(player_id, season_id)` — done 2026-08-12 alongside the schema (see above), listing separately since this item named them explicitly
-- [x] Generate initial migration — done 2026-08-12, `packages/db/drizzle/0000_*.sql` (`drizzle-kit generate` needs no live DB connection). **Not yet run** — blocked on the Neon project above.
+- [x] Generate initial migration — done 2026-08-12, `packages/db/drizzle/0000_*.sql` (`drizzle-kit generate` needs no live DB connection). **Run 2026-08-14** against the Neon project's `local-dev` branch, verified via `information_schema.tables`. A second migration (`0001_*.sql`, dropping `competitions.tier`) has also run — see Phase 4's correction note below.
 - [ ] Seed a small manual dataset (1–2 fixtures worth) for early development before ingestion is built
 
 ### Phase 3 — Sportmonks trial verification
