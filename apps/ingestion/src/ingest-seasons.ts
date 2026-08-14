@@ -28,9 +28,14 @@ export const ingestSeasons = async (
 	}
 
 	const competitionIdByLeagueId = new Map(
-		ingestedCompetitions.map((c) => [c.sportmonksId, c.id]),
+		ingestedCompetitions.map((competition) => [
+			competition.sportmonksId,
+			competition.id,
+		]),
 	);
-	const leagueIds = ingestedCompetitions.map((c) => c.sportmonksId);
+	const leagueIds = ingestedCompetitions.map(
+		(competition) => competition.sportmonksId,
+	);
 
 	const rawSeasons = await fetchSeasons(token, leagueIds);
 
