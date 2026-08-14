@@ -16,9 +16,13 @@ bun run test        # normalization unit tests
 
 ## Structure
 
-First real vertical slice: `competitions` only (2026-08-14) — `sportmonks-client.ts` (auth via `Authorization` header, `fetchLeagues()`), `normalize-competition.ts` (validates against `packages/shared`'s `CompetitionSchema.omit({ id: true })` — `id` is DB-generated, not part of the insert shape), `ingest-competitions.ts` (orchestrates fetch → normalize → upsert, per-league failure isolation so one bad league doesn't sink the run — same philosophy as the planned per-fixture transaction loop, PROJECT.md §3). Upsert is a real `onConflictDoUpdate` keyed on `sportmonksId`, verified idempotent (ran twice, still 5 rows).
+Two entities so far: `competitions` (2026-08-14) and `seasons` (2026-08-14). Shared shape per entity — a fetcher in `sportmonks-client.ts`, a `normalize-<entity>.ts`, an `ingest-<entity>.ts` orchestrator (fetch → normalize → upsert, per-item failure isolation so one bad row doesn't sink the run — same philosophy as the planned per-fixture transaction loop, PROJECT.md §3). `sportmonks-client.ts`'s fetch/error-handling boilerplate is now extracted into a shared `fetchSportmonks<T>()` helper — done once `fetchSeasons` gave it a second real consumer, not before (see `TODO.md`'s BACKLOG note on this exact trigger).
 
-**Not yet implemented** (Phase 4's fuller scope, deliberately deferred — see `TODO.md`): rate-limit handling, `ingestion_runs` audit logging, fixtures/seasons/teams/match_events/ball_positions/player_season_stats, scheduling. `.env`/`.env.example` needs `SPORTMONKS_TOKEN` and `DATABASE_URL` (pooled — see `packages/db`'s ADR 0012).
+`seasons.competitionId` is an FK — `ingest-seasons.ts` resolves Sportmonks' `league_id` to our internal `competitions.id` via a `Map` built by querying already-ingested competitions first (so `ingestCompetitions` must run before `ingestSeasons` — `index.ts` runs them sequentially, not in parallel). `fetchSeasons` also fetches all target leagues' seasons in one call (`filters=leagueIds:a,b,c`), not one call per league.
+
+Both upserts are real `onConflictDoUpdate`s keyed on `sportmonksId`, verified idempotent (ran twice, row counts unchanged both times: 5 competitions, 15 seasons).
+
+**Not yet implemented** (Phase 4's fuller scope, deliberately deferred — see `TODO.md`): rate-limit handling, `ingestion_runs` audit logging, teams/players/squad_memberships/fixtures/match_events/ball_positions/player_season_stats, scheduling. `.env`/`.env.example` needs `SPORTMONKS_TOKEN` and `DATABASE_URL` (pooled — see `packages/db`'s ADR 0012).
 
 ## Notes
 
