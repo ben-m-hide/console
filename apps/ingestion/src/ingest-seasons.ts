@@ -2,6 +2,7 @@ import type { Db } from "@console-next/db";
 import { competitions, seasons } from "@console-next/db/schema";
 import { sql } from "drizzle-orm";
 
+import type { IngestionFailure } from "./ingest-result";
 import type { InsertableSeason } from "./normalize-season";
 import { normalizeSeason } from "./normalize-season";
 import { fetchSeasons } from "./sportmonks-client";
@@ -9,7 +10,7 @@ import { fetchSeasons } from "./sportmonks-client";
 export interface IngestSeasonsResult {
 	fetched: number;
 	upserted: number;
-	failed: Array<{ id: number; name: string; error: string }>;
+	failed: Array<IngestionFailure>;
 }
 
 // Depends on competitions already being ingested — seasons.competitionId is
@@ -24,7 +25,12 @@ export const ingestSeasons = async (
 		.from(competitions);
 
 	if (ingestedCompetitions.length === 0) {
-		return { fetched: 0, upserted: 0, failed: [] };
+		const emptyResult: IngestSeasonsResult = {
+			fetched: 0,
+			upserted: 0,
+			failed: [],
+		};
+		return emptyResult;
 	}
 
 	const competitionIdByLeagueId = new Map(
@@ -70,5 +76,10 @@ export const ingestSeasons = async (
 			});
 	}
 
-	return { fetched: rawSeasons.length, upserted: rows.length, failed };
+	const result: IngestSeasonsResult = {
+		fetched: rawSeasons.length,
+		upserted: rows.length,
+		failed,
+	};
+	return result;
 };
