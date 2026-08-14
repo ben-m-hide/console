@@ -67,7 +67,11 @@ for (const rawSeason of rawSeasons) {
   try {
     rows.push(normalizeSeason(rawSeason, competitionIdByLeagueId));
   } catch (error) {
-    failed.push(toIngestionFailure(rawSeason, error));
+    failed.push({
+      id: rawSeason.id,
+      name: rawSeason.name,
+      error: toErrorMessage(error),
+    });
   }
 }
 ```
@@ -75,3 +79,5 @@ for (const rawSeason of rawSeasons) {
 ## Check for an existing util before writing one
 
 Before writing logic that looks like it might already exist elsewhere in the repo, search for it first (`rg` for the shape, not just the name). If the same small piece of logic is about to appear a second time, extract it into a shared, tested util instead of duplicating it — don't wait for a third copy.
+
+Real example: `error instanceof Error ? error.message : String(error)` appeared verbatim in both `ingest-competitions.ts` and `ingest-seasons.ts`'s catch blocks — extracted into `apps/ingestion/src/to-error-message.ts`'s `toErrorMessage()`, with its own test file, on the second occurrence.

@@ -6,6 +6,7 @@ import type { IngestionFailure } from "./ingest-result";
 import type { InsertableCompetition } from "./normalize-competition";
 import { normalizeCompetition } from "./normalize-competition";
 import { fetchLeagues } from "./sportmonks-client";
+import { toErrorMessage } from "./to-error-message";
 
 export interface IngestCompetitionsResult {
 	fetched: number;
@@ -32,7 +33,7 @@ export const ingestCompetitions = async (
 			failed.push({
 				id: league.id,
 				name: league.name,
-				error: error instanceof Error ? error.message : String(error),
+				error: toErrorMessage(error),
 			});
 		}
 	}
