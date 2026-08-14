@@ -33,7 +33,7 @@ const config = loadConfig();
 const matchingIndex = items.findIndex((item) => item.id === targetId);
 ```
 
-Common, unambiguous conventions are fine as-is and don't need spelling out: `i`/`j` in a bare numeric `for` loop, generic type parameters (`T`, `K`, `V`), and well-known short forms already used consistently in this codebase (`db`, `id`).
+Common, unambiguous conventions are fine as-is and don't need spelling out: `i`/`j` in a bare numeric `for` loop, generic type parameters (`T`, `K`, `V`), well-known short forms already used consistently in this codebase (`db`, `id`), and a library's own documented idiomatic parameter name for its own callback (e.g. Hono's `c` for `Context` in `app.openapi(route, (c) => c.json(...))`, Playwright's `msg`/`err` for event-handler payloads) — these read as unclear in isolation but are immediately recognizable to anyone who knows the library, and renaming them fights the ecosystem's own convention rather than this project's.
 
 ## Name the return value before returning it
 
