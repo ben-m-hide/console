@@ -30,6 +30,15 @@
     "apps/ingestion": {
       "name": "@console-next/ingestion",
       "version": "1.0.0",
+      "dependencies": {
+        "@console-next/db": "workspace:*",
+        "@console-next/shared": "workspace:*",
+        "drizzle-orm": "0.45.2",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.3.14",
+        "vitest": "^4.1.10",
+      },
     },
     "apps/web": {
       "name": "@console-next/web",

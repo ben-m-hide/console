@@ -3,7 +3,7 @@
 	"compilerOptions": {
 		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.ingestion.tsbuildinfo",
 		"lib": ["ES2023"],
-		"types": ["node"]
+		"types": ["node", "bun", "vitest/globals"]
 	},
 	"include": ["src"]
 }
