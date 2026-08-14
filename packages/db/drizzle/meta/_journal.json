@@ -15,6 +15,13 @@
 			"when": 1786698085224,
 			"tag": "0001_melodic_wolfsbane",
 			"breakpoints": true
+		},
+		{
+			"idx": 2,
+			"version": "7",
+			"when": 1786717027594,
+			"tag": "0002_slim_hellcat",
+			"breakpoints": true
 		}
 	]
 }

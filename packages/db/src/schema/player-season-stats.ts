@@ -26,12 +26,14 @@ export const playerSeasonStats = pgTable(
 		minutesPlayed: integer().notNull(),
 		goals: integer().notNull(),
 		assists: integer().notNull(),
+		// xa/xaPer90 (Expected Assists) deliberately not modeled — verified live
+		// against Sportmonks: no "Expected Assists" stat type exists anywhere
+		// under this subscription (only "Expected Goals (xG)" does). No data
+		// source, no consumer — same reasoning as competitions.tier's removal.
 		xg: doublePrecision().notNull(),
-		xa: doublePrecision().notNull(),
 		goalsPer90: doublePrecision().notNull(),
 		assistsPer90: doublePrecision().notNull(),
 		xgPer90: doublePrecision().notNull(),
-		xaPer90: doublePrecision().notNull(),
 	},
 	(table) => [
 		// §2: keyed on (player, team, season), not (player, season) alone — a
