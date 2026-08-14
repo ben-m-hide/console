@@ -32,6 +32,7 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 - [ ] OIDC-federated IAM role for GitHub Actions (no long-lived keys) + a CI deploy job
 - [ ] Sourcemap strip/upload strategy, tied to error tracking setup
 - [ ] Build the backend CD pipeline: Docker build, `drizzle-kit migrate` as an explicit pipeline step, deploy to Render (PROJECT.md §8) — not blocked by the AWS-account guardrail, can land independently of frontend CD
+- [ ] Get Neon fully production-configured — currently just a project + a `local-dev` branch used for local dev (ADR 0010/0012), no production-readiness review done. Needs its own plan (Complex per `.claude/CLAUDE.md`'s classification), at minimum: a separate `production` branch distinct from `local-dev` (Neon's branching model, not reusing dev data); role/auth review (currently whatever the default Neon-created role grants — confirm least-privilege, not just "it works"); connection pooling limits appropriate for Render's expected concurrency (pooled-vs-direct string distinction already documented, but limits/timeouts not reviewed); backup/PITR retention policy (Neon's defaults vs. what this project actually needs); IP allowlisting or Neon's own network security options if available on the current plan tier; secrets handling for `DATABASE_URL` in Render's env vars (not `.env`) once deployed. Tied to — but not blocked by — the backend CD pipeline item above; do this before Render deploy, not after, so production isn't running against dev-grade config even temporarily.
 
 ## Observability
 
