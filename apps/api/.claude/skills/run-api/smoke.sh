@@ -13,16 +13,20 @@ PID=$!
 trap 'kill "$PID" 2>/dev/null || true' EXIT
 
 for _ in $(seq 1 30); do
-	curl -sf "http://localhost:$PORT/health" >/dev/null && break
+	curl -sf "http://localhost:$PORT/api/v1/health" >/dev/null && break
 	sleep 0.5
 done
 
-echo "== /health =="
-curl -sf "http://localhost:$PORT/health"
+echo "== /api/v1/health =="
+curl -sf "http://localhost:$PORT/api/v1/health"
+echo
+
+echo "== /api/v1/competitions =="
+curl -sf "http://localhost:$PORT/api/v1/competitions"
 echo
 
 echo "== /doc (paths) =="
-curl -sf "http://localhost:$PORT/doc" | grep -o '"/health"'
+curl -sf "http://localhost:$PORT/doc" | grep -o '"/api/v1/health"'
 
 echo "== /reference (Scalar UI) =="
 curl -sf -o /dev/null -w "%{http_code} %{content_type}\n" "http://localhost:$PORT/reference"

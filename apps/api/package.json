@@ -8,6 +8,8 @@
 		"typecheck": "tsc -b --noEmit"
 	},
 	"dependencies": {
+		"@console-next/db": "workspace:*",
+		"@console-next/shared": "workspace:*",
 		"@hono/zod-openapi": "1.5.2",
 		"@scalar/hono-api-reference": "0.11.13",
 		"hono": "4.13.1",
