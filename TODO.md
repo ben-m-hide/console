@@ -4,7 +4,7 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 
 ## Backend
 
-- [ ] Wire up a test setup for `apps/api` once there's real behavior worth testing (`node` environment, not `apps/web`'s `jsdom`)
+- [x] Wire up a test setup for `apps/api` once there's real behavior worth testing (`node` environment, not `apps/web`'s `jsdom`) — done 2026-08-14, `vitest.config.ts` mirroring `apps/ingestion`/`packages/shared`. Same split as ingestion's `normalize-*.ts`/`ingest-*.ts`: extracted `players-compare.ts`'s percentile calc/transfer-dedup/missing-player logic into a pure `build-player-compare-entries.ts` (unit tested, no DB import), `error-handler.ts`'s three exports tested via Hono's own `app.request()` pattern. Both routes' actual `db.select()` calls deliberately not unit tested — same reasoning as `ingest-*.ts` orchestrators, avoids a DB-mocking abstraction and automated tests silently hitting the real `local-dev` branch. 13 tests, 0 `DATABASE_URL` needed. Verified the extraction is behavior-preserving: re-ran the same real request against real data before/after, byte-identical output. See `docs/plans/2026-08-14-api-vitest-setup.md`.
 - [ ] Migrate backend compute from Render to AWS Lambda/Fargate + EventBridge once an AWS account is confirmed and approved (see ADR 0010) — update `connect-src` again at that point
 
 ## Football analytics domain (see `PROJECT.md`, ADR 0010)
