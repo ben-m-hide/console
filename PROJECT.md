@@ -249,16 +249,16 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 
 ### Phase 4 — Ingestion job
 
-- [ ] Build Sportmonks API client (typed, using `packages/shared` schemas to validate responses). Base URL `https://api.sportmonks.com/api/v3/football/...`; authenticate via the `Authorization` header, not the `?api_token=` query param — same rate limit either way, but a query-param token is far more likely to leak into logs/proxies/browser history than a header. Docs also explicitly warn never to expose the token to a frontend; not a risk here since `apps/ingestion` calls Sportmonks server-side only.
-- [ ] Write normalization functions: Sportmonks response shape → internal schema shape
-- [ ] Write upsert logic (fixtures, match_events, `ball_positions`, keyed on Sportmonks IDs), wrapped per-fixture in a transaction — `ball_positions` is high-volume (~900+ rows/fixture), batch the insert rather than row-at-a-time
+- [x] Build Sportmonks API client (typed, using `packages/shared` schemas to validate responses) — done 2026-08-14 for `competitions`/`League` only (`apps/ingestion/src/sportmonks-client.ts`). **Base URL corrected against the real API, not the docs as originally written:** `https://api.sportmonks.com/v3/football/...` — no `/api/` segment, unlike this item's original text. Authenticates via the `Authorization` header, not `?api_token=`, as planned.
+- [x] Write normalization functions: Sportmonks response shape → internal schema shape — done 2026-08-14 for `competitions` (`normalize-competition.ts`), validated against `packages/shared`'s `CompetitionSchema.omit({ id: true })`. Fixtures/seasons/teams/match_events/ball_positions normalization not started.
+- [ ] Write upsert logic (fixtures, match_events, `ball_positions`, keyed on Sportmonks IDs), wrapped per-fixture in a transaction — `ball_positions` is high-volume (~900+ rows/fixture), batch the insert rather than row-at-a-time. **`competitions` upsert done 2026-08-14** (`ingest-competitions.ts`, real `onConflictDoUpdate`, verified idempotent by running twice) — this item is about the remaining, higher-volume entities.
 - [ ] Add rate-limit handling to the Sportmonks client: track the `rate_limit` object (`remaining`/`resets_in_seconds`/`requested_entity`) from each response to throttle proactively per-entity, and on `429` honor `retry_after` if present or exponential backoff otherwise (see §3 for specifics)
-- [ ] Use `include=` to combine related-resource fetches into single requests rather than separate calls per entity (§3) — the main lever for staying inside the hourly budget
+- [ ] Use `include=` to combine related-resource fetches into single requests rather than separate calls per entity (§3) — the main lever for staying inside the hourly budget. (The `competitions` slice already does this in miniature — `include=country` combines two lookups into one call — but the real payoff is for fixtures with events/statistics, not yet built.)
 - [ ] Write `player_season_stats` aggregation step (keyed on player+team+season, not player+season)
 - [ ] Wire up `ingestion_runs` audit logging, including `fixtures_processed`/`fixtures_failed`
-- [ ] Unit test normalization logic (Vitest)
+- [x] Unit test normalization logic (Vitest) — done 2026-08-14 for `normalize-competition.ts`, against a real captured Sportmonks response (not fabricated). Fixtures/events normalization tests not started (code doesn't exist yet).
 - [ ] Integration test: recorded sample Sportmonks payload → run ingestion → assert the final `/report` response shape end-to-end
-- [ ] Manually trigger a run against one real competition/season, verify data lands correctly
+- [x] Manually trigger a run against one real competition/season, verify data lands correctly — done 2026-08-14: `bun run src/index.ts` against the real Sportmonks trial API and Neon's `local-dev` branch. 5 leagues fetched and upserted, 0 failures, verified via a direct `information_schema`-independent `SELECT` (not just trusting the app's own log line). Also found `competitions.tier` had no real Sportmonks data source — dropped from the schema, see the correction note below.
 
 ### Phase 5 — API layer
 
