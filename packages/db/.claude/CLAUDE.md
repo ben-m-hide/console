@@ -22,7 +22,7 @@ One file per table under `src/schema/`, barrel-exported from `src/schema/index.t
 
 ## Open items
 
-- No Neon project exists yet — the generated migration (`drizzle/0000_*.sql`) hasn't run anywhere.
+- `drizzle-kit`'s CLI (`db:generate`/`db:migrate`) needs a real Postgres driver package installed to connect — `postgres` (postgres.js) is a devDependency for exactly that. Independent of the app's own runtime driver (`drizzle-orm/bun-sql`, ADR 0012) — CLI tooling only, never imported by app code.
 - `CHECK` constraints on `match_events` scoping `outcome`/`body_part`/`situation` by `type` are deliberately not implemented — Sportmonks' real `type` enum values aren't confirmed anywhere in this codebase yet. See the inline comment in `src/schema/match-event.ts` and ADR 0012.
 - **Before wiring `createDb()` into `apps/api`/`apps/ingestion`: pass the pooled connection string (`-pooler` hostname suffix), not the direct one** — `drizzle.config.ts` uses direct (correct, migrations need it); `createDb()` needs pooled. See the comment in `src/client.ts` and ADR 0012's "Consequences" section for why (Neon's own docs, plus Scale to Zero cold-start latency on `apps/ingestion`'s every-few-hours cadence — no retry/reconnect handling exists yet either).
 - Nothing calls `createDb()` yet — `apps/api`/`apps/ingestion` wiring is still open (`TODO.md`).
