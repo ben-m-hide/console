@@ -18,6 +18,7 @@ import type {
 	SportmonksFixtureRaw,
 	SportmonksPlayerRaw,
 } from "./sportmonks-types";
+import { toErrorMessage } from "./to-error-message";
 
 const databaseUrl = process.env.DATABASE_URL;
 const sportmonksToken = process.env.SPORTMONKS_TOKEN;
@@ -87,80 +88,121 @@ if (fixturesResult.failed.length > 0) {
 	console.log("fixture failures:", fixturesResult.failed);
 }
 
-// Players/stats: Premier League only, most-recently-*finished* season — not
-// "current" (2026/2027 hasn't kicked off, so it has ~zero real minutes
-// played) and not every competition yet (real request volume here is ~500
-// per competition — one team's squad list, then one profile+stats request
-// per player — proving this on one competition first, same discipline as the
-// earlier competitions-before-scaling-to-teams/fixtures step). See
-// docs/plans/2026-08-14-players-compare-route.md.
-const [premierLeague] = await db
-	.select({ id: competitions.id })
-	.from(competitions)
-	.where(eq(competitions.name, "Premier League"));
+// Players/stats: each target competition's most-recently-*finished* season —
+// not "current" (2026/2027 hasn't kicked off, so it has ~zero real minutes
+// played). "Club Friendlies 1" deliberately excluded — its season has 97
+// teams (real clubs mixed with one-off/academy sides playing preseason
+// exhibition matches), vs. 18-20 for a real league; ingesting it needs
+// ~2,425 Player-entity requests, which alone exceeds Sportmonks' 2,000/hour
+// rate limit (no backoff handling exists yet — see TODO.md). Also low value
+// for /players/compare — friendly-match stats aren't a real competitive peer
+// group. See docs/plans/2026-08-14-players-compare-route.md and TODO.md's
+// BACKLOG for the deferred Club Friendlies item.
+const PLAYER_STATS_COMPETITION_NAMES = [
+	"Premier League",
+	"Bundesliga",
+	"La Liga",
+	"Community Shield",
+];
 
-if (premierLeague) {
+const ingestPlayersAndStatsForCompetition = async (
+	competitionName: string,
+): Promise<void> => {
+	const [competition] = await db
+		.select({ id: competitions.id })
+		.from(competitions)
+		.where(eq(competitions.name, competitionName));
+	if (!competition) {
+		return;
+	}
+
 	const [finishedSeason] = await db
 		.select({ id: seasons.id, sportmonksId: seasons.sportmonksId })
 		.from(seasons)
 		.where(
 			and(
-				eq(seasons.competitionId, premierLeague.id),
+				eq(seasons.competitionId, competition.id),
 				eq(seasons.isCurrent, false),
 			),
 		)
 		.orderBy(desc(seasons.endDate))
 		.limit(1);
+	if (!finishedSeason) {
+		return;
+	}
 
-	if (finishedSeason) {
-		const finishedSeasonTeams = await fetchSeasonTeams(
-			sportmonksToken,
-			finishedSeason.sportmonksId,
-		);
-		const finishedSeasonTeamsResult = await ingestTeams(
-			db,
-			finishedSeasonTeams,
-		);
-		console.log(
-			`ingested finished-season teams: fetched ${finishedSeasonTeamsResult.fetched}, upserted ${finishedSeasonTeamsResult.upserted}, failed ${finishedSeasonTeamsResult.failed.length}`,
-		);
+	const finishedSeasonTeams = await fetchSeasonTeams(
+		sportmonksToken,
+		finishedSeason.sportmonksId,
+	);
+	const finishedSeasonTeamsResult = await ingestTeams(db, finishedSeasonTeams);
+	console.log(
+		`ingested ${competitionName} finished-season teams: fetched ${finishedSeasonTeamsResult.fetched}, upserted ${finishedSeasonTeamsResult.upserted}, failed ${finishedSeasonTeamsResult.failed.length}`,
+	);
 
-		const squadMemberLists = await Promise.all(
-			finishedSeasonTeams.map((team) =>
-				fetchTeamSquad(sportmonksToken, team.id, finishedSeason.sportmonksId),
-			),
-		);
-		const playerIds = [
-			...new Set(squadMemberLists.flat().map((member) => member.player_id)),
-		];
+	const squadMemberLists = await Promise.all(
+		finishedSeasonTeams.map((team) =>
+			fetchTeamSquad(sportmonksToken, team.id, finishedSeason.sportmonksId),
+		),
+	);
+	const playerIds = [
+		...new Set(squadMemberLists.flat().map((member) => member.player_id)),
+	];
 
-		const rawPlayers: Array<SportmonksPlayerRaw> = [];
-		for (const playerId of playerIds) {
+	// Per-player failure isolation — a single failed fetch (429, network blip,
+	// etc.) must not discard every other player already fetched successfully
+	// in this loop. Found live: without this, a mid-loop 429 threw away the
+	// whole competition's progress, not just the one failed player (see
+	// TODO.md).
+	const rawPlayers: Array<SportmonksPlayerRaw> = [];
+	for (const playerId of playerIds) {
+		try {
 			rawPlayers.push(await fetchPlayerWithStats(sportmonksToken, playerId));
-		}
-
-		const playersResult = await ingestPlayers(db, rawPlayers);
-		console.log(
-			`ingested players: fetched ${playersResult.fetched}, upserted ${playersResult.upserted}, failed ${playersResult.failed.length}`,
-		);
-		if (playersResult.failed.length > 0) {
-			console.log("player failures:", playersResult.failed);
-		}
-
-		const playerSeasonStatsResult = await ingestPlayerSeasonStats(
-			db,
-			rawPlayers,
-			finishedSeason.sportmonksId,
-		);
-		console.log(
-			`ingested player season stats: fetched ${playerSeasonStatsResult.fetched}, upserted ${playerSeasonStatsResult.upserted}, failed ${playerSeasonStatsResult.failed.length}`,
-		);
-		if (playerSeasonStatsResult.failed.length > 0) {
+		} catch (error) {
 			console.log(
-				"player season stats failures:",
-				playerSeasonStatsResult.failed,
+				`failed to fetch player ${playerId} for ${competitionName}: ${toErrorMessage(error)}`,
 			);
 		}
+	}
+
+	const playersResult = await ingestPlayers(db, rawPlayers);
+	console.log(
+		`ingested ${competitionName} players: fetched ${playersResult.fetched}, upserted ${playersResult.upserted}, failed ${playersResult.failed.length}`,
+	);
+	if (playersResult.failed.length > 0) {
+		console.log(`${competitionName} player failures:`, playersResult.failed);
+	}
+
+	const playerSeasonStatsResult = await ingestPlayerSeasonStats(
+		db,
+		rawPlayers,
+		finishedSeason.sportmonksId,
+	);
+	console.log(
+		`ingested ${competitionName} player season stats: fetched ${playerSeasonStatsResult.fetched}, upserted ${playerSeasonStatsResult.upserted}, failed ${playerSeasonStatsResult.failed.length}`,
+	);
+	if (playerSeasonStatsResult.failed.length > 0) {
+		console.log(
+			`${competitionName} player season stats failures:`,
+			playerSeasonStatsResult.failed,
+		);
+	}
+};
+
+// Sequential, not parallel — each competition's requests should complete
+// before starting the next, keeping the real-time rate-limit picture legible
+// (and avoiding bursting well past the per-entity budget all at once).
+// Per-competition failure isolation — one competition running into a
+// rate-limit wall must not prevent the next competition from being
+// attempted at all (found live: this is why Community Shield never even
+// started after La Liga hit a 429).
+for (const competitionName of PLAYER_STATS_COMPETITION_NAMES) {
+	try {
+		await ingestPlayersAndStatsForCompetition(competitionName);
+	} catch (error) {
+		console.log(
+			`failed to ingest players/stats for ${competitionName}: ${toErrorMessage(error)}`,
+		);
 	}
 }
 
