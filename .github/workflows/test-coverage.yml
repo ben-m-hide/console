@@ -58,6 +58,7 @@ jobs:
           name: "apps/web"
           json-summary-path: "./apps/web/coverage/coverage-summary.json"
           json-final-path: "./apps/web/coverage/coverage-final.json"
+          threshold-icons: "{0: '🔴', 60: '🟠', 80: '🟢'}"
 
       - name: "Report apps/api Coverage"
         if: always()
@@ -66,6 +67,7 @@ jobs:
           name: "apps/api"
           json-summary-path: "./apps/api/coverage/coverage-summary.json"
           json-final-path: "./apps/api/coverage/coverage-final.json"
+          threshold-icons: "{0: '🔴', 60: '🟠', 80: '🟢'}"
 
       - name: "Report apps/ingestion Coverage"
         if: always()
@@ -74,6 +76,7 @@ jobs:
           name: "apps/ingestion"
           json-summary-path: "./apps/ingestion/coverage/coverage-summary.json"
           json-final-path: "./apps/ingestion/coverage/coverage-final.json"
+          threshold-icons: "{0: '🔴', 60: '🟠', 80: '🟢'}"
 
       - name: "Report packages/shared Coverage"
         if: always()
@@ -82,3 +85,4 @@ jobs:
           name: "packages/shared"
           json-summary-path: "./packages/shared/coverage/coverage-summary.json"
           json-final-path: "./packages/shared/coverage/coverage-final.json"
+          threshold-icons: "{0: '🔴', 60: '🟠', 80: '🟢'}"
