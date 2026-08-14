@@ -12,7 +12,7 @@ Bun workspace monorepo. TypeScript 7, strictest config, everywhere except `infra
 - **`apps/api/`**: Hono 4 + `@hono/zod-openapi` — REST + OpenAPI, not tRPC. Spike stage: `/health`, `/doc`, `/reference` only.
 - **`infra/`** (shares root `package.json`, not a workspace package): AWS CDK (TypeScript) — S3 + CloudFront. Synthesized, **not deployed**.
 - **Quality**: Biome (lint/format/import-order, everything except Markdown) + Prettier (Markdown only) + Vitest/RTL/axe-core + `bun audit`.
-- **Docs**: `README.md` (stack/commands/known quirks), `CONTRIBUTING.md` (dev workflow, pinning policy), `docs/adr/` (decisions), `TODO.md` (todo-md standard — action list, not rationale).
+- **Docs**: `README.md` (stack/commands/known quirks), `CONTRIBUTING.md` (dev workflow, pinning policy), `docs/adr/` (decisions), `docs/plans/` (persisted Complex-task plans), `TODO.md` (todo-md standard — action list, not rationale).
 
 ## Commands
 
@@ -63,11 +63,18 @@ Touch only what the request requires. Don't refactor or "improve" adjacent unbro
 
 ## Goal-driven execution
 
-Turn vague tasks into verifiable ones before starting: "fix the bug" → reproduce it first, then fix, then re-verify the reproduction is gone (this is exactly how every bug in this project has actually been fixed — reproduced locally before and after, never assumed). For multi-step work, state a brief plan with a verification step per item.
+Turn vague tasks into verifiable ones before starting: "fix the bug" → reproduce it first, then fix, then re-verify the reproduction is gone (this is exactly how every bug in this project has actually been fixed — reproduced locally before and after, never assumed).
 
 ## Planning
 
-Plans: extremely concise — sacrifice grammar for concision. Before listing a question, try answering it by exploring the codebase — only list what exploration can't resolve. End with an "Unresolved questions" list (omit if none), each with your recommended answer. Self-critique before presenting: surface concerns/risks in the plan and mitigations. Do not implement until both of us have reviewed and approved the plan.
+Classify every task first:
+
+- **Trivial** — single file, small diff, no new deps/shared-state/API changes, obviously reversible. Just do it, no plan.
+- **Complex** — everything else: multiple files, new dependency, shared state/config changes, API/contract changes, schema/migrations, auth/permissions, unsure of approach. Editing `CLAUDE.md`, a skill, or `biome.json` is always Complex — shared behavior, not diff size. Default to Complex when unsure.
+
+For Complex tasks: research first (read affected files/patterns/tests — only ask what exploration can't resolve), then present a plan before touching files — Files touched + why; Approach (+ alternatives if a real tradeoff); Test/type impact; Migration/breaking-change risk; Rollback plan if risky. Concise, sacrifice grammar. Self-critique — surface risks/edge cases, not just the happy path. End with an "Unresolved questions" list (omit if none), each with your recommended answer. Wait for explicit approval before touching files. If execution diverges mid-task, STOP, re-plan, re-approve — don't quietly adapt.
+
+Once approved, persist it: `docs/plans/YYYY-MM-DD-slug.md` (see `docs/plans/README.md`). Re-approved after diverging → update that same file, don't create a second one.
 
 ## Known gotchas
 
