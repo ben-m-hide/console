@@ -38,6 +38,8 @@ export default defineConfig({
 		coverage: {
 			provider: "v8",
 			exclude: ["src/routeTree.gen.ts"],
+			reporter: ["text", "json-summary", "json"],
+			reportOnFailure: true,
 		},
 	},
 });
