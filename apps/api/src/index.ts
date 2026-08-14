@@ -1,5 +1,9 @@
 import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
+import { cors } from "hono/cors";
+
+import { errorHandler } from "./middleware/error-handler";
+import { registerCompetitionsRoute } from "./routes/competitions";
 
 const HealthResponseSchema = z
 	.object({
@@ -9,7 +13,7 @@ const HealthResponseSchema = z
 
 const healthRoute = createRoute({
 	method: "get",
-	path: "/health",
+	path: "/api/v1/health",
 	responses: {
 		200: {
 			content: {
@@ -22,7 +26,14 @@ const healthRoute = createRoute({
 
 const app = new OpenAPIHono();
 
+app.use(
+	"/api/*",
+	cors({ origin: process.env.API_CORS_ORIGIN ?? "http://localhost:5173" }),
+);
+app.onError(errorHandler);
+
 app.openapi(healthRoute, (c) => c.json({ status: "ok" as const }));
+registerCompetitionsRoute(app);
 
 app.doc("/doc", {
 	openapi: "3.1.0",
