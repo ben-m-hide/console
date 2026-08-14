@@ -253,8 +253,8 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 - [x] Write normalization functions: Sportmonks response shape → internal schema shape — done 2026-08-14 for `competitions` (`normalize-competition.ts`) and `seasons` (`normalize-season.ts`, also resolves the `competitionId` FK from Sportmonks' `league_id` via a lookup built from already-ingested competitions). Teams/players/squad_memberships/fixtures/match_events/ball_positions normalization not started.
 - [ ] Write upsert logic (fixtures, match_events, `ball_positions`, keyed on Sportmonks IDs), wrapped per-fixture in a transaction — `ball_positions` is high-volume (~900+ rows/fixture), batch the insert rather than row-at-a-time. **`competitions` and `seasons` upserts done 2026-08-14** (`ingest-competitions.ts`/`ingest-seasons.ts`, real `onConflictDoUpdate`s, both verified idempotent by running twice) — this item is about the remaining, higher-volume/FK-heavier entities.
 - [ ] Add rate-limit handling to the Sportmonks client: track the `rate_limit` object (`remaining`/`resets_in_seconds`/`requested_entity`) from each response to throttle proactively per-entity, and on `429` honor `retry_after` if present or exponential backoff otherwise (see §3 for specifics)
-- [ ] Use `include=` to combine related-resource fetches into single requests rather than separate calls per entity (§3) — the main lever for staying inside the hourly budget. (Both slices already do this in miniature — `competitions`' `include=country` combines two lookups into one call, `seasons` fetches all target leagues' seasons in a single `filters=leagueIds:...` call rather than one per league — but the real payoff is for fixtures with events/statistics, not yet built.)
-- [ ] Write `player_season_stats` aggregation step (keyed on player+team+season, not player+season)
+- [x] Use `include=` to combine related-resource fetches into single requests rather than separate calls per entity (§3) — the main lever for staying inside the hourly budget. Done 2026-08-14, extended beyond the original two miniature cases: `fetchSeasonFixtures` combines a season's fixtures with their participants/scores/state in one request (`GET /seasons/{id}?include=fixtures.participants;fixtures.scores;fixtures.state`), and `fetchPlayerWithStats` combines a player's profile with nationality/position/every season's statistics in one request. This also sidestepped a real subscription-tier gate — the originally-planned `/fixtures/between/...` date-range filter (`fixtureLeagues`/`fixtureSeasons`) returns "no access via your current subscription" on this Starter-plan token; the season-scoped `include=` avoids that filter entirely.
+- [x] Write `player_season_stats` aggregation step (keyed on player+team+season, not player+season) — done 2026-08-14, `normalize-player-season-stats.ts`/`ingest-player-season-stats.ts`, keyed correctly per the schema's own `unique(playerId, teamId, seasonId)`. `xa`/`xaPer90` dropped from the schema first — no "Expected Assists" stat type exists under this subscription (verified across an entire finished-season squad), same reasoning as `competitions.tier`'s removal.
 - [ ] Wire up `ingestion_runs` audit logging, including `fixtures_processed`/`fixtures_failed`
 - [x] Unit test normalization logic (Vitest) — done 2026-08-14 for `normalize-competition.ts` and `normalize-season.ts`, both against real captured Sportmonks responses (not fabricated). Fixtures/events normalization tests not started (code doesn't exist yet).
 - [ ] Integration test: recorded sample Sportmonks payload → run ingestion → assert the final `/report` response shape end-to-end
@@ -262,17 +262,17 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 
 ### Phase 5 — API layer
 
-- [ ] Namespace all routes under `/api/v1`
-- [ ] Implement `/health`
-- [ ] Implement `/competitions`, `/competitions/:id/fixtures`
+- [x] Namespace all routes under `/api/v1` — done 2026-08-14 for every route that exists (`/health`, `/competitions`, `/players/compare`); `/doc`/`/reference` deliberately stayed unversioned (dev tooling, not part of the documented API surface).
+- [x] Implement `/health` — done 2026-08-14 (moved from bare `/health` to `/api/v1/health` alongside the versioning decision above).
+- [ ] Implement `/competitions`, `/competitions/:id/fixtures` — `GET /api/v1/competitions` done 2026-08-14 (the first real route); `/competitions/:id/fixtures` not started.
 - [ ] Implement `/fixtures/:id/report`
 - [ ] Implement `/players`, `/players/:id/stats` (with pagination on `/players`)
-- [ ] Implement `/players/compare`, using the explicit percentile baseline definition from §9 (position + competition + season + minutes floor)
+- [x] Implement `/players/compare`, using the explicit percentile baseline definition from §9 (position + competition + season + minutes floor) — done 2026-08-14, `GET /api/v1/players/compare?ids=&season=`, backed by real `players`/`player_season_stats` data (Premier League only so far — see Phase 4). See `TODO.md`'s Football analytics domain section for full verification detail.
 - [ ] Implement `/teams/:id/stats`
-- [ ] Add Zod request/response validation on all routes
-- [ ] Add `hono/cors` middleware scoped to the CloudFront domain
+- [ ] Add Zod request/response validation on all routes — request-side done where routes take input (`/players/compare`'s query params); response schemas exist on every route for typing/OpenAPI docs but aren't runtime-enforced by `@hono/zod-openapi` (it validates requests, not responses, by default) — not yet a real gap since no route has hand-built its response outside the schema's shape, but worth being explicit this isn't the same guarantee as request validation.
+- [x] Add `hono/cors` middleware scoped to the CloudFront domain — done 2026-08-14, scoped via a new `API_CORS_ORIGIN` env var rather than a literal CloudFront domain (none deployed yet — see ADR 0007/0008's `connect-src` placeholder for the same situation).
 - [ ] Add `Cache-Control` headers on GET routes
-- [ ] Add a shared error-handling middleware with a consistent error envelope
+- [x] Add a shared error-handling middleware with a consistent error envelope — done 2026-08-14 in two passes: `app.onError`/`app.notFound` for thrown errors and unmatched routes, then `OpenAPIHono`'s `defaultHook` for request-validation failures (found live: `@hono/zod-openapi`'s validator responds directly rather than throwing, so it bypassed `app.onError` entirely until this was added).
 - [ ] Add basic rate limiting on public endpoints
 - [ ] Unit test route handlers (Vitest)
 

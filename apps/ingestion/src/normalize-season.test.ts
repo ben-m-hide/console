@@ -1,5 +1,5 @@
 import { normalizeSeason } from "./normalize-season";
-import { SAMPLE_SEASON_2024 } from "./sportmonks-types";
+import { SAMPLE_SEASON_2024 } from "./sportmonks-fixtures";
 
 describe("normalizeSeason", () => {
 	it("maps a real Sportmonks season response to the insertable shape, resolving league_id via the map", () => {

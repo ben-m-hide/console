@@ -47,7 +47,7 @@ export const ingestSeasons = async (
 	const rawSeasons = await fetchSeasons(token, leagueIds);
 
 	const rows: Array<InsertableSeason> = [];
-	const failed: IngestSeasonsResult["failed"] = [];
+	const failed: Array<IngestionFailure> = [];
 
 	for (const rawSeason of rawSeasons) {
 		try {

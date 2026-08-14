@@ -25,6 +25,11 @@ echo "== /api/v1/competitions =="
 curl -sf "http://localhost:$PORT/api/v1/competitions"
 echo
 
+echo "== /api/v1/players/compare (malformed ids -> envelope, not a raw ZodError) =="
+curl -s "http://localhost:$PORT/api/v1/players/compare?ids=abc&season=1"
+echo
+echo "(needs a real player id + season id from the DB to check a real 200 — see SKILL.md)"
+
 echo "== /doc (paths) =="
 curl -sf "http://localhost:$PORT/doc" | grep -o '"/api/v1/health"'
 

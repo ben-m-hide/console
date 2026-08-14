@@ -5,7 +5,7 @@ import { sql } from "drizzle-orm";
 import type { IngestionFailure } from "./ingest-result";
 import type { InsertableTeam } from "./normalize-team";
 import { normalizeTeam } from "./normalize-team";
-import type { SportmonksFixtureRaw } from "./sportmonks-types";
+import type { SportmonksTeamRaw } from "./sportmonks-types";
 import { toErrorMessage } from "./to-error-message";
 
 export interface IngestTeamsResult {
@@ -14,23 +14,24 @@ export interface IngestTeamsResult {
 	failed: Array<IngestionFailure>;
 }
 
-// Teams have no dedicated fetch of their own — every fixture's `participants`
-// include already carries full team objects (sportmonks-client.ts's
-// fetchSeasonFixtures), so this derives teams from fixtures already fetched
-// for ingestFixtures rather than issuing a second Sportmonks request.
+// Teams have no single dedicated fetch — callers source raw teams from
+// wherever's cheapest for the season in question: a current season's
+// fixtures already carry full team objects in their `participants`
+// (sportmonks-client.ts's fetchSeasonFixtures), while a season whose
+// fixtures aren't otherwise needed uses the standalone fetchSeasonTeams
+// instead. Deduped here by sportmonksId so callers can pass overlapping
+// lists from multiple sources without worrying about it.
 export const ingestTeams = async (
 	db: Db,
-	rawFixtures: Array<SportmonksFixtureRaw>,
+	rawTeamsInput: Array<SportmonksTeamRaw>,
 ): Promise<IngestTeamsResult> => {
 	const rawTeamsById = new Map(
-		rawFixtures
-			.flatMap((fixture) => fixture.participants)
-			.map((participant) => [participant.id, participant]),
+		rawTeamsInput.map((rawTeam) => [rawTeam.id, rawTeam]),
 	);
 	const rawTeams = [...rawTeamsById.values()];
 
 	const rows: Array<InsertableTeam> = [];
-	const failed: IngestTeamsResult["failed"] = [];
+	const failed: Array<IngestionFailure> = [];
 
 	for (const rawTeam of rawTeams) {
 		try {

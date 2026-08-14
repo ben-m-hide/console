@@ -19,6 +19,22 @@ interface IngestionFailure {
 failed: Array<IngestionFailure>;
 ```
 
+## Reference a field's type directly, not via indexed access on its parent
+
+Once a field's type is already named (an interface property, a schema-derived type), reference that name directly at every other use site — don't reach for `ParentType["fieldName"]` as a shorthand. It reads as an extra indirection the reader has to resolve (look up `ParentType`, find `fieldName`, infer the actual type) for no benefit over just importing and using the field's own type name.
+
+```ts
+// Avoid
+const failed: IngestSeasonsResult["failed"] = [];
+const details: SportmonksPlayerStatisticRaw["details"] = [];
+
+// Prefer
+const failed: Array<IngestionFailure> = [];
+const details: Array<SportmonksStatisticDetailRaw> = [];
+```
+
+Real example: this pattern (`XResult["failed"]`) had spread to every `ingest-<entity>.ts` orchestrator by the time it was caught — fixed everywhere at once, 2026-08-14, once flagged.
+
 ## Use explicit, human-readable names — no unexplained abbreviations
 
 Biome's `useNamingConvention` only enforces casing and a two-character minimum — it can't judge whether a name is actually clear. Spell names out: `competition` not `cfg`, `request` not `req`, `temporary` not `tmp`, `index`/the actual loop variable's meaning not `idx`. This applies everywhere an identifier is introduced: variables, function/arrow parameters, loop variables, types, interfaces. A reader (human or Claude) should be able to tell what a value is without cross-referencing its declaration.
@@ -98,6 +114,12 @@ export interface IngestionFailure {
 // Tier 3 — packages/shared, two apps, DB-schema-derived (schemas/competition.gen.ts)
 export type Competition = z.infer<typeof CompetitionSchema>;
 ```
+
+## Test fixtures don't live in a types file
+
+Real captured sample data used only by tests (`SAMPLE_*`-style constants) is not a type — it doesn't belong in a `-types.ts`/`sportmonks-types.ts`-style file even if that file's types are what the sample data is shaped as. Give it its own file (`sportmonks-fixtures.ts`, sibling to `sportmonks-types.ts`), importing the types it needs from the types file. Same "where types live" promotion logic applies to _where fixtures live_: inline in the one test that needs it by default, extracted to a shared fixtures file once a second test file needs the same sample.
+
+Real example: `sportmonks-types.ts` originally held both the raw Sportmonks type definitions and every `SAMPLE_*` real-captured-response constant used by `normalize-*.test.ts` files. Split apart 2026-08-14 — types stayed, fixtures moved to `sportmonks-fixtures.ts`. A file whose header comment says "raw API response shapes" describing types should not also be where test data lives; a reader looking for "what does the wire format look like" shouldn't have to scroll past 150 lines of test fixtures to find it, and vice versa.
 
 ## Check for an existing util before writing one
 

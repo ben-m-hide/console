@@ -1,8 +1,11 @@
 import type {
 	SportmonksFixtureRaw,
 	SportmonksLeagueRaw,
+	SportmonksPlayerRaw,
 	SportmonksSeasonFixturesRaw,
 	SportmonksSeasonRaw,
+	SportmonksSquadMemberRaw,
+	SportmonksTeamRaw,
 } from "./sportmonks-types";
 
 const SPORTMONKS_BASE_URL = "https://api.sportmonks.com/v3/football";
@@ -69,3 +72,38 @@ export const fetchSeasonFixtures = async (
 	);
 	return season.fixtures;
 };
+
+// Standalone team list for a season — used instead of fetchSeasonFixtures
+// when that season's fixtures aren't otherwise needed (a past, already-played
+// season's teams, wanted only for players/stats FK resolution).
+export const fetchSeasonTeams = (
+	token: string,
+	seasonId: number,
+): Promise<Array<SportmonksTeamRaw>> =>
+	fetchSportmonks<Array<SportmonksTeamRaw>>(
+		token,
+		`/teams/seasons/${seasonId}`,
+	);
+
+export const fetchTeamSquad = (
+	token: string,
+	teamId: number,
+	seasonId: number,
+): Promise<Array<SportmonksSquadMemberRaw>> =>
+	fetchSportmonks<Array<SportmonksSquadMemberRaw>>(
+		token,
+		`/squads/seasons/${seasonId}/teams/${teamId}`,
+	);
+
+// One request returns the player's profile plus every season's statistics it
+// has — the caller filters statistics down to the season(s) it actually
+// wants (ingest-player-season-stats.ts), rather than a per-season player
+// endpoint that doesn't exist.
+export const fetchPlayerWithStats = (
+	token: string,
+	playerId: number,
+): Promise<SportmonksPlayerRaw> =>
+	fetchSportmonks<SportmonksPlayerRaw>(
+		token,
+		`/players/${playerId}?include=nationality;position;statistics.details.type`,
+	);
