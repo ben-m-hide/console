@@ -99,7 +99,7 @@
 	},
 	"overrides": [
 		{
-			"includes": ["**/sportmonks-types.ts"],
+			"includes": ["**/sportmonks-types.ts", "**/sportmonks-fixtures.ts"],
 			"linter": {
 				"rules": {
 					"style": {

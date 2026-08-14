@@ -2,8 +2,13 @@ import { createRoute, OpenAPIHono, z } from "@hono/zod-openapi";
 import { Scalar } from "@scalar/hono-api-reference";
 import { cors } from "hono/cors";
 
-import { errorHandler, notFoundHandler } from "./middleware/error-handler";
+import {
+	errorHandler,
+	notFoundHandler,
+	validationErrorHook,
+} from "./middleware/error-handler";
 import { registerCompetitionsRoute } from "./routes/competitions";
+import { registerPlayersCompareRoute } from "./routes/players-compare";
 
 const HealthResponseSchema = z
 	.object({
@@ -24,7 +29,7 @@ const healthRoute = createRoute({
 	},
 });
 
-const app = new OpenAPIHono();
+const app = new OpenAPIHono({ defaultHook: validationErrorHook });
 
 app.use(
 	"/api/*",
@@ -35,6 +40,7 @@ app.notFound(notFoundHandler);
 
 app.openapi(healthRoute, (c) => c.json({ status: "ok" as const }));
 registerCompetitionsRoute(app);
+registerPlayersCompareRoute(app);
 
 app.doc("/doc", {
 	openapi: "3.1.0",

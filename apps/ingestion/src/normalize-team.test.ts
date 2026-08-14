@@ -3,7 +3,7 @@ import {
 	SAMPLE_TEAM_BRIGHTON,
 	SAMPLE_TEAM_WITHOUT_LOGO,
 	SAMPLE_TEAM_WITHOUT_SHORT_CODE,
-} from "./sportmonks-types";
+} from "./sportmonks-fixtures";
 
 describe("normalizeTeam", () => {
 	it("maps a real Sportmonks team response to the insertable shape", () => {

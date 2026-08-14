@@ -25,6 +25,7 @@
         "@console-next/shared": "workspace:*",
         "@hono/zod-openapi": "1.5.2",
         "@scalar/hono-api-reference": "0.11.13",
+        "drizzle-orm": "0.45.2",
         "hono": "4.13.1",
         "zod": "^4.4.3",
       },

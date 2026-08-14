@@ -24,7 +24,7 @@ export const ingestCompetitions = async (
 	const leagues = await fetchLeagues(token);
 
 	const rows: Array<InsertableCompetition> = [];
-	const failed: IngestCompetitionsResult["failed"] = [];
+	const failed: Array<IngestionFailure> = [];
 
 	for (const league of leagues) {
 		try {

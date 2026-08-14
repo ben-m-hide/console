@@ -37,7 +37,7 @@ export const ingestFixtures = async (
 	);
 
 	const rows: Array<InsertableFixture> = [];
-	const failed: IngestFixturesResult["failed"] = [];
+	const failed: Array<IngestionFailure> = [];
 
 	for (const rawFixture of rawFixtures) {
 		try {

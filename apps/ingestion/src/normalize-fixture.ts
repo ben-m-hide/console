@@ -3,6 +3,7 @@ import { FixtureSchema } from "@console-next/shared";
 import {
 	SPORTMONKS_CURRENT_SCORE_TYPE_ID,
 	type SportmonksFixtureRaw,
+	type SportmonksFixtureScoreRaw,
 } from "./sportmonks-types";
 
 // id is DB-generated (identity column) — see normalize-competition.ts for the
@@ -14,7 +15,7 @@ export type InsertableFixture = ReturnType<
 >;
 
 const findScoreFor = (
-	scores: SportmonksFixtureRaw["scores"],
+	scores: Array<SportmonksFixtureScoreRaw>,
 	location: "home" | "away",
 ): number | null => {
 	const currentScore = scores.find(

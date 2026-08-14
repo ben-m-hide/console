@@ -2,7 +2,7 @@ import { normalizeFixture } from "./normalize-fixture";
 import {
 	SAMPLE_FIXTURE_FINISHED,
 	SAMPLE_FIXTURE_UPCOMING,
-} from "./sportmonks-types";
+} from "./sportmonks-fixtures";
 
 describe("normalizeFixture", () => {
 	it("maps a not-yet-played fixture, leaving scores null", () => {

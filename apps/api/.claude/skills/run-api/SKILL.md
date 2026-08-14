@@ -1,6 +1,6 @@
 ---
 name: run-api
-description: Build, run, and smoke-test the console-next backend (apps/api, a Hono REST API). Use when asked to start the API, run its smoke test, verify it's up, or check /api/v1/health, /api/v1/competitions, /doc, or /reference.
+description: Build, run, and smoke-test the console-next backend (apps/api, a Hono REST API). Use when asked to start the API, run its smoke test, verify it's up, or check /api/v1/health, /api/v1/competitions, /api/v1/players/compare, /doc, or /reference.
 ---
 
 Hono API, no separate build step (Bun runs the TypeScript directly). Drive it via `.claude/skills/run-api/smoke.sh` — launches the dev server in the background, waits for readiness, hits every route, shuts down cleanly.
@@ -31,6 +31,7 @@ PORT=4100 bun run dev > /tmp/console-next-api.log 2>&1 &
 PID=$!
 curl http://localhost:4100/api/v1/health         # → {"status":"ok"}
 curl http://localhost:4100/api/v1/competitions   # → real rows from the local-dev Neon branch
+curl "http://localhost:4100/api/v1/players/compare?ids=298,614&season=7"  # → percentile-ranked comparison (real ids from the local-dev branch's Premier League data — look one up first, e.g. `select id, name from players limit 5`)
 curl http://localhost:4100/doc                   # → OpenAPI 3.1 document
 curl http://localhost:4100/reference             # → Scalar API reference (HTML)
 kill $PID                                        # confirmed to actually free the port — see Gotchas
