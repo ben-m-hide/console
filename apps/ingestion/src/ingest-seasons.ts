@@ -6,6 +6,7 @@ import type { IngestionFailure } from "./ingest-result";
 import type { InsertableSeason } from "./normalize-season";
 import { normalizeSeason } from "./normalize-season";
 import { fetchSeasons } from "./sportmonks-client";
+import { toErrorMessage } from "./to-error-message";
 
 export interface IngestSeasonsResult {
 	fetched: number;
@@ -55,7 +56,7 @@ export const ingestSeasons = async (
 			failed.push({
 				id: rawSeason.id,
 				name: rawSeason.name,
-				error: error instanceof Error ? error.message : String(error),
+				error: toErrorMessage(error),
 			});
 		}
 	}
