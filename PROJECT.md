@@ -279,7 +279,7 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 ### Phase 6 — Frontend
 
 - [ ] Decide styling approach (see §10)
-- [ ] Set up TanStack Query + typed API client using `packages/shared`
+- [x] Set up TanStack Query + typed API client using `packages/shared` — done 2026-08-15 for the query half: the index page makes a real `useQuery` call to `GET /api/v1/competitions`, validated against `packages/shared`'s `CompetitionSchema` (that package's first `apps/web` consumer). **Deliberately no "typed API client" abstraction yet** — one consumer, one read endpoint; per root `CLAUDE.md`'s promotion rule, the fetch stays inline in the component until a second consumer needs it. A generic data-fetching module (CRUD helpers, related-entity fetching, suspense/infinite loading) was explicitly considered and sequenced _after_ the frontend UI/UX design session, so its shape is driven by real screen requirements rather than guessed against endpoints that don't exist (`apps/api` has zero create/update/delete routes today). See `docs/plans/2026-08-15-wire-frontend-to-api.md`.
 - [ ] Build `<Pitch>` base component, viewBox matched to the real pitch aspect ratio confirmed in Phase 3
 - [ ] Build `<BallHeatmap>` (and/or `<BallTrail>`) overlay component, rendering `ballPositions` from `/report` (§4/§5) — not computing aggregates client-side if the endpoint ships pre-binned data
 - [ ] Build Match Report page, wire to `/api/v1/fixtures/:id/report`

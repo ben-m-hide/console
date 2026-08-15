@@ -19,7 +19,7 @@
     },
     "apps/api": {
       "name": "@console-next/api",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "dependencies": {
         "@console-next/db": "workspace:*",
         "@console-next/shared": "workspace:*",
@@ -37,7 +37,7 @@
     },
     "apps/ingestion": {
       "name": "@console-next/ingestion",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "dependencies": {
         "@console-next/db": "workspace:*",
         "@console-next/shared": "workspace:*",
@@ -51,8 +51,9 @@
     },
     "apps/web": {
       "name": "@console-next/web",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "dependencies": {
+        "@console-next/shared": "workspace:*",
         "@fontsource-variable/geist": "^5.3.0",
         "@mantine/core": "^9.5.1",
         "@mantine/hooks": "^9.5.1",
@@ -91,7 +92,7 @@
     },
     "packages/db": {
       "name": "@console-next/db",
-      "version": "0.0.0",
+      "version": "1.0.0",
       "dependencies": {
         "drizzle-orm": "0.45.2",
       },
@@ -110,7 +111,7 @@
     },
     "packages/shared": {
       "name": "@console-next/shared",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "dependencies": {
         "zod": "^4.4.3",
       },
