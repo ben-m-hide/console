@@ -1,11 +1,10 @@
-import { MantineProvider } from "@mantine/core";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import axe from "axe-core";
-import type { PropsWithChildren, ReactElement } from "react";
-import { Component, Fragment, Suspense } from "react";
 
-import { createQueryClient } from "@/lib/query-client";
+import {
+	LOADING_FALLBACK_TEXT,
+	renderWithProviders,
+} from "@/test/render-with-providers";
 
 import { IndexPage } from "./-index-page";
 
@@ -14,49 +13,8 @@ const SAMPLE_COMPETITIONS = [
 	{ id: 2, sportmonksId: 82, name: "Bundesliga", country: "Germany" },
 ];
 
-interface ErrorBoundaryState {
-	message: string | null;
-}
-
-// useSuspenseQuery throws to the nearest boundary rather than returning an
-// error flag, so these tests need real boundaries around the component. In the
-// app those roles are played by the route's pendingComponent/errorComponent.
-class TestErrorBoundary extends Component<
-	PropsWithChildren,
-	ErrorBoundaryState
-> {
-	override state: ErrorBoundaryState = { message: null };
-
-	static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-		return { message: error.message };
-	}
-
-	override render(): ReactElement {
-		const { message } = this.state;
-		if (message !== null) {
-			return <div role="alert">{message}</div>;
-		}
-		return <Fragment>{this.props.children}</Fragment>;
-	}
-}
-
-const renderIndexPage = (): ReturnType<typeof render> => {
-	const queryClient = createQueryClient({
-		defaultOptions: { queries: { retry: false } },
-	});
-	const wrapper = ({ children }: PropsWithChildren): ReactElement => (
-		<MantineProvider>
-			<QueryClientProvider client={queryClient}>
-				<TestErrorBoundary>
-					<Suspense fallback={<div>Loading competitions</div>}>
-						{children}
-					</Suspense>
-				</TestErrorBoundary>
-			</QueryClientProvider>
-		</MantineProvider>
-	);
-	return render(<IndexPage />, { wrapper });
-};
+const renderIndexPage = (): ReturnType<typeof renderWithProviders> =>
+	renderWithProviders(<IndexPage />);
 
 const stubFetchResolving = (body: unknown, ok = true): void => {
 	vi.stubGlobal(
@@ -77,7 +35,7 @@ describe("IndexPage", () => {
 	it("suspends while the request is in flight", () => {
 		stubFetchResolving(SAMPLE_COMPETITIONS);
 		renderIndexPage();
-		expect(screen.getByText("Loading competitions")).toBeInTheDocument();
+		expect(screen.getByText(LOADING_FALLBACK_TEXT)).toBeInTheDocument();
 	});
 
 	it("renders the competitions returned by the API", async () => {
