@@ -8,10 +8,7 @@ import {
 	validationErrorHook,
 } from "./middleware/error-handler";
 import { publicApiRateLimiter } from "./middleware/rate-limiter";
-import { registerCompetitionsRoute } from "./routes/competitions";
-import { registerPlayersRoute } from "./routes/players";
-import { registerPlayersCompareRoute } from "./routes/players-compare";
-import { registerSeasonsRoute } from "./routes/seasons";
+import { registerRoutes } from "./routes";
 
 const HealthResponseSchema = z
 	.object({
@@ -48,10 +45,7 @@ app.use("/api/v1/seasons", publicApiRateLimiter);
 app.use("/api/v1/players/*", publicApiRateLimiter);
 
 app.openapi(healthRoute, (c) => c.json({ status: "ok" as const }));
-registerCompetitionsRoute(app);
-registerPlayersCompareRoute(app);
-registerPlayersRoute(app);
-registerSeasonsRoute(app);
+registerRoutes(app);
 
 app.doc("/doc", {
 	openapi: "3.1.0",
