@@ -83,7 +83,7 @@ Not loader _or_ Query — both. The loader triggers and awaits the fetch; Query 
 This does not make the shipped index screen wrong — plain `useQuery` works, and is verified working in a browser. But the following are prerequisites for everything else in this section:
 
 1. `createRootRouteWithContext<{ queryClient: QueryClient }>()` in `__root.tsx`; `RootComponent` drops `QueryClientProvider`, keeps `MantineProvider` + `Outlet` + devtools.
-2. `main.tsx` — `createRouter({ routeTree, context: { queryClient }, defaultPreload: 'intent', defaultPreloadStaleTime: 0 })`, with `QueryClientProvider` wrapping `RouterProvider` **outside** it.
+2. `main.tsx` — `createRouter({ routeTree, context: { queryClient } })`, with `QueryClientProvider` wrapping `RouterProvider` **outside** it. **`defaultPreload: 'intent'` and `defaultPreloadStaleTime: 0` land with the second route, not this one** — with one route there is nothing to preload between, so neither has observable behaviour to verify, and `defaultPreloadStaleTime` is moot while `defaultPreload` is `false`. Enable them where the interaction with the rate limiter (gotcha #10) can be tested against a real hover-dense list.
 3. Keep the existing `createQueryClient(config?)` factory — it is what tests need.
 4. **Set a default `staleTime` in that factory.** `defaultPreloadStaleTime: 0` deliberately makes Query the single source of freshness truth — but Query's own default `staleTime` is **0**, so leaving it unset means every hover over a `<Link>` fires a real request. That is acutely wrong here: the players table is hover-dense, the API rate-limits at 100 req/15 min (gotcha #10), and `PROJECT.md` §4 establishes these reads are "highly cacheable" because data only changes when the ingestion job runs every few hours. **Minutes, not zero** — loosely matched to the ingestion interval.
 5. **Add a root error boundary and a `notFoundComponent`.** Per-route `errorComponent` does not catch a render error in the shell itself, and three routes take an ID param. CloudFront rewrites 403/404 to `/index.html` at HTTP 200 (ADR 0007), so a deep link to a nonexistent ID lands in the app — `notFound()` + `notFoundComponent` is what turns that into an honest message instead of a crash or an empty list. Note `NotFoundRoute` is deprecated.
@@ -232,20 +232,20 @@ Recorded here so the frontend's error strategy is not designed as if it were the
 
 Three states, not two. **"Trigger already met"** is the honest middle: the condition has fired but the work is unscheduled, which is different from "not yet needed" and must not hide inside the deferred column.
 
-| #   | Item                                                          | State    | Trigger / note                                                                                                      |
-| --- | ------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
-| 1   | Route-folder colocation (`-` prefix)                          | ✅ done  | Already correct                                                                                                     |
-| 2   | Tests beside source                                           | ✅ done  | Already correct                                                                                                     |
-| 3   | Router context + provider rewiring                            | ✅ now   | **Prerequisite for all loader work**                                                                                |
-| 4   | Default `staleTime`, root error boundary, `notFoundComponent` | ✅ now   | Part of the same rewiring — see §3                                                                                  |
-| 5   | `queryOptions()` factories, hierarchical keys                 | ✅ now   | Prerequisite of the first loader-driven fetch. (Not "justified at one query" — the app has **zero** queries today.) |
-| 6   | Search-param state                                            | 🔔 fired | Players is build-order step 1 and needs pagination + filters. Sequence it in.                                       |
-| 7   | Generated API client                                          | 🔔 fired | Players + Player detail cross the third-endpoint line immediately                                                   |
-| 8   | `src/features/<domain>/`                                      | 🔔 fired | The players branch is 3 routes on one entity — the stated trigger. Introduce for **that domain only**.              |
-| 9   | `src/components/`, `src/hooks/`                               | ⏳ defer | Second consumer **of a given component or hook** (not of a type — §5 owns type promotion)                           |
-| 10  | First Zustand store                                           | ⏳ defer | First client-only cross-route state. Navbar `opened` is the likely first.                                           |
-| 11  | Import-boundary enforcement                                   | ⏳ defer | Lands with #8, but **only after** a deliberately-violating import proves Biome errors                               |
-| 12  | Feature-Sliced Design                                         | ❌ no    | Not this app                                                                                                        |
+| #   | Item                                          | State    | Trigger / note                                                                                                           |
+| --- | --------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Route-folder colocation (`-` prefix)          | ✅ done  | Already correct                                                                                                          |
+| 2   | Tests beside source                           | ✅ done  | Already correct                                                                                                          |
+| 3   | Router context + provider rewiring            | ✅ done  | Landed 2026-08-16 — see `docs/plans/2026-08-15-router-query-context.md`                                                  |
+| 4   | Default `staleTime` (5 min)                   | ✅ done  | Landed with #3. Root error boundary + `notFoundComponent` deliberately split out as error-surface concerns — still to do |
+| 5   | `queryOptions()` factories, hierarchical keys | ✅ done  | `routes/-queries/competitions.ts`, landed with #3                                                                        |
+| 6   | Search-param state                            | 🔔 fired | Players is build-order step 1 and needs pagination + filters. Sequence it in.                                            |
+| 7   | Generated API client                          | 🔔 fired | Players + Player detail cross the third-endpoint line immediately                                                        |
+| 8   | `src/features/<domain>/`                      | 🔔 fired | The players branch is 3 routes on one entity — the stated trigger. Introduce for **that domain only**.                   |
+| 9   | `src/components/`, `src/hooks/`               | ⏳ defer | Second consumer **of a given component or hook** (not of a type — §5 owns type promotion)                                |
+| 10  | First Zustand store                           | ⏳ defer | First client-only cross-route state. Navbar `opened` is the likely first.                                                |
+| 11  | Import-boundary enforcement                   | ⏳ defer | Lands with #8, but **only after** a deliberately-violating import proves Biome errors                                    |
+| 12  | Feature-Sliced Design                         | ❌ no    | Not this app                                                                                                             |
 
 ---
 

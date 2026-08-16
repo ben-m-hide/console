@@ -1,10 +1,10 @@
-import { MantineProvider } from "@mantine/core";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import axe from "axe-core";
-import type { PropsWithChildren, ReactElement } from "react";
 
-import { createQueryClient } from "@/lib/query-client";
+import {
+	LOADING_FALLBACK_TEXT,
+	renderWithProviders,
+} from "@/test/render-with-providers";
 
 import { IndexPage } from "./-index-page";
 
@@ -13,17 +13,8 @@ const SAMPLE_COMPETITIONS = [
 	{ id: 2, sportmonksId: 82, name: "Bundesliga", country: "Germany" },
 ];
 
-const renderIndexPage = (): ReturnType<typeof render> => {
-	const queryClient = createQueryClient({
-		defaultOptions: { queries: { retry: false } },
-	});
-	const wrapper = ({ children }: PropsWithChildren): ReactElement => (
-		<MantineProvider>
-			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-		</MantineProvider>
-	);
-	return render(<IndexPage />, { wrapper });
-};
+const renderIndexPage = (): ReturnType<typeof renderWithProviders> =>
+	renderWithProviders(<IndexPage />);
 
 const stubFetchResolving = (body: unknown, ok = true): void => {
 	vi.stubGlobal(
@@ -41,10 +32,10 @@ describe("IndexPage", () => {
 		vi.unstubAllGlobals();
 	});
 
-	it("shows a loading state while the request is in flight", () => {
+	it("suspends while the request is in flight", () => {
 		stubFetchResolving(SAMPLE_COMPETITIONS);
 		renderIndexPage();
-		expect(screen.getByLabelText("Loading competitions")).toBeInTheDocument();
+		expect(screen.getByText(LOADING_FALLBACK_TEXT)).toBeInTheDocument();
 	});
 
 	it("renders the competitions returned by the API", async () => {
@@ -56,23 +47,23 @@ describe("IndexPage", () => {
 		expect(screen.getByText(/Bundesliga/)).toBeInTheDocument();
 	});
 
-	it("shows an error when the request fails", async () => {
+	it("throws to the error boundary when the request fails", async () => {
 		stubFetchResolving({}, false);
 		renderIndexPage();
 		await waitFor(() => {
-			expect(
-				screen.getByText("Could not load competitions"),
-			).toBeInTheDocument();
+			expect(screen.getByRole("alert")).toHaveTextContent(
+				"Request failed: 500",
+			);
 		});
 	});
 
-	it("shows an error when the response does not match the schema", async () => {
+	it("throws to the error boundary when the response does not match the schema", async () => {
 		stubFetchResolving([{ id: 1, name: "Premier League" }]);
 		renderIndexPage();
 		await waitFor(() => {
-			expect(
-				screen.getByText("Response did not match the expected schema"),
-			).toBeInTheDocument();
+			expect(screen.getByRole("alert")).toHaveTextContent(
+				"Response did not match the expected schema",
+			);
 		});
 	});
 
