@@ -3,7 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import axe from "axe-core";
 import type { PropsWithChildren, ReactElement } from "react";
-import { Component, Suspense } from "react";
+import { Component, Fragment, Suspense } from "react";
 
 import { createQueryClient } from "@/lib/query-client";
 
@@ -36,7 +36,7 @@ class TestErrorBoundary extends Component<
 		if (message !== null) {
 			return <div role="alert">{message}</div>;
 		}
-		return <>{this.props.children}</>;
+		return <Fragment>{this.props.children}</Fragment>;
 	}
 }
 
