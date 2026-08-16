@@ -1,6 +1,6 @@
 ---
 name: run-api
-description: Build, run, and smoke-test the console-next backend (apps/api, a Hono REST API). Use when asked to start the API, run its smoke test, verify it's up, or check /api/v1/health, /api/v1/competitions, /api/v1/players/compare, /doc, or /reference.
+description: Build, run, and smoke-test the console-next backend (apps/api, a Hono REST API). Use when asked to start the API, run its smoke test, verify it's up, or check /api/v1/health, /api/v1/competitions, /api/v1/seasons, /api/v1/players, /api/v1/players/compare, /doc, or /reference.
 ---
 
 Hono API, no separate build step (Bun runs the TypeScript directly). Drive it via `.claude/skills/run-api/smoke.sh` — launches the dev server in the background, waits for readiness, hits every route, shuts down cleanly.
@@ -31,6 +31,9 @@ PORT=4100 bun run dev > /tmp/console-next-api.log 2>&1 &
 PID=$!
 curl http://localhost:4100/api/v1/health         # → {"status":"ok"}
 curl http://localhost:4100/api/v1/competitions   # → real rows from the local-dev Neon branch
+curl "http://localhost:4100/api/v1/players?page=1&pageSize=5"   # → paginated envelope: { data, meta }
+curl "http://localhost:4100/api/v1/players?search=saka"          # → case-insensitive substring on name
+curl "http://localhost:4100/api/v1/seasons?competition=1"        # → seasons, newest first within a competition
 curl "http://localhost:4100/api/v1/players/compare?ids=298,614&season=7"  # → percentile-ranked comparison (real ids from the local-dev branch's Premier League data — look one up first, e.g. `select id, name from players limit 5`)
 curl http://localhost:4100/doc                   # → OpenAPI 3.1 document
 curl http://localhost:4100/reference             # → Scalar API reference (HTML)
@@ -51,4 +54,4 @@ kill $PID                                        # confirmed to actually free th
 - **`/health` moved to `/api/v1/health`** once PROJECT.md §4's versioning decision applied to real routes — `/doc`/`/reference` stayed unversioned (dev tooling, not part of the public API surface it documents).
 - **The default export in `src/index.ts` is what makes `bun run` auto-serve it** — `export default app` where `app` has a `.fetch` method is enough for Bun to start an HTTP server itself; there's no explicit `Bun.serve()` call in this codebase. `PORT` env var is respected for this automatically (confirmed by testing, not assumed) — no code change needed to override it.
 - **`bun run --watch src/index.ts` is a child of the `bun run dev` wrapper** (`ppid` confirmed via `ps`), and killing the wrapper's PID (`$!` from the background launch) successfully frees the port — unlike npm, which doesn't forward signals to what it spawns. `kill $!` alone is sufficient here; a port-based fallback (`lsof -ti:$PORT -sTCP:LISTEN | xargs -r kill`) isn't needed but is a safe belt-and-suspenders if the process tree ever changes.
-- **`/api/v1/competitions` and `/api/v1/players/*` are rate-limited (100 req/15min per `x-forwarded-for`)** — `smoke.sh`'s plain `curl` calls don't set that header, so every local request without it shares one global `""` key. Repeated `smoke.sh` runs in quick succession during dev could eventually 429 (verified live: 100 requests from the same key trigger it, envelope `{"error":{"code":429,"message":"Too many requests"}}`). Set `-H "x-forwarded-for: <anything>"` on manual `curl` calls if this comes up.
+- **`/api/v1/competitions`, `/api/v1/seasons` and `/api/v1/players/*` are rate-limited (100 req/15min per `x-forwarded-for`)**. Note the `/api/v1/players/*` wildcard **does** cover the bare `/api/v1/players` path — verified 2026-08-16 by counting requests to the first 429, which landed at exactly #101. Do not add a second explicit mount for the bare path: both would match, each request would be counted twice, and the effective limit would silently halve (observed first-429 at #51 while that mistake was in place). — `smoke.sh`'s plain `curl` calls don't set that header, so every local request without it shares one global `""` key. Repeated `smoke.sh` runs in quick succession during dev could eventually 429 (verified live: 100 requests from the same key trigger it, envelope `{"error":{"code":429,"message":"Too many requests"}}`). Set `-H "x-forwarded-for: <anything>"` on manual `curl` calls if this comes up.

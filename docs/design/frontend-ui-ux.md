@@ -26,7 +26,7 @@ Seven screens. The **Blocked on** column is the honest constraint, not a guess �
 
 ### The API gap this design surfaced
 
-**The API has exactly three routes today** — `/api/v1/health`, `/api/v1/competitions`, `/api/v1/players/compare` (verified in `apps/api/src/index.ts`, not assumed).
+**The API had exactly three routes when this document was written** — `/api/v1/health`, `/api/v1/competitions`, `/api/v1/players/compare`. Two of the gaps below are now closed: `GET /api/v1/players` (paginated) and `GET /api/v1/seasons` landed 2026-08-16, so the Players screen and the header scope selector are both unblocked. `/players/:id/stats` is still missing, so Player detail remains blocked.
 
 An earlier draft of this document called Compare "buildable today" because its endpoint exists. **That was wrong.** Compare needs a user to supply player IDs and a season — so it needs a **player picker** (no `/players` route) and a **season picker**, and there is **no seasons endpoint in the API or in `PROJECT.md` §4's planned endpoint table**. The header scope selector (§2.1) is blocked on the same missing route.
 
