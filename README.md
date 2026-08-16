@@ -101,9 +101,17 @@ bun run typecheck                  # tsc -b --noEmit — whole workspace, via pr
 bunx playwright install chromium   # one-time browser binary download, not part of bun install
 bun run e2e                        # playwright test — delegates to packages/e2e; also runs in CI now
 
-cd apps/api && bun run dev         # backend dev server (bun --watch)
+cd apps/api && PORT=4100 bun run dev  # backend dev server (bun --watch)
 bunx cdk synth                     # synthesize the CDK hosting stack (see infra/)
 ```
+
+**Browsable API reference:** with the backend running, open
+[`http://localhost:4100/reference`](http://localhost:4100/reference) — a Scalar UI over the OpenAPI 3.1
+document at `/doc`. `/` redirects there, so the port alone is enough to find it.
+
+An explicit `PORT` is used above rather than Bun's default: port 3000 can already be bound by another
+process without a bind error, so requests silently reach something else (see `apps/api`'s `run-api`
+skill for the full gotcha). `4100` matches what that skill and its smoke script use.
 
 Root `package.json` no longer holds the frontend's own scripts directly — `dev`/`build`/`preview`/`test:watch`/`test:coverage` are one-line delegations to `apps/web` via Bun's `bun run --filter <path> <script>` (see `docs/adr/0011-apps-and-packages-workspace-restructure.md`); `codegen` delegates to `apps/web` and `packages/shared` (see ADR 0013 for why `packages/shared` needs its own codegen step); `test` delegates to `apps/web`, `packages/shared`, and `apps/ingestion`; `lint`/`typecheck` stay as they were, since Biome's includes and `tsc -b`'s project references already operate tree-wide regardless of workspace boundaries.
 

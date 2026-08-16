@@ -58,4 +58,9 @@ app.doc("/doc", {
 
 app.get("/reference", Scalar({ url: "/doc" }));
 
+// The API root exists purely so /reference is discoverable. Without it the
+// browsable docs are unfindable unless you already know the URL, which was the
+// actual complaint behind "can we make the API easier to navigate".
+app.get("/", (c) => c.redirect("/reference"));
+
 export default app;

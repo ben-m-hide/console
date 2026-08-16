@@ -6,9 +6,10 @@
 	"scripts": {
 		"dev": "bun run --watch src/index.ts",
 		"typecheck": "tsc -b --noEmit",
-		"test": "vitest run",
+		"test": "vitest run && bun run check:openapi",
 		"test:watch": "vitest",
-		"test:coverage": "vitest run --coverage"
+		"test:coverage": "vitest run --coverage",
+		"check:openapi": "bun run scripts/check-openapi.ts"
 	},
 	"dependencies": {
 		"@console-next/db": "workspace:*",
