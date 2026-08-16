@@ -3,6 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import axe from "axe-core";
 import type { PropsWithChildren, ReactElement } from "react";
+import { Component, Suspense } from "react";
 
 import { createQueryClient } from "@/lib/query-client";
 
@@ -13,13 +14,45 @@ const SAMPLE_COMPETITIONS = [
 	{ id: 2, sportmonksId: 82, name: "Bundesliga", country: "Germany" },
 ];
 
+interface ErrorBoundaryState {
+	message: string | null;
+}
+
+// useSuspenseQuery throws to the nearest boundary rather than returning an
+// error flag, so these tests need real boundaries around the component. In the
+// app those roles are played by the route's pendingComponent/errorComponent.
+class TestErrorBoundary extends Component<
+	PropsWithChildren,
+	ErrorBoundaryState
+> {
+	override state: ErrorBoundaryState = { message: null };
+
+	static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+		return { message: error.message };
+	}
+
+	override render(): ReactElement {
+		const { message } = this.state;
+		if (message !== null) {
+			return <div role="alert">{message}</div>;
+		}
+		return <>{this.props.children}</>;
+	}
+}
+
 const renderIndexPage = (): ReturnType<typeof render> => {
 	const queryClient = createQueryClient({
 		defaultOptions: { queries: { retry: false } },
 	});
 	const wrapper = ({ children }: PropsWithChildren): ReactElement => (
 		<MantineProvider>
-			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+			<QueryClientProvider client={queryClient}>
+				<TestErrorBoundary>
+					<Suspense fallback={<div>Loading competitions</div>}>
+						{children}
+					</Suspense>
+				</TestErrorBoundary>
+			</QueryClientProvider>
 		</MantineProvider>
 	);
 	return render(<IndexPage />, { wrapper });
@@ -41,10 +74,10 @@ describe("IndexPage", () => {
 		vi.unstubAllGlobals();
 	});
 
-	it("shows a loading state while the request is in flight", () => {
+	it("suspends while the request is in flight", () => {
 		stubFetchResolving(SAMPLE_COMPETITIONS);
 		renderIndexPage();
-		expect(screen.getByLabelText("Loading competitions")).toBeInTheDocument();
+		expect(screen.getByText("Loading competitions")).toBeInTheDocument();
 	});
 
 	it("renders the competitions returned by the API", async () => {
@@ -56,23 +89,23 @@ describe("IndexPage", () => {
 		expect(screen.getByText(/Bundesliga/)).toBeInTheDocument();
 	});
 
-	it("shows an error when the request fails", async () => {
+	it("throws to the error boundary when the request fails", async () => {
 		stubFetchResolving({}, false);
 		renderIndexPage();
 		await waitFor(() => {
-			expect(
-				screen.getByText("Could not load competitions"),
-			).toBeInTheDocument();
+			expect(screen.getByRole("alert")).toHaveTextContent(
+				"Request failed: 500",
+			);
 		});
 	});
 
-	it("shows an error when the response does not match the schema", async () => {
+	it("throws to the error boundary when the response does not match the schema", async () => {
 		stubFetchResolving([{ id: 1, name: "Premier League" }]);
 		renderIndexPage();
 		await waitFor(() => {
-			expect(
-				screen.getByText("Response did not match the expected schema"),
-			).toBeInTheDocument();
+			expect(screen.getByRole("alert")).toHaveTextContent(
+				"Response did not match the expected schema",
+			);
 		});
 	});
 
