@@ -1,5 +1,3 @@
-import { MantineProvider } from "@mantine/core";
-import { QueryClientProvider } from "@tanstack/react-query";
 import {
 	createMemoryHistory,
 	createRouter,
@@ -8,7 +6,10 @@ import {
 import { render, screen, waitFor } from "@testing-library/react";
 import type { ReactElement } from "react";
 
-import { createQueryClient } from "@/lib/query-client";
+import {
+	createTestQueryClient,
+	TestProviders,
+} from "@/test/render-with-providers";
 
 import { routeTree } from "../routeTree.gen";
 
@@ -21,9 +22,7 @@ const SAMPLE_COMPETITIONS = [
 // the loader through router context, which is the whole subject of this change
 // and is invisible to a component-level test.
 const renderRoute = (): ReturnType<typeof render> => {
-	const queryClient = createQueryClient({
-		defaultOptions: { queries: { retry: false } },
-	});
+	const queryClient = createTestQueryClient();
 	const router = createRouter({
 		routeTree,
 		context: { queryClient },
@@ -35,11 +34,9 @@ const renderRoute = (): ReturnType<typeof render> => {
 	// paths are required, and omitting the provider fails with
 	// "No QueryClient set" even though the loader itself succeeded.
 	const RoutedApp = (): ReactElement => (
-		<MantineProvider>
-			<QueryClientProvider client={queryClient}>
-				<RouterProvider router={router} />
-			</QueryClientProvider>
-		</MantineProvider>
+		<TestProviders queryClient={queryClient}>
+			<RouterProvider router={router} />
+		</TestProviders>
 	);
 	return render(<RoutedApp />);
 };
