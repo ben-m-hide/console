@@ -93,7 +93,7 @@ Sources: [TanStack Router — Routing Concepts](https://tanstack.com/router/late
 bun install                        # installs the whole workspace (apps/web, apps/api, apps/ingestion, packages/db, packages/e2e, packages/shared)
 bun run dev                        # frontend dev server — delegates to apps/web (bun run --filter ./apps/web dev)
 bun run build                      # frontend typecheck (apps/web's own tsconfig) + production build — delegates to apps/web
-bun run test                       # vitest run — delegates to apps/web, packages/shared, apps/ingestion; apps/api has no tests yet
+bun run test                       # vitest run — delegates to apps/web, packages/shared, apps/ingestion, apps/api (apps/api also runs scripts/check-openapi.ts, guarding /doc and /reference)
 bun run test:coverage              # vitest run --coverage — apps/web only
 bun run lint                       # biome check — whole workspace (apps/web, apps/api, infra/), file-tree-based, not workspace-filtered
 bun run lint:fix                   # biome check --write

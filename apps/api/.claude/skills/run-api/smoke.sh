@@ -25,6 +25,14 @@ echo "== /api/v1/competitions =="
 curl -sf "http://localhost:$PORT/api/v1/competitions"
 echo
 
+echo "== /api/v1/seasons?competition=1 =="
+curl -sf "http://localhost:$PORT/api/v1/seasons?competition=1"
+echo
+
+echo "== /api/v1/players (paginated envelope) =="
+curl -sf "http://localhost:$PORT/api/v1/players?page=1&pageSize=1"
+echo
+
 echo "== /api/v1/players/compare (malformed ids -> envelope, not a raw ZodError) =="
 curl -s "http://localhost:$PORT/api/v1/players/compare?ids=abc&season=1"
 echo
