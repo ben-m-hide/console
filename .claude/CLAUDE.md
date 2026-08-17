@@ -78,7 +78,7 @@ Once approved, persist it: `docs/plans/YYYY-MM-DD-slug.md` (see `docs/plans/READ
 
 ## Known gotchas
 
-Full list with reasoning lives in `README.md`'s **Known quirks** section and `docs/adr/`. Highlights: Bun workspace installs don't hoist to root `node_modules`; `axe-core`'s `color-contrast` is deliberately disabled in tests (jsdom has no layout engine); the CSP needs `style-src 'unsafe-inline'` for Mantine's runtime styles and `connect-src` is a deliberate placeholder, not the API's real origin yet; `bun audit` has no allowlist for an unfixable advisory. No custom client wrappers exist yet (no `apiClient`-style abstraction) — this project is small enough that none has been needed.
+Full list with reasoning lives in `README.md`'s **Known quirks** section and `docs/adr/`. Highlights: Bun workspace installs don't hoist to root `node_modules`; `axe-core`'s `color-contrast` is deliberately disabled in tests (jsdom has no layout engine); the CSP needs `style-src 'unsafe-inline'` for Mantine's runtime styles and `connect-src` is a deliberate placeholder, not the API's real origin yet; `bun audit` has no allowlist for an unfixable advisory. `apps/web`'s API calls go through a hand-written `wretch`-based client (`src/lib/api/`, `API.configure()`/`get()`) — see `docs/adr/0016-wretch-for-api-client.md` for why hand-written over generated.
 
 ## Responses
 

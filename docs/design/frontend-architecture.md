@@ -192,9 +192,9 @@ Promotion tiers, matching `docs/conventions/typescript.md`:
 
 ## 6. API client
 
-**Deferred.** One configured client (or a client generated from `apps/api`'s OpenAPI document) is right eventually — prefer generating over hand-writing, since the OpenAPI doc already exists at `/doc`.
+**Done.** `apps/web/src/lib/api/` — `api-error.ts` (`ApiError` class, `isApiError` guard), `api-client.ts` (an `ApiClass` singleton exported as `API`, `configure()` + `getClient()`/`get<T>()`), `types/requests.ts` (`Param`/`PathParams`/`QueryParams`), `utils/{error,params,path}.ts`. Used by both `-queries/competitions.ts` and `-queries/players.ts`. See [ADR 0016](../adr/0016-wretch-for-api-client.md) for the full trade-off: hand-written, not generated from the OpenAPI document — 4 endpoints don't clear the bar where generation's payoff (not hand-typing shapes) beats what `packages/shared`'s existing Zod schemas already provide for free. Response validation is unchanged — `safeParse` immediately after `get()` resolves.
 
-**Trigger: the third endpoint, or the first time base-URL or error handling is copy-pasted.** Building the Players screen crosses this almost immediately — so this is **already-fired, not deferred**; sequence it into that work.
+**Trigger: the third endpoint, or the first time base-URL or error handling is copy-pasted.** Building the Players screen crossed this; this work closed it.
 
 **The CSP currently forbids this entire data path in production.** `infra/lib/hosting-stack.ts` sets `connect-src 'self'` — a deliberate fail-safe placeholder (ADR 0007), since no API origin is deployed yet. Every screen in these documents fetches cross-origin. Tracked in `TODO.md`, but recorded here because a data-loading design that never mentions the policy blocking it is missing a load-bearing constraint. Local dev is unaffected (Vite's dev server sends no CSP).
 
@@ -234,25 +234,25 @@ Recorded here so the frontend's error strategy is not designed as if it were the
 
 Three states, not two. **"Trigger already met"** is the honest middle: the condition has fired but the work is unscheduled, which is different from "not yet needed" and must not hide inside the deferred column.
 
-| #   | Item                                          | State    | Trigger / note                                                                                                           |
-| --- | --------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
-| 1   | Route-folder colocation (`-` prefix)          | ✅ done  | Already correct                                                                                                          |
-| 2   | Tests beside source                           | ✅ done  | Already correct                                                                                                          |
-| 3   | Router context + provider rewiring            | ✅ done  | Landed 2026-08-16 — see `docs/plans/2026-08-15-router-query-context.md`                                                  |
-| 4   | Default `staleTime` (5 min)                   | ✅ done  | Landed with #3. Root error boundary + `notFoundComponent` deliberately split out as error-surface concerns — still to do |
-| 5   | `queryOptions()` factories, hierarchical keys | ✅ done  | `routes/-queries/competitions.ts`, landed with #3                                                                        |
-| 6   | Search-param state                            | 🔔 fired | Players is build-order step 1 and needs pagination + filters. Sequence it in.                                            |
-| 7   | Generated API client                          | 🔔 fired | Players + Player detail cross the third-endpoint line immediately                                                        |
-| 8   | `src/features/<domain>/`                      | 🔔 fired | The players branch is 3 routes on one entity — the stated trigger. Introduce for **that domain only**.                   |
-| 9   | `src/components/`, `src/hooks/`               | ⏳ defer | Second consumer **of a given component or hook** (not of a type — §5 owns type promotion)                                |
-| 10  | First Zustand store                           | ⏳ defer | First client-only cross-route state. Navbar `opened` is the likely first.                                                |
-| 11  | Import-boundary enforcement                   | ⏳ defer | Lands with #8, but **only after** a deliberately-violating import proves Biome errors                                    |
-| 12  | Feature-Sliced Design                         | ❌ no    | Not this app                                                                                                             |
+| #   | Item                                            | State    | Trigger / note                                                                                                           |
+| --- | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Route-folder colocation (`-` prefix)            | ✅ done  | Already correct                                                                                                          |
+| 2   | Tests beside source                             | ✅ done  | Already correct                                                                                                          |
+| 3   | Router context + provider rewiring              | ✅ done  | Landed 2026-08-16 — see `docs/plans/2026-08-15-router-query-context.md`                                                  |
+| 4   | Default `staleTime` (5 min)                     | ✅ done  | Landed with #3. Root error boundary + `notFoundComponent` deliberately split out as error-surface concerns — still to do |
+| 5   | `queryOptions()` factories, hierarchical keys   | ✅ done  | `routes/-queries/competitions.ts`, landed with #3                                                                        |
+| 6   | Search-param state                              | 🔔 fired | Players is build-order step 1 and needs pagination + filters. Sequence it in.                                            |
+| 7   | API client (hand-written wretch, not generated) | ✅ done  | Landed 2026-08-17 — see [ADR 0016](../adr/0016-wretch-for-api-client.md)                                                 |
+| 8   | `src/features/<domain>/`                        | 🔔 fired | The players branch is 3 routes on one entity — the stated trigger. Introduce for **that domain only**.                   |
+| 9   | `src/components/`, `src/hooks/`                 | ⏳ defer | Second consumer **of a given component or hook** (not of a type — §5 owns type promotion)                                |
+| 10  | First Zustand store                             | ⏳ defer | First client-only cross-route state. Navbar `opened` is the likely first.                                                |
+| 11  | Import-boundary enforcement                     | ⏳ defer | Lands with #8, but **only after** a deliberately-violating import proves Biome errors                                    |
+| 12  | Feature-Sliced Design                           | ❌ no    | Not this app                                                                                                             |
 
 ---
 
 ## 9. Open questions
 
 1. **Does the router-context rewiring go in its own change, or with the first screen that needs a loader?** Recommend its own — it touches `__root.tsx` and `main.tsx`, and bundling it with feature work makes both harder to review.
-2. **Generate the API client from OpenAPI, or hand-write one?** Generation is preferred but the generator has not been evaluated for a `@hono/zod-openapi` backend.
+2. ~~**Generate the API client from OpenAPI, or hand-write one?**~~ Resolved 2026-08-17: hand-write, using `wretch`. See [ADR 0016](../adr/0016-wretch-for-api-client.md).
 3. **Where do non-DB-derived cross-app types live?** See §5. First real instance is Compare's response shape.

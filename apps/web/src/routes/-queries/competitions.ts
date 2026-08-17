@@ -2,17 +2,14 @@ import type { Competition } from "@console-next/shared";
 import { CompetitionSchema } from "@console-next/shared";
 import { queryOptions } from "@tanstack/react-query";
 
-const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4100";
+import { get } from "@/lib/api/api-client";
 
 const fetchCompetitions = async (
 	signal: AbortSignal,
 ): Promise<Array<Competition>> => {
-	const response = await fetch(`${API_URL}/api/v1/competitions`, { signal });
-	if (!response.ok) {
-		throw new Error(`Request failed: ${response.status}`);
-	}
+	const body = await get({ path: "/api/v1/competitions", signal });
 
-	const parsed = CompetitionSchema.array().safeParse(await response.json());
+	const parsed = CompetitionSchema.array().safeParse(body);
 	if (!parsed.success) {
 		throw new Error("Response did not match the expected schema");
 	}
