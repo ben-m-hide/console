@@ -12,6 +12,7 @@ import {
 } from "@/test/render-with-providers";
 
 import { routeTree } from "../routeTree.gen";
+import type { PlayerListMeta } from "./-queries/players";
 
 const SAMPLE_PLAYERS = [
 	{
@@ -34,7 +35,7 @@ const SAMPLE_PLAYERS = [
 
 interface SamplePlayersResponse {
 	data: Array<unknown>;
-	meta: { page: number; pageSize: number; total: number; totalPages: number };
+	meta: PlayerListMeta;
 }
 
 const samplePlayersResponse = (

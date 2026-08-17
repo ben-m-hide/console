@@ -41,6 +41,8 @@ const PlayerListMetaSchema = z.object({
 	totalPages: z.number().int().nonnegative(),
 });
 
+export type PlayerListMeta = z.infer<typeof PlayerListMetaSchema>;
+
 const PlayerListResponseSchema = z.object({
 	data: z.array(PlayerSchema),
 	meta: PlayerListMetaSchema,
