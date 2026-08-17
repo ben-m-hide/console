@@ -126,3 +126,28 @@ Real example: `sportmonks-types.ts` originally held both the raw Sportmonks type
 Before writing logic that looks like it might already exist elsewhere in the repo, search for it first (`rg` for the shape, not just the name). If the same small piece of logic is about to appear a second time, extract it into a shared, tested util instead of duplicating it — don't wait for a third copy.
 
 Real example: `error instanceof Error ? error.message : String(error)` appeared verbatim in both `ingest-competitions.ts` and `ingest-seasons.ts`'s catch blocks — extracted into `apps/ingestion/src/to-error-message.ts`'s `toErrorMessage()`, with its own test file, on the second occurrence.
+
+## `void`-prefix a promise only when it's bound to a synchronous callback type
+
+Prefer `await` in an `async` function over `void`-prefixing a fire-and-forget promise — it keeps a place for a future `.catch` and reads as "not blocking on this" rather than "ignored." But when the function is passed directly as a prop typed to return `void` synchronously (Mantine's `onChange`/`onClick`, and other DOM/UI-library event handlers), making it `async` trips `nursery.noMisusedPromises` ("this function returns a Promise, but no return value was expected") — verified empirically against Biome 2.5.7, which exposes no option to relax this check. `void` is the only one of `noFloatingPromises`'s five accepted forms that also satisfies `noMisusedPromises` in that position, so it stays.
+
+```ts
+// Not bound to a callback type — prefer async/await
+useEffect(() => {
+  const timeoutId = setTimeout(async () => {
+    await navigate({
+      search: (previous) => ({ ...previous, search: nextSearch, page: 1 }),
+    });
+  }, SEARCH_DEBOUNCE_MS);
+  return (): void => clearTimeout(timeoutId);
+}, [navigate]);
+
+// Bound to a synchronous callback prop (Mantine's onChange: (page: number) => void) —
+// making this async would fail noMisusedPromises, so void stays
+const handlePageChange = useCallback(
+  (page: number): void => {
+    void navigate({ search: (previous) => ({ ...previous, page }) });
+  },
+  [navigate],
+);
+```
