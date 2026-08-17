@@ -61,8 +61,8 @@ export const PlayersPage = (): ReactElement => {
 			return;
 		}
 
-		const timeoutId = setTimeout(() => {
-			void navigate({
+		const timeoutId = setTimeout(async () => {
+			await navigate({
 				search: (previous) => ({ ...previous, search: nextSearch, page: 1 }),
 			});
 		}, SEARCH_DEBOUNCE_MS);
