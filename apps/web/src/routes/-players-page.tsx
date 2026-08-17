@@ -12,7 +12,7 @@ import {
 } from "@mantine/core";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
-import type { ChangeEvent, ReactElement } from "react";
+import type { ChangeEvent, FC } from "react";
 import { Fragment, useCallback, useEffect, useState } from "react";
 
 import type { PlayerPosition } from "./-queries/players";
@@ -32,7 +32,7 @@ const POSITION_SELECT_DATA = PLAYER_POSITIONS.map((position) => ({
 // keystroke.
 const SEARCH_DEBOUNCE_MS = 300;
 
-export const PlayersPage = (): ReactElement => {
+export const PlayersPage: FC = () => {
 	const search = routeApi.useSearch();
 	const navigate = routeApi.useNavigate();
 
