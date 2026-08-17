@@ -19,6 +19,7 @@ One record per significant, hard-to-reverse, non-obvious decision — not every 
 | [0013](./0013-generate-shared-schemas-from-drizzle.md)        | Generate `packages/shared`'s Zod schemas from `packages/db`'s Drizzle tables          | Accepted — built                                               |
 | [0014](./0014-sentry-for-error-tracking.md)                   | Sentry (hosted free tier) for error tracking, over GlitchTip or self-hosting          | Accepted — decision only, no DSN/SDK yet                       |
 | [0015](./0015-visx-for-charting.md)                           | visx for charting and data visualisation, over Mantine Charts/Recharts                | Accepted — decision only, nothing built                        |
+| [0016](./0016-wretch-for-api-client.md)                       | wretch for the API-client transport layer, hand-written not generated                 | Accepted — built                                               |
 
 ## Adding one
 

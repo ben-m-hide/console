@@ -19,6 +19,10 @@ const stubFetchResolving = (body: unknown, ok = true): void => {
 			ok,
 			status: ok ? 200 : 500,
 			json: async () => body,
+			text: async () => JSON.stringify(body),
+			clone() {
+				return this;
+			},
 		}),
 	);
 };
@@ -44,10 +48,13 @@ describe("IndexPage", () => {
 	});
 
 	it("throws to the error boundary when the request fails", async () => {
-		stubFetchResolving({}, false);
+		stubFetchResolving(
+			{ error: { code: 500, message: "Internal Server Error" } },
+			false,
+		);
 		const { getByRole } = renderIndexPage();
 		await waitFor(() => {
-			expect(getByRole("alert")).toHaveTextContent("Request failed: 500");
+			expect(getByRole("alert")).toHaveTextContent("Internal Server Error");
 		});
 	});
 

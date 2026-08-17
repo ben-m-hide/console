@@ -3,12 +3,17 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
+import { API } from "@/lib/api/api-client";
 import { queryClient } from "@/lib/query-client";
 
 import { routeTree } from "./routeTree.gen";
 
 import "@mantine/core/styles.css";
 import "./index.css";
+
+API.configure({
+	endpoint: import.meta.env.VITE_API_URL ?? "http://localhost:4100",
+});
 
 // defaultPreload/defaultPreloadStaleTime deliberately unset — nothing to
 // preload between with one route; add once a second route makes it testable.
