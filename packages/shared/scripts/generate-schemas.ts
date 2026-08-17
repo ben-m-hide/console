@@ -1,14 +1,7 @@
-// Codegen: derives packages/shared's Zod schemas from packages/db's Drizzle
-// table definitions, so field shape (name, base type, nullability, identity)
-// has one source of truth instead of two hand-maintained copies. Run via
-// `bun run codegen` (wired into `typecheck`/`build`, matching apps/web's
-// `tsr generate` pattern) — never edit the *.gen.ts output by hand.
-//
-// What's NOT derivable from Drizzle alone: numeric bound strictness
-// (positive vs. nonnegative vs. unbounded) is a business decision with no
-// structural signal in a plain SQL integer/double column — see OVERRIDES
-// below. Everything else (base type, nullability, identity-column-as-
-// positive-int) is fully structural.
+// Derives packages/shared's Zod schemas from packages/db's Drizzle tables —
+// never edit the *.gen.ts output by hand. Numeric bound strictness (positive
+// vs. nonnegative vs. unbounded) isn't derivable from a plain SQL column, so
+// it's a manual business decision — see OVERRIDES below.
 
 import {
 	ballPositions,
@@ -31,8 +24,8 @@ interface EntityConfig {
 	typeName: string;
 }
 
-// Scoped per-entity, not global — a field name like `x` shouldn't silently
-// apply its override to some future unrelated entity.
+// Scoped per-entity, not global — `x` shouldn't silently apply to some
+// future unrelated entity.
 type Bound = "positive" | "unbounded";
 const OVERRIDES: Record<string, Record<string, Bound>> = {
 	"ball-position": { x: "unbounded", y: "unbounded" },
@@ -124,9 +117,9 @@ const mapColumn = (
 			expr = "z.iso.date()";
 			break;
 		case "PgTimestamp":
-			// Always ISO string at the JSON boundary, regardless of Drizzle's own
-			// column mode (which stays Date-typed for DB/query-layer ergonomics —
-			// see PROJECT.md's "different layers, not a conflict" note).
+			// ISO string at the JSON boundary — Drizzle's own column stays
+			// Date-typed for query-layer ergonomics (PROJECT.md's "different
+			// layers, not a conflict" note).
 			expr = "z.iso.datetime()";
 			break;
 		default:

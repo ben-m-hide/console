@@ -46,10 +46,8 @@ const samplePlayersResponse = (
 	meta: { page: 1, pageSize: 25, total, totalPages: Math.ceil(total / 25) },
 });
 
-// Drives the real route tree, same rationale as -index-route.test.tsx: this
-// is the only way loaderDeps/loader/validateSearch and the loader-vs-component
-// data path are actually exercised, and it's the only render path that gives
-// getRouteApi("/players") a matched route to read from.
+// Drives the real route tree, same rationale as -index-route.test.tsx — also
+// the only render path that gives getRouteApi("/players") a matched route.
 const renderPlayersRoute = (
 	initialEntries: Array<string> = ["/players"],
 ): ReturnType<typeof render> => {
@@ -150,10 +148,8 @@ describe("players route", () => {
 	});
 
 	it("debounces search input before navigating and refetching", async () => {
-		// Real timers throughout: testing-library's waitFor polls via a real
-		// setTimeout internally, which fake timers would need to be manually
-		// driven past too — real time is simpler here since the debounce
-		// (300ms) is well under waitFor's default 1000ms timeout.
+		// Real timers: waitFor polls via a real setTimeout, and the 300ms
+		// debounce is well under its default 1000ms timeout.
 		const fetchMock = vi.fn().mockResolvedValue({
 			ok: true,
 			status: 200,
@@ -190,12 +186,9 @@ describe("players route", () => {
 		});
 		vi.stubGlobal("fetch", fetchMock);
 
-		// Mantine's Select opens its options through a Combobox/Popover that
-		// doesn't reliably open under jsdom's mouse/pointer event simulation —
-		// no real layout to position against. Driving the param via the URL
-		// instead still exercises validateSearch parsing, loaderDeps, and the
-		// query wiring; the actual click-to-open interaction is checked in real
-		// browser verification per the plan.
+		// Mantine's Select popover doesn't reliably open under jsdom (no real
+		// layout to position against), so this drives the param via the URL
+		// instead — the click-to-open path is covered by real browser verification.
 		renderPlayersRoute(["/players?position=Goalkeeper"]);
 
 		await waitFor(() => {

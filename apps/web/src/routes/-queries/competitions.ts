@@ -19,9 +19,8 @@ const fetchCompetitions = async (
 	return parsed.data;
 };
 
-// One definition shared by the route loader and the component, so neither can
-// drift from the other. Key is hierarchical (["competitions", "list"]) so a
-// future detail query can invalidate siblings without matching everything.
+// Hierarchical key (["competitions", "list"]) so a future detail query can
+// invalidate siblings without matching everything.
 export const competitionsQueryOptions = queryOptions({
 	queryKey: ["competitions", "list"],
 	queryFn: ({ signal }) => fetchCompetitions(signal),

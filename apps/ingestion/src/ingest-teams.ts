@@ -15,12 +15,8 @@ export interface IngestTeamsResult {
 }
 
 // Teams have no single dedicated fetch — callers source raw teams from
-// wherever's cheapest for the season in question: a current season's
-// fixtures already carry full team objects in their `participants`
-// (sportmonks-client.ts's fetchSeasonFixtures), while a season whose
-// fixtures aren't otherwise needed uses the standalone fetchSeasonTeams
-// instead. Deduped here by sportmonksId so callers can pass overlapping
-// lists from multiple sources without worrying about it.
+// wherever's cheapest (see this package's CLAUDE.md). Deduped here by
+// sportmonksId so callers can pass overlapping lists without worrying about it.
 export const ingestTeams = async (
 	db: Db,
 	rawTeamsInput: Array<SportmonksTeamRaw>,

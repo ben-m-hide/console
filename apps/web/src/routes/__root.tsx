@@ -13,13 +13,10 @@ interface RouterContext {
 	queryClient: QueryClient;
 }
 
-// QueryClientProvider deliberately lives in main.tsx, outside RouterProvider,
-// not here: loaders run before this component tree renders, so a provider
-// mounted here would be out of scope for every route loader.
-// Dev only, checked against MODE rather than DEV: Vitest also reports
-// DEV === true, and the devtools throw "Devtools is not mounted" on teardown
-// under jsdom, which fails any test that renders the real route tree. Keeping
-// them out of the production bundle is the right default regardless.
+// QueryClientProvider lives in main.tsx, not here: loaders run before this
+// tree renders, so a provider mounted here is out of scope for every loader.
+// Checked against MODE not DEV: Vitest also reports DEV === true, and the
+// devtools throw "Devtools is not mounted" on teardown under jsdom.
 const isDevelopment = import.meta.env.MODE === "development";
 
 const RootComponent: FC = () => (

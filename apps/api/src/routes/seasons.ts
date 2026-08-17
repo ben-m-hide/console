@@ -6,9 +6,8 @@ import { asc, desc, eq } from "drizzle-orm";
 
 import { db } from "../db";
 
-// Bare array, not the paginated envelope /players uses: the season count is
-// small and bounded (one row per competition-season), so paginating it would
-// add a shape the client has to handle for no benefit.
+// Bare array, not the paginated envelope /players uses: season count is
+// small and bounded (one row per competition-season) — no need to paginate.
 const SeasonListResponseSchema = z.array(SeasonSchema).openapi("SeasonList");
 
 const SeasonListQuerySchema = z.object({

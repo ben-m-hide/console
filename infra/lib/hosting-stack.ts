@@ -15,8 +15,7 @@ export class HostingStack extends Stack {
 	constructor(scope: Construct, id: string, props?: StackProps) {
 		super(scope, id, props);
 
-		// Build artifact only (`dist/`), trivially reproducible from source —
-		// safe to destroy alongside the stack, unlike a data-holding bucket.
+		// Build artifact only, trivially reproducible — safe to destroy with the stack.
 		const siteBucket = new Bucket(this, "SiteBucket", {
 			blockPublicAccess: BlockPublicAccess.BLOCK_ALL,
 			enforceSSL: true,
@@ -24,18 +23,13 @@ export class HostingStack extends Stack {
 			autoDeleteObjects: true,
 		});
 
-		// `unsafe-inline` on style-src is required because Mantine injects
-		// runtime <style data-mantine-styles> tags for responsive breakpoints
-		// (verified empirically — see docs/adr/0007-aws-s3-cloudfront-hosting.md).
-		// A strict policy needs a per-request nonce via a CloudFront Function,
-		// deferred until this is worth the extra edge-compute complexity.
+		// unsafe-inline on style-src: Mantine injects runtime <style> tags for
+		// breakpoints, verified empirically (docs/adr/0007). A strict policy
+		// needs a per-request nonce, deferred until worth the edge-compute cost.
 		//
-		// `connect-src 'self'` is explicit, not redundant with default-src: it's
-		// a deliberate placeholder that fails safe (blocks) until the API's real
-		// origin exists (see docs/adr/0008-hono-rest-openapi-backend.md) — without
-		// it, connect-src silently falls back to default-src and this line item
-		// would be invisible instead of a recorded, deliberate gap. Update this to
-		// the API's actual origin once the Lambda-vs-Fargate/domain decision lands.
+		// connect-src 'self' is explicit, not redundant with default-src: a
+		// deliberate fail-safe placeholder until the API's real origin exists
+		// (docs/adr/0008) — update once the Lambda-vs-Fargate/domain decision lands.
 		const securityHeaders = new ResponseHeadersPolicy(
 			this,
 			"SecurityHeadersPolicy",
@@ -73,8 +67,7 @@ export class HostingStack extends Stack {
 				viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
 				responseHeadersPolicy: securityHeaders,
 			},
-			// SPA fallback: any unknown path (S3 403 for a private bucket, or a
-			// genuine 404) serves index.html so client-side routing can take over.
+			// SPA fallback: an S3 403 or genuine 404 serves index.html instead.
 			errorResponses: [
 				{
 					httpStatus: 403,

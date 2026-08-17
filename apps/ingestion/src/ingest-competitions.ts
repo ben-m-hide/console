@@ -14,9 +14,7 @@ export interface IngestCompetitionsResult {
 	failed: Array<IngestionFailure>;
 }
 
-// A bad league shouldn't sink the whole run — same per-item failure
-// isolation as the per-fixture transaction loop planned for match_events
-// (PROJECT.md §3), applied here at league granularity.
+// Per-item isolation: a bad league shouldn't sink the whole run.
 export const ingestCompetitions = async (
 	db: Db,
 	token: string,

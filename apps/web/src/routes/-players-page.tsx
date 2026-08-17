@@ -18,8 +18,7 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import type { PlayerPosition } from "./-queries/players";
 import { PLAYER_POSITIONS, playersQueryOptions } from "./-queries/players";
 
-// getRouteApi, not `Route` imported from players.tsx directly, to avoid a
-// circular import — the route file imports this page component.
+// getRouteApi avoids a circular import with players.tsx, which imports this component.
 const routeApi = getRouteApi("/players");
 
 const POSITION_SELECT_DATA = PLAYER_POSITIONS.map((position) => ({
@@ -27,19 +26,14 @@ const POSITION_SELECT_DATA = PLAYER_POSITIONS.map((position) => ({
 	label: position,
 }));
 
-// Debounce delay for syncing the search draft into the URL. Short enough to
-// feel responsive, long enough that fast typing doesn't fire a request per
-// keystroke.
 const SEARCH_DEBOUNCE_MS = 300;
 
 export const PlayersPage: FC = () => {
 	const search = routeApi.useSearch();
 	const navigate = routeApi.useNavigate();
 
-	// The route loader has already resolved this exact params tuple, so
-	// useSuspenseQuery reads it straight from the cache on first render.
-	// A later param change (page/search/position) re-triggers the loader via
-	// loaderDeps, which resolves before this re-renders — no loading flash.
+	// loaderDeps re-triggers and resolves the loader before a param change
+	// re-renders this, so useSuspenseQuery always reads a warm cache — no flash.
 	const { data: playersResponse } = useSuspenseQuery(
 		playersQueryOptions(search),
 	);
@@ -48,8 +42,7 @@ export const PlayersPage: FC = () => {
 
 	const [searchDraft, setSearchDraft] = useState(search.search ?? "");
 
-	// Keeps the draft in sync with external changes to the URL (back/forward
-	// navigation), not just user typing.
+	// Syncs the draft with back/forward navigation, not just typing.
 	useEffect(() => {
 		setSearchDraft(search.search ?? "");
 	}, [search.search]);

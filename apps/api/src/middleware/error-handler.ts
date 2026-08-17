@@ -21,10 +21,9 @@ export const errorHandler: ErrorHandler = (err, c) => {
 export const notFoundHandler: NotFoundHandler = (c) =>
 	c.json({ error: { code: 404, message: "Not Found" } }, 404);
 
-// @hono/zod-openapi's request validation (query/params/body) responds
-// directly — it never throws, so app.onError never sees it. Without this
-// hook it returns its own raw { success: false, error: ZodError } shape
-// instead of the envelope every other error response uses (PROJECT.md §9).
+// @hono/zod-openapi's request validation responds directly rather than
+// throwing, so app.onError never sees it — without this hook it returns its
+// own raw ZodError shape instead of this app's envelope (PROJECT.md §9).
 export const validationErrorHook: Hook<
 	unknown,
 	Env,

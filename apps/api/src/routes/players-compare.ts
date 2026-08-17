@@ -24,10 +24,7 @@ const PlayerCompareStatsSchema = z
 	})
 	.openapi("PlayerCompareStats");
 
-// Percentile: share of the (position + season) peer group, minutes-floor
-// applied, that this player outperforms — null when the peer group is empty.
-// The requested player's own row counts toward the peer group like anyone
-// else's, even if that player themselves is below the minutes floor.
+// See percentileOf in build-player-compare-entries.ts for the exact semantics.
 const PlayerComparePercentilesSchema = z
 	.object({
 		goalsPer90: z.number().min(0).max(100).nullable(),

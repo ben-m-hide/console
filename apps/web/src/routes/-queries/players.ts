@@ -4,14 +4,11 @@ import { z } from "zod";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:4100";
 
-// Mirrors apps/api's default (build-players-query.ts) — no shared package
-// exports this across the two runtimes, so it is duplicated with a comment
-// rather than invented independently.
+// Mirrors apps/api's default (build-players-query.ts); no shared package
+// exports it across the two runtimes.
 export const DEFAULT_PAGE_SIZE = 25;
 
-// Confirmed against real data 2026-08-16 (all ~1,991 players scanned across
-// every page) rather than guessed — Sportmonks' position strings for this
-// dataset are exactly these four, no others observed.
+// Confirmed against real data 2026-08-16 (all ~1,991 players scanned), not guessed.
 export const PLAYER_POSITIONS = [
 	"Attacker",
 	"Defender",
@@ -21,10 +18,9 @@ export const PLAYER_POSITIONS = [
 
 export type PlayerPosition = (typeof PLAYER_POSITIONS)[number];
 
-// Also the route's validateSearch schema. Using Zod's own .optional() output
-// type (`T | undefined`) rather than a hand-written `search?: string` matters
-// here — exactOptionalPropertyTypes rejects assigning `undefined` to the
-// latter, and loaderDeps below does exactly that for an absent param.
+// Also the route's validateSearch schema. `.optional()`'s inferred
+// `T | undefined`, not a hand-written `search?: string`, is required by
+// exactOptionalPropertyTypes — loaderDeps assigns `undefined` for absent params.
 export const PlayersSearchSchema = z.object({
 	page: z.number().int().positive().catch(1),
 	pageSize: z.number().int().positive().catch(DEFAULT_PAGE_SIZE),
@@ -79,14 +75,11 @@ const fetchPlayers = async (
 	return parsed.data;
 };
 
-// Key includes the full param set, so a search/position/page change is a
-// genuinely different cache entry — this is what makes useSuspenseQuery pick
-// up a loader-driven navigation reactively (architecture doc §3 gotcha #1).
-// No explicit return type here — see biome.json's override for this
-// directory. queryOptions() is overloaded on a skipToken sentinel that a hand
-// -written annotation can't reproduce without breaking assignability to
-// useSuspenseQuery; TS's own inference from the object literal is the only
-// type that stays precise enough to satisfy it.
+// Key includes the full param set so a search/position/page change is a
+// different cache entry (architecture doc §3 gotcha #1).
+// No explicit return type: queryOptions()'s skipToken-sentinel overload isn't
+// reproducible by hand without breaking useSuspenseQuery assignability — see
+// biome.json's override for this directory.
 export const playersQueryOptions = (params: PlayersSearchParams) =>
 	queryOptions({
 		queryKey: ["players", "list", params],

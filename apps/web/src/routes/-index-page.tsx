@@ -4,9 +4,9 @@ import type { FC } from "react";
 
 import { competitionsQueryOptions } from "./-queries/competitions";
 
-// The route loader has already resolved this query, so useSuspenseQuery reads
-// it straight from the cache on first render — no loading flash, no waterfall.
-// Loading and error states live in the route's pendingComponent/errorComponent.
+// The loader has already resolved this query, so useSuspenseQuery reads a
+// warm cache — no flash. Loading/error states live in the route's
+// pendingComponent/errorComponent.
 export const IndexPage: FC = () => {
 	const { data: competitions } = useSuspenseQuery(competitionsQueryOptions);
 

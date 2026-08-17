@@ -16,16 +16,13 @@ export const CompetitionsError: FC<ErrorComponentProps> = ({ error }) => {
 	const router = useRouter();
 	const { reset } = useQueryErrorResetBoundary();
 
-	// Without resetting Query's error boundary, a retry re-throws the cached
-	// error immediately and the button appears permanently broken.
+	// Without this, a retry re-throws the cached error immediately.
 	useEffect(() => {
 		reset();
 	}, [reset]);
 
-	// invalidate() re-runs the loader; if it fails again the loader throws and
-	// this same errorComponent re-renders, so there is nothing extra to handle
-	// here — but the promise is awaited rather than dropped so a rejection
-	// can't surface as an unhandled one.
+	// Awaited, not dropped, so a rejection can't surface as unhandled — a
+	// second failure re-throws from the loader and this component re-renders.
 	const handleRetry = useCallback(async (): Promise<void> => {
 		await router.invalidate();
 	}, [router]);
