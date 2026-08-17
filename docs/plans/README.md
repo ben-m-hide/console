@@ -12,6 +12,8 @@ Newest first. This table is for **navigation only** — what a plan covered, so 
 
 | Date       | Plan                                                                                          | Covered                                                                                          |
 | ---------- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 2026-08-16 | [`/players` + `/seasons` routes](./2026-08-16-players-and-seasons-routes.md)                  | Paginated player list, season list, the API navigability fixes it surfaced                       |
+| 2026-08-15 | [Router query-context rewiring](./2026-08-15-router-query-context.md)                         | Router `context` + `QueryClientProvider` placement fix; first loader-driven route                |
 | 2026-08-15 | [Wire `apps/web` to `apps/api`](./2026-08-15-wire-frontend-to-api.md)                         | First real browser→API request; `packages/shared` in the frontend; `createQueryClient()` factory |
 | 2026-08-14 | [`apps/api` Vitest setup](./2026-08-14-api-vitest-setup.md)                                   | Test setup for the API; pure-logic extraction from the compare route                             |
 | 2026-08-14 | [Coverage PR comments](./2026-08-14-coverage-pr-comments.md)                                  | Per-package coverage reports posted on PRs                                                       |
