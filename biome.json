@@ -107,6 +107,16 @@
 					}
 				}
 			}
+		},
+		{
+			"includes": ["apps/web/src/routes/-queries/**"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"useExplicitReturnType": "off"
+					}
+				}
+			}
 		}
 	]
 }

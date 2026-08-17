@@ -15,7 +15,7 @@ Seven screens. The **Blocked on** column is the honest constraint, not a guess �
 | #   | Screen             | Route                          | Data today                                          | API route                                        | Blocked on                                                                     |
 | --- | ------------------ | ------------------------------ | --------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------ |
 | 1   | Dashboard          | `/`                            | ✅                                                  | ❌ needs summary + leaders                       | Nothing structural — one new API route                                         |
-| 2   | Players            | `/players`                     | ⚠️ 1,991 players — most competitions, PL-only stats | ✅ `/api/v1/players` (paginated)                 | Nothing — **built 2026-08-16**                                                 |
+| 2   | Players            | `/players`                     | ⚠️ 1,991 players — most competitions, PL-only stats | ✅ `/api/v1/players` (paginated)                 | **✅ Shipped 2026-08-17**                                                      |
 | 3   | Player detail      | `/players/$playerId`           | ⚠️ 714 stat rows — **PL only**                      | ❌ needs detail + stats                          | Nothing structural — one new API route                                         |
 | 4   | Compare            | `/compare`                     | ✅                                                  | ✅ `/api/v1/players/compare` + `/api/v1/seasons` | Nothing — **the player and season pickers this needed both landed 2026-08-16** |
 | 5   | Competitions       | `/competitions`                | ✅ 5 rows                                           | ✅ `/api/v1/competitions`                        | **Nothing — partially built**                                                  |
@@ -36,9 +36,9 @@ Net, as of 2026-08-16: **Players and Compare are both frontend-only work now.** 
 
 Sequential and complete, per depth-first priority — each screen ships with its states, accessibility, and tests before the next begins. API routes are listed as the prerequisites they are.
 
-1. ~~**API: `/players` (paginated) + a seasons route**~~ **Done 2026-08-16** — `GET /api/v1/players` and `GET /api/v1/seasons` both landed. → **Players** screen, still to build. The discovery path everything else hangs off.
+1. ~~**API: `/players` (paginated) + a seasons route** → **Players** screen. The discovery path everything else hangs off.~~ **✅ Shipped 2026-08-17** — `/players` route, search/position filters (debounced search, `Select`), pagination, all four states (loading/error/empty/success), tested via the real route tree.
 2. **API: `/players/:id` + `/players/:id/stats`** → **Player detail**. Introduces the percentile card component. Still open.
-3. **Compare** — reuses the percentile card, and now has real pickers to feed it (`/players` for the player picker, `/seasons` for the season picker — both closed by step 1). Frontend-only.
+3. **Compare** — reuses the percentile card and now has real pickers feeding it (`/players` for the player picker, `/seasons` for the season picker — both closed by step 1). Its endpoint already exists, so this step is frontend-only.
 4. **API: dashboard summary + leaders** → **Dashboard**, replacing the placeholder index.
 5. **API: `/competitions/:id/fixtures`** → **Competitions** → **Competition detail**. The explorer branch.
 6. **Ingestion: `match_events` + `ball_positions`**, then **API: `/fixtures/:id/report`** → **Match report**. Much the largest step — an unbuilt ingestion pipeline before any UI work starts.
