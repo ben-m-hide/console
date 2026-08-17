@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-// Shaped to match packages/shared's CompetitionSchema — the page safeParses the
-// response, so a drifting fixture surfaces as a schema error, not a silent pass.
+// Shaped to match packages/shared's CompetitionSchema, so a drifting fixture
+// surfaces as a schema error, not a silent pass.
 const SAMPLE_COMPETITIONS = [
 	{ id: 1, sportmonksId: 8, name: "Premier League", country: "England" },
 	{ id: 2, sportmonksId: 82, name: "Bundesliga", country: "Germany" },
@@ -16,10 +16,8 @@ test("renders the homepage with no console errors", async ({
 	});
 	page.on("pageerror", (err) => consoleErrors.push(String(err)));
 
-	// CI runs the Vite dev server only — apps/api isn't started, and standing a
-	// real API + database up for a smoke test would make it neither smoke nor
-	// deterministic. Without this the fetch fails, the page renders its error
-	// state, and the failed request itself logs a console error.
+	// CI runs the dev server only, no real API — without this stub the fetch
+	// fails and the resulting console error would fail the assertion below.
 	await page.route("**/api/v1/competitions", (route) =>
 		route.fulfill({ json: SAMPLE_COMPETITIONS }),
 	);

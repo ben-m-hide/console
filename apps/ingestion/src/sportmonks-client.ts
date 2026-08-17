@@ -15,9 +15,7 @@ interface SportmonksResponse<T> {
 }
 
 // Authorization header, not ?api_token= — a query-param token is far more
-// likely to leak into logs/proxies (PROJECT.md §11 Phase 4). Shared by every
-// entity fetcher below — extracted once a second one (fetchSeasons) actually
-// needed the same shape, not before.
+// likely to leak into logs/proxies (PROJECT.md §11 Phase 4).
 const fetchSportmonks = async <T>(token: string, path: string): Promise<T> => {
 	const response = await fetch(`${SPORTMONKS_BASE_URL}${path}`, {
 		// biome-ignore lint/style/useNamingConvention: literal HTTP header name, not ours to rename
@@ -42,10 +40,8 @@ export const fetchLeagues = (
 		"/leagues?include=country",
 	);
 
-// A single filtered call across all target leagues, not one call per league —
-// confirmed against a live call that Sportmonks' /seasons endpoint supports
-// filters=leagueIds:a,b,c (comma-separated), same "combine into one request"
-// discipline as leagues' include=country (PROJECT.md §3).
+// One filtered call across all target leagues, not one per league — confirmed
+// live that /seasons supports filters=leagueIds:a,b,c (PROJECT.md §3).
 export const fetchSeasons = (
 	token: string,
 	leagueIds: Array<number>,
@@ -55,13 +51,10 @@ export const fetchSeasons = (
 		`/seasons?filters=leagueIds:${leagueIds.join(",")}`,
 	);
 
-// One request returns the season's full fixture list, each fixture already
-// carrying its teams (participants), score history, and match state — a
-// stronger form of PROJECT.md §3's "combine via include=" than a separate
-// per-entity call. Verified live: date-range filtering
-// (`/fixtures/between/...?filters=fixtureLeagues:...`) returns "no access via
-// your current subscription" (Starter plan) — this season-scoped include
-// avoids that gate entirely, so it's the actual approach, not a workaround.
+// One request returns the season's fixtures with teams, scores, and state
+// included. Not a workaround: date-range filtering
+// (/fixtures/between/...?filters=fixtureLeagues:...) is verified live to
+// reject with "no access via your current subscription" (Starter plan).
 export const fetchSeasonFixtures = async (
 	token: string,
 	seasonId: number,
@@ -73,9 +66,8 @@ export const fetchSeasonFixtures = async (
 	return season.fixtures;
 };
 
-// Standalone team list for a season — used instead of fetchSeasonFixtures
-// when that season's fixtures aren't otherwise needed (a past, already-played
-// season's teams, wanted only for players/stats FK resolution).
+// Used instead of fetchSeasonFixtures when a season's fixtures aren't
+// otherwise needed — a finished season's teams, wanted only for FK resolution.
 export const fetchSeasonTeams = (
 	token: string,
 	seasonId: number,
@@ -95,10 +87,8 @@ export const fetchTeamSquad = (
 		`/squads/seasons/${seasonId}/teams/${teamId}`,
 	);
 
-// One request returns the player's profile plus every season's statistics it
-// has — the caller filters statistics down to the season(s) it actually
-// wants (ingest-player-season-stats.ts), rather than a per-season player
-// endpoint that doesn't exist.
+// Returns the player's profile plus every season's statistics — the caller
+// filters down to the season(s) it wants; no per-season endpoint exists.
 export const fetchPlayerWithStats = (
 	token: string,
 	playerId: number,

@@ -14,10 +14,8 @@ export interface IngestFixturesResult {
 	failed: Array<IngestionFailure>;
 }
 
-// Depends on seasons and teams already being ingested — fixtures.seasonId,
-// homeTeamId, and awayTeamId are all FKs, resolved here via each parent's own
-// sportmonksId rather than re-fetching from Sportmonks again (same pattern as
-// ingest-seasons.ts's competitionId resolution).
+// seasonId/homeTeamId/awayTeamId FKs resolved via already-ingested parents'
+// sportmonksId, same pattern as ingest-seasons.ts's competitionId.
 export const ingestFixtures = async (
 	db: Db,
 	rawFixtures: Array<SportmonksFixtureRaw>,
@@ -58,10 +56,8 @@ export const ingestFixtures = async (
 	}
 
 	if (rows.length > 0) {
-		// kickoffAt is validated as an ISO string (FixtureSchema, matching the
-		// JSON-API-facing shape) but Drizzle's timestamptz column insert type
-		// wants a Date, not a string — unlike seasons' date() columns, which
-		// accept a plain string directly.
+		// Drizzle's timestamptz insert type wants a Date, not the ISO string
+		// FixtureSchema validates — unlike seasons' date() columns.
 		const insertableRows = rows.map((row) => ({
 			...row,
 			kickoffAt: new Date(row.kickoffAt),

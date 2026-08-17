@@ -10,10 +10,8 @@ import { routeTree } from "./routeTree.gen";
 import "@mantine/core/styles.css";
 import "./index.css";
 
-// `defaultPreload`/`defaultPreloadStaleTime` are deliberately not set yet —
-// with one route there is nothing to preload between, so neither would have
-// observable behaviour to verify. Added with the second route, where the
-// interaction with the API's rate limiter can also be tested for real.
+// defaultPreload/defaultPreloadStaleTime deliberately unset — nothing to
+// preload between with one route; add once a second route makes it testable.
 const router = createRouter({ routeTree, context: { queryClient } });
 
 declare module "@tanstack/react-router" {

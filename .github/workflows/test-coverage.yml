@@ -26,15 +26,12 @@ jobs:
 
       - run: bun install --frozen-lockfile
 
-      # codegen writes apps/web/src/routeTree.gen.ts and packages/shared's
-      # schema files, both gitignored — packages/shared's tests fail without
-      # this (see typecheck's own bun run codegen && ... pattern).
+      # Writes gitignored routeTree.gen.ts/schema files — packages/shared's
+      # tests fail without this.
       - run: bun run codegen
 
-      # Each package runs independently (not the chained root test:coverage
-      # script) with continue-on-error, so one package's test failure doesn't
-      # block the others' coverage-summary.json from being generated — every
-      # package should still get a report below.
+      # continue-on-error so one package's failure doesn't block the others'
+      # coverage-summary.json from being generated.
       - run: bun run --filter ./apps/web test:coverage
         continue-on-error: true
 
@@ -47,10 +44,9 @@ jobs:
       - run: bun run --filter ./packages/shared test:coverage
         continue-on-error: true
 
-      # apps/ingestion's ingest-*.ts orchestrators (DB/HTTP I/O) are
-      # deliberately untested here and verified manually against real data
-      # instead — see apps/ingestion/.claude/CLAUDE.md. Low coverage on those
-      # specific files is expected, not a gap to close.
+      # apps/ingestion's ingest-*.ts orchestrators are deliberately untested
+      # here (verified manually instead, see its CLAUDE.md) — low coverage
+      # there is expected, not a gap.
       - name: "Report apps/web Coverage"
         if: always()
         uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2.12.2

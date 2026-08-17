@@ -17,10 +17,9 @@ const SAMPLE_COMPETITIONS = [
 	{ id: 1, sportmonksId: 8, name: "Premier League", country: "England" },
 ];
 
-// Drives the real route tree rather than the page component directly, so the
-// loader actually runs. That is the point: it proves the query client reaches
-// the loader through router context, which is the whole subject of this change
-// and is invisible to a component-level test.
+// Drives the real route tree, not the page component directly, so the loader
+// actually runs — that's what proves the query client reaches it via router
+// context, invisible to a component-level test.
 const renderRoute = (): ReturnType<typeof render> => {
 	const queryClient = createTestQueryClient();
 	const router = createRouter({
@@ -29,10 +28,8 @@ const renderRoute = (): ReturnType<typeof render> => {
 		history: createMemoryHistory({ initialEntries: ["/"] }),
 	});
 
-	// Mirrors main.tsx: the loader reaches the client through router context,
-	// but useSuspenseQuery in the component reads it from React context — both
-	// paths are required, and omitting the provider fails with
-	// "No QueryClient set" even though the loader itself succeeded.
+	// Both providers are required: the loader reads the client from router
+	// context, useSuspenseQuery from React context.
 	const RoutedApp: FC = () => (
 		<TestProviders queryClient={queryClient}>
 			<RouterProvider router={router} />

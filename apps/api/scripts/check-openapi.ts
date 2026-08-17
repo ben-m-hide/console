@@ -1,15 +1,11 @@
-// Guards the OpenAPI document, which nothing else covers.
+// Guards the OpenAPI document, which nothing else covers: a schema the
+// generator can't introspect (z.coerce.number().catch(), the real case,
+// 2026-08-16) makes /doc 500 and Scalar render empty at /reference, while
+// every route and the rest of the pipeline stays green.
 //
-// A schema the generator cannot introspect — z.coerce.number().catch() was the
-// real case, 2026-08-16 — makes /doc return a 500 and leaves Scalar rendering
-// an empty page at /reference, while every route keeps working normally. Lint,
-// typecheck, unit tests and E2E all stay green through that.
-//
-// This runs under Bun rather than Vitest deliberately: Vitest runs on Node, and
-// importing the app pulls in drizzle-orm/bun-sql, which imports the `bun`
-// module and cannot load there. A placeholder DATABASE_URL is enough — src/db.ts
-// throws at import time if it is missing, but the Bun SQL client connects
-// lazily, so generating the document never opens a connection.
+// Runs under Bun, not Vitest: Vitest runs on Node, and importing the app
+// pulls in drizzle-orm/bun-sql's `bun` module, which can't load there. The
+// placeholder DATABASE_URL is enough since the Bun SQL client connects lazily.
 process.env.DATABASE_URL ??= "postgres://check:check@localhost:5432/check";
 
 const EXPECTED_PATH_PREFIX = "/api/v1/";

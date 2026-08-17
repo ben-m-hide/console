@@ -6,15 +6,12 @@ import * as schema from "./schema/index";
 
 export type Db = BunSQLDatabase<typeof schema> & { $client: SQL };
 
-// connectionString must be Neon's POOLED string (the "-pooler" hostname
-// suffix), not the direct one — see ADR 0012. Direct is for drizzle-kit
-// migrations only (packages/db/drizzle.config.ts already uses it correctly).
+// connectionString must be Neon's POOLED string ("-pooler" hostname), not
+// direct — direct is for drizzle-kit migrations only. See ADR 0012.
 //
-// No app-level connection retry here, deliberately: Bun's SQL client already
-// retries a cold Neon compute (ERR_POSTGRES_CONNECTION_FAILED) with backoff
-// up to connectionTimeout, which defaults to 30s — comfortably more than
-// Neon's own ~few-hundred-ms typical Scale-to-Zero wake time. See ADR 0012's
-// Consequences section.
+// No app-level connection retry: Bun's SQL client already retries a cold
+// Neon compute with backoff up to connectionTimeout (30s default), well
+// past Neon's typical Scale-to-Zero wake time. See ADR 0012's Consequences.
 export const createDb = (connectionString: string): Db =>
 	drizzle({
 		connection: connectionString,

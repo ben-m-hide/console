@@ -22,9 +22,8 @@ const PlayerPageMetaSchema = z
 	})
 	.openapi("PlayerPageMeta");
 
-// Envelope rather than a bare array, unlike /competitions: a paginated list is
-// unusable without `total`, since the client cannot render pagination without
-// knowing how many pages exist. See PROJECT.md §4 for which shape applies when.
+// Envelope, not a bare array like /competitions: pagination needs `total`.
+// See PROJECT.md §4 for which shape applies when.
 const PlayerListResponseSchema = z
 	.object({
 		data: z.array(PlayerSchema),
@@ -49,11 +48,8 @@ const PlayerListQuerySchema = z.object({
 			param: { name: "position", in: "query" },
 			example: "Midfielder",
 		}),
-	// Plain optional strings, parsed in resolvePagination rather than by Zod.
-	// z.coerce.number().catch() cannot be introspected by the OpenAPI
-	// generator: it returns a 500 for /doc, which leaves Scalar rendering an
-	// empty reference page. Parsing in code also makes the lenient-fallback
-	// behaviour unit-testable.
+	// Plain optional strings — see parsePositiveInteger in build-players-query.ts
+	// for why not z.coerce.number().catch().
 	page: z
 		.string()
 		.optional()

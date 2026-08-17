@@ -1,7 +1,5 @@
-// PROJECT.md §4's recommended default: same position, same competition
-// (implied by seasonId — a season belongs to exactly one competition), same
-// season, minimum 450 minutes played (~5 full matches) — small samples make
-// percentiles meaningless.
+// PROJECT.md §4's default peer group: same position, competition, and
+// season; 450 minutes (~5 matches) floors out samples too small to percentile.
 export const MINIMUM_MINUTES_FOR_PEER_GROUP = 450;
 
 export interface PlayerCompareRow {
@@ -29,9 +27,9 @@ export interface ResolvedPlayerRows {
 	missingPlayerIds: Array<number>;
 }
 
-// A mid-season transfer gives a player two rows for the same season (one per
-// team, per player_season_stats' own unique(playerId, teamId, seasonId)) —
-// compare against their stint with the most minutes.
+// A mid-season transfer gives two rows for the same season, one per team
+// (player_season_stats' unique(playerId, teamId, seasonId)) — keep the
+// stint with the most minutes.
 export const resolvePlayerRows = (
 	playerIds: Array<number>,
 	rows: Array<PlayerCompareRow>,
@@ -52,10 +50,9 @@ export const resolvePlayerRows = (
 	return result;
 };
 
-// Percentile: share of the (position + season) peer group, minutes-floor
-// applied, that this player outperforms — null when the peer group is empty.
-// The requested player's own row counts toward the peer group like anyone
-// else's, even if that player themselves is below the minutes floor.
+// Share of the peer group this value outperforms, null when the group is
+// empty. The requested player's own row counts toward the group like any
+// other, even below the minutes floor themselves.
 const percentileOf = (
 	value: number,
 	peerValues: Array<number>,
@@ -89,10 +86,9 @@ export interface PlayerCompareEntry {
 	peerGroupSize: number;
 }
 
-// Every playerId must already have a row in rowByPlayerId (the caller resolves
-// missing ids via resolvePlayerRows and handles that case, e.g. a 404, before
-// calling this) and every row's position must have a peer group in
-// peersByPosition, even if empty.
+// Caller contract: every playerId must already have a row in rowByPlayerId
+// (resolvePlayerRows/a 404 handles the missing case first) and every row's
+// position must have a peer group in peersByPosition, even if empty.
 export const buildCompareEntries = (
 	playerIds: Array<number>,
 	seasonId: number,

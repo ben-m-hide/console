@@ -14,9 +14,8 @@ export interface IngestSeasonsResult {
 	failed: Array<IngestionFailure>;
 }
 
-// Depends on competitions already being ingested — seasons.competitionId is
-// an FK, resolved here via each competition's own sportmonksId rather than
-// re-fetching leagues from Sportmonks again.
+// competitionId FK resolved via already-ingested competitions' sportmonksId,
+// not by re-fetching leagues.
 export const ingestSeasons = async (
 	db: Db,
 	token: string,

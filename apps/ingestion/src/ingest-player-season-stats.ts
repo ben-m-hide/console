@@ -19,12 +19,9 @@ export interface IngestPlayerSeasonStatsResult {
 	failed: Array<IngestionFailure>;
 }
 
-// Depends on players/teams/seasons already being ingested — every FK here is
-// resolved via each parent's own sportmonksId, same pattern as
-// ingest-fixtures.ts. Each fetched player's `statistics` can carry more than
-// one entry for the target season (a mid-season transfer, per the schema's
-// own unique(playerId, teamId, seasonId) comment) — every entry becomes its
-// own row, not just the first one.
+// FKs resolved same pattern as ingest-fixtures.ts. A mid-season transfer
+// gives `statistics` more than one entry for the target season — every entry
+// becomes its own row, not just the first.
 export const ingestPlayerSeasonStats = async (
 	db: Db,
 	rawPlayers: Array<SportmonksPlayerRaw>,

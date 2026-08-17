@@ -38,8 +38,7 @@ app.use(
 app.onError(errorHandler);
 app.notFound(notFoundHandler);
 
-// Not applied to /api/v1/health — uptime/monitoring checks shouldn't be
-// throttled, unlike the actual data routes below.
+// Not applied to /api/v1/health — uptime/monitoring checks shouldn't be throttled.
 app.use("/api/v1/competitions", publicApiRateLimiter);
 app.use("/api/v1/seasons", publicApiRateLimiter);
 app.use("/api/v1/players/*", publicApiRateLimiter);
@@ -57,9 +56,7 @@ app.doc("/doc", {
 
 app.get("/reference", Scalar({ url: "/doc" }));
 
-// The API root exists purely so /reference is discoverable. Without it the
-// browsable docs are unfindable unless you already know the URL, which was the
-// actual complaint behind "can we make the API easier to navigate".
+// Exists purely so /reference is discoverable without already knowing the URL.
 app.get("/", (c) => c.redirect("/reference"));
 
 export default app;

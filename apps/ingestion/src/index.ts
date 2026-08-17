@@ -32,8 +32,7 @@ if (!sportmonksToken) {
 
 const db = createDb(databaseUrl);
 
-// Seasons depend on competitions already being ingested (FK resolution via
-// each competition's sportmonksId) — sequential, not parallel.
+// Sequential: seasons' FK resolution needs competitions already ingested.
 const competitionsResult = await ingestCompetitions(db, sportmonksToken);
 console.log(
 	`ingested competitions: fetched ${competitionsResult.fetched}, upserted ${competitionsResult.upserted}, failed ${competitionsResult.failed.length}`,
@@ -50,8 +49,7 @@ if (seasonsResult.failed.length > 0) {
 	console.log("season failures:", seasonsResult.failed);
 }
 
-// Fixtures/teams are scoped to each competition's current season only —
-// deliberately not a full historical backfill yet (see TODO.md).
+// Current season only, not a historical backfill yet — see TODO.md.
 const currentSeasons = await db
 	.select({ sportmonksId: seasons.sportmonksId })
 	.from(seasons)
@@ -66,9 +64,7 @@ for (const season of currentSeasons) {
 	rawFixtures.push(...seasonFixtures);
 }
 
-// Teams depend on nothing but the fixtures already fetched above; fixtures
-// depend on teams being ingested first (homeTeamId/awayTeamId FKs) — same
-// sequential-not-parallel discipline as competitions before seasons.
+// Teams must ingest before fixtures — fixtures' homeTeamId/awayTeamId are FKs.
 const currentSeasonTeams = rawFixtures.flatMap(
 	(fixture) => fixture.participants,
 );
@@ -88,16 +84,9 @@ if (fixturesResult.failed.length > 0) {
 	console.log("fixture failures:", fixturesResult.failed);
 }
 
-// Players/stats: each target competition's most-recently-*finished* season —
-// not "current" (2026/2027 hasn't kicked off, so it has ~zero real minutes
-// played). "Club Friendlies 1" deliberately excluded — its season has 97
-// teams (real clubs mixed with one-off/academy sides playing preseason
-// exhibition matches), vs. 18-20 for a real league; ingesting it needs
-// ~2,425 Player-entity requests, which alone exceeds Sportmonks' 2,000/hour
-// rate limit (no backoff handling exists yet — see TODO.md). Also low value
-// for /players/compare — friendly-match stats aren't a real competitive peer
-// group. See docs/plans/2026-08-14-players-compare-route.md and TODO.md's
-// BACKLOG for the deferred Club Friendlies item.
+// Most-recently-*finished* season, not current (2026/2027 has ~zero minutes
+// played yet). "Club Friendlies 1" excluded — see this package's CLAUDE.md
+// and TODO.md's BACKLOG for why.
 const PLAYER_STATS_COMPETITION_NAMES = [
 	"Premier League",
 	"Bundesliga",
@@ -149,11 +138,8 @@ const ingestPlayersAndStatsForCompetition = async (
 		...new Set(squadMemberLists.flat().map((member) => member.player_id)),
 	];
 
-	// Per-player failure isolation — a single failed fetch (429, network blip,
-	// etc.) must not discard every other player already fetched successfully
-	// in this loop. Found live: without this, a mid-loop 429 threw away the
-	// whole competition's progress, not just the one failed player (see
-	// TODO.md).
+	// Per-player isolation — found live: without it, one 429 mid-loop discarded
+	// the whole competition's already-fetched progress, not just that player.
 	const rawPlayers: Array<SportmonksPlayerRaw> = [];
 	for (const playerId of playerIds) {
 		try {
@@ -189,13 +175,8 @@ const ingestPlayersAndStatsForCompetition = async (
 	}
 };
 
-// Sequential, not parallel — each competition's requests should complete
-// before starting the next, keeping the real-time rate-limit picture legible
-// (and avoiding bursting well past the per-entity budget all at once).
-// Per-competition failure isolation — one competition running into a
-// rate-limit wall must not prevent the next competition from being
-// attempted at all (found live: this is why Community Shield never even
-// started after La Liga hit a 429).
+// Sequential, with per-competition isolation — found live: without it, La
+// Liga hitting a 429 stopped Community Shield from starting at all.
 for (const competitionName of PLAYER_STATS_COMPETITION_NAMES) {
 	try {
 		await ingestPlayersAndStatsForCompetition(competitionName);

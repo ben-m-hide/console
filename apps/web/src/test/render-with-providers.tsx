@@ -7,8 +7,7 @@ import { Component, Fragment, Suspense } from "react";
 
 import { createQueryClient } from "@/lib/query-client";
 
-// Text rendered by the Suspense fallback, exported so a test asserting the
-// pending state matches on the same string the helper renders.
+// Exported so a pending-state test can assert on the same string.
 export const LOADING_FALLBACK_TEXT = "Loading";
 
 // Retries are off: TanStack Query retries 3x with backoff by default, which
@@ -21,8 +20,7 @@ interface ErrorBoundaryState {
 }
 
 // useSuspenseQuery throws to the nearest boundary rather than returning an
-// error flag, so a component test needs a real boundary around it. In the app
-// this role is played by the route's errorComponent.
+// error flag — the route's errorComponent plays this role in the app.
 export class TestErrorBoundary extends Component<
 	PropsWithChildren,
 	ErrorBoundaryState
@@ -46,9 +44,7 @@ interface TestProvidersProps extends PropsWithChildren {
 	queryClient: QueryClient;
 }
 
-// The app-level providers a rendered subtree needs, mirroring main.tsx's
-// nesting. Route tests compose this around their own RouterProvider; component
-// tests get it via renderWithProviders below.
+// Mirrors main.tsx's provider nesting.
 export const TestProviders: FC<TestProvidersProps> = ({
 	children,
 	queryClient,

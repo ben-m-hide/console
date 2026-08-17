@@ -1,7 +1,5 @@
 // Real captured Sportmonks API sample data, for tests only — kept out of
-// sportmonks-types.ts (types only there) and exempted from
-// useNamingConvention alongside it (biome.json's overrides), same reasoning:
-// mirrors Sportmonks' own snake_case wire format field-for-field.
+// sportmonks-types.ts (types only there), same useNamingConvention exemption.
 import type {
 	SportmonksFixtureRaw,
 	SportmonksPlayerRaw,
@@ -10,10 +8,8 @@ import type {
 	SportmonksTeamRaw,
 } from "./sportmonks-types";
 
-// Real captured shape (id 23614, league_id 8,
-// https://api.sportmonks.com/v3/football/leagues/8?include=seasons) —
-// shared by tests so the raw snake_case sample lives in one file, not
-// duplicated inline in every test that needs a realistic fixture.
+// Real captured shape: id 23614, league_id 8
+// (https://api.sportmonks.com/v3/football/leagues/8?include=seasons).
 export const SAMPLE_SEASON_2024: SportmonksSeasonRaw = {
 	id: 23614,
 	league_id: 8,
@@ -23,9 +19,8 @@ export const SAMPLE_SEASON_2024: SportmonksSeasonRaw = {
 	is_current: false,
 };
 
-// Real captured shape (id 78, from
-// https://api.sportmonks.com/v3/football/teams/seasons/28083), trimmed to
-// the fields normalizeTeam actually reads.
+// Real captured shape: id 78
+// (https://api.sportmonks.com/v3/football/teams/seasons/28083).
 export const SAMPLE_TEAM_BRIGHTON: SportmonksTeamRaw = {
 	id: 78,
 	name: "Brighton & Hove Albion",
@@ -46,9 +41,8 @@ export const SAMPLE_TEAM_WITHOUT_SHORT_CODE: SportmonksTeamRaw = {
 	image_path: null,
 };
 
-// Real captured shape (fixture 19722194, Fulham vs Chelsea, season 28083,
-// https://api.sportmonks.com/v3/football/seasons/28083?include=fixtures.participants;fixtures.scores;fixtures.state) —
-// not yet played: empty scores, state "NS".
+// Real captured shape: fixture 19722194, season 28083, not yet played
+// (https://api.sportmonks.com/v3/football/seasons/28083?include=fixtures.participants;fixtures.scores;fixtures.state).
 export const SAMPLE_FIXTURE_UPCOMING: SportmonksFixtureRaw = {
 	id: 19722194,
 	name: "Fulham vs Chelsea",
@@ -74,9 +68,8 @@ export const SAMPLE_FIXTURE_UPCOMING: SportmonksFixtureRaw = {
 	state: { short_name: "NS" },
 };
 
-// Real captured shape (fixture 19433487, FC Augsburg vs FC Bayern München,
-// season 25646, https://api.sportmonks.com/v3/football/seasons/25646?include=fixtures.participants;fixtures.scores;fixtures.state) —
-// finished, home 2 away 3.
+// Real captured shape: fixture 19433487, season 25646, finished home 2 away 3
+// (https://api.sportmonks.com/v3/football/seasons/25646?include=fixtures.participants;fixtures.scores;fixtures.state).
 export const SAMPLE_FIXTURE_FINISHED: SportmonksFixtureRaw = {
 	id: 19433487,
 	name: "FC Augsburg vs FC Bayern München",
@@ -107,11 +100,9 @@ export const SAMPLE_FIXTURE_FINISHED: SportmonksFixtureRaw = {
 	state: { short_name: "FT" },
 };
 
-// Real captured shape (player 627, Daniel Welbeck, team 78, season 25583,
-// https://api.sportmonks.com/v3/football/players/627?include=nationality;position;statistics.details.type),
-// trimmed to one season's stats and the detail types normalizePlayerSeasonStats
-// actually reads. Exported separately (not just inline in the player below) so
-// tests can reference it without indexing into a statistics array.
+// Real captured shape: player 627, team 78, season 25583
+// (https://api.sportmonks.com/v3/football/players/627?include=nationality;position;statistics.details.type).
+// Exported separately so tests can reference it without indexing into `statistics`.
 export const SAMPLE_PLAYER_WELBECK_STATISTIC: SportmonksPlayerStatisticRaw = {
 	player_id: 627,
 	team_id: 78,
@@ -133,9 +124,8 @@ export const SAMPLE_PLAYER_WELBECK: SportmonksPlayerRaw = {
 	statistics: [SAMPLE_PLAYER_WELBECK_STATISTIC],
 };
 
-// Real captured shape (player 37590697, Diego Coppola, team 78, season 25583)
-// — a defender with zero goals/assists/xG: those detail types are entirely
-// absent, not present with a zero value.
+// Real captured shape: player 37590697, a defender with zero goals/assists/xG
+// — those detail types are entirely absent, not present with a zero value.
 export const SAMPLE_PLAYER_NO_ATTACKING_STATS_STATISTIC: SportmonksPlayerStatisticRaw =
 	{
 		player_id: 37590697,

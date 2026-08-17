@@ -75,16 +75,13 @@ describe("IndexPage", () => {
 		});
 		const results = await axe.run(container, {
 			rules: {
-				// jsdom has no layout engine (Range#getClientRects etc. are stubs),
-				// so color-contrast can never fully evaluate here regardless of the
-				// `canvas` package — it needs a real browser. Out of scope until
-				// Playwright E2E lands; see README Known quirks.
+				// jsdom has no layout engine, so color-contrast can never fully
+				// evaluate here — needs a real browser. See README Known quirks.
 				"color-contrast": { enabled: false },
 			},
 		});
 		expect(results.violations).toEqual([]);
-		// Assert `incomplete` is empty too, so any *other* check axe silently
-		// skips (not just violations) fails loud instead of passing quiet.
+		// Catches axe silently skipping a check too, not just real violations.
 		expect(results.incomplete).toEqual([]);
 	});
 });

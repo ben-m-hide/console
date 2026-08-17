@@ -4,13 +4,9 @@ import { fixtures } from "./fixture";
 import { players } from "./player";
 
 // PROJECT.md §2/§11 Phase 2 call for CHECK constraints scoping `outcome`/
-// `bodyPart`/`situation` per `type` (the wide-table trade-off's DB-level
-// honesty check). Not implemented: Sportmonks' actual `type` enum values are
-// unconfirmed anywhere in this codebase (see packages/shared's MatchEventSchema
-// — `type` is plain `string()` for the same reason), so there's no verified
-// per-type field-requirement list to encode. Writing CHECK constraints against
-// invented type values would fail the "never guess" rule. Revisit once Phase 4
-// (Sportmonks API client) surfaces the real `type`/`sub_type_id` values.
+// `bodyPart`/`situation` per `type` — not implemented, since Sportmonks'
+// real `type` values are unconfirmed anywhere in this codebase (same reason
+// MatchEventSchema's `type` is plain string()). Revisit once Phase 4 surfaces them.
 export const matchEvents = pgTable(
 	"match_events",
 	{

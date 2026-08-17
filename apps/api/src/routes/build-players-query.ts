@@ -14,11 +14,9 @@ export interface PlayersPageMeta {
 	totalPages: number;
 }
 
-// Query params arrive as strings, and are parsed here rather than in the Zod
-// schema: @hono/zod-openapi cannot introspect a `z.coerce.number().catch()`
-// wrapper and returns a 500 for /doc if one is used, which in turn leaves
-// Scalar rendering an empty page. Keeping the parse here also makes the
-// lenient-fallback behaviour unit-testable instead of schema magic.
+// Parsed here, not in the Zod schema: @hono/zod-openapi can't introspect
+// `z.coerce.number().catch()` and returns a 500 for /doc if used, leaving
+// Scalar rendering an empty page. Also makes the fallback unit-testable.
 const parsePositiveInteger = (
 	raw: string | undefined,
 	fallback: number,
@@ -33,10 +31,9 @@ const parsePositiveInteger = (
 	return parsed;
 };
 
-// Clamps rather than rejects: a page number past the end returns an empty
-// page, which is a normal outcome for a paginated list, not a client error.
-// A malformed value degrades to the default rather than 400-ing the screen —
-// a hand-edited or shared URL should still render something.
+// Clamps rather than rejects: a page past the end or a malformed value
+// degrades to an empty page or the default — a hand-edited or shared URL
+// should still render something, not 400.
 export const resolvePagination = (
 	rawPage: string | undefined,
 	rawPageSize: string | undefined,
