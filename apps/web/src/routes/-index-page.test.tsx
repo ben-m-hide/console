@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { waitFor } from "@testing-library/react";
 import axe from "axe-core";
 
 import {
@@ -30,34 +30,32 @@ describe("IndexPage", () => {
 
 	it("suspends while the request is in flight", () => {
 		stubFetchResolving(SAMPLE_COMPETITIONS);
-		renderIndexPage();
-		expect(screen.getByText(LOADING_FALLBACK_TEXT)).toBeInTheDocument();
+		const { getByText } = renderIndexPage();
+		expect(getByText(LOADING_FALLBACK_TEXT)).toBeInTheDocument();
 	});
 
 	it("renders the competitions returned by the API", async () => {
 		stubFetchResolving(SAMPLE_COMPETITIONS);
-		renderIndexPage();
+		const { getByText } = renderIndexPage();
 		await waitFor(() => {
-			expect(screen.getByText(/Premier League/)).toBeInTheDocument();
+			expect(getByText("Premier League", { exact: false })).toBeInTheDocument();
 		});
-		expect(screen.getByText(/Bundesliga/)).toBeInTheDocument();
+		expect(getByText("Bundesliga", { exact: false })).toBeInTheDocument();
 	});
 
 	it("throws to the error boundary when the request fails", async () => {
 		stubFetchResolving({}, false);
-		renderIndexPage();
+		const { getByRole } = renderIndexPage();
 		await waitFor(() => {
-			expect(screen.getByRole("alert")).toHaveTextContent(
-				"Request failed: 500",
-			);
+			expect(getByRole("alert")).toHaveTextContent("Request failed: 500");
 		});
 	});
 
 	it("throws to the error boundary when the response does not match the schema", async () => {
 		stubFetchResolving([{ id: 1, name: "Premier League" }]);
-		renderIndexPage();
+		const { getByRole } = renderIndexPage();
 		await waitFor(() => {
-			expect(screen.getByRole("alert")).toHaveTextContent(
+			expect(getByRole("alert")).toHaveTextContent(
 				"Response did not match the expected schema",
 			);
 		});
@@ -65,9 +63,9 @@ describe("IndexPage", () => {
 
 	it("has no accessibility violations", async () => {
 		stubFetchResolving(SAMPLE_COMPETITIONS);
-		const { container } = renderIndexPage();
+		const { container, getByText } = renderIndexPage();
 		await waitFor(() => {
-			expect(screen.getByText(/Premier League/)).toBeInTheDocument();
+			expect(getByText("Premier League", { exact: false })).toBeInTheDocument();
 		});
 		const results = await axe.run(container, {
 			rules: {

@@ -1,4 +1,4 @@
-import { fireEvent, screen, waitFor } from "@testing-library/react";
+import { fireEvent, waitFor } from "@testing-library/react";
 
 import { renderRouteTree } from "@/test/render-route";
 import { SAMPLE_PLAYERS, samplePlayersResponse } from "@/test/route-fixtures";
@@ -21,12 +21,12 @@ describe("players route", () => {
 		});
 		vi.stubGlobal("fetch", fetchMock);
 
-		renderPlayersRoute();
+		const { getByText } = renderPlayersRoute();
 
 		await waitFor(() => {
-			expect(screen.getByText("Erling Haaland")).toBeInTheDocument();
+			expect(getByText("Erling Haaland")).toBeInTheDocument();
 		});
-		expect(screen.getByText("Alisson Becker")).toBeInTheDocument();
+		expect(getByText("Alisson Becker")).toBeInTheDocument();
 		// The loader awaits ensureQueryData, so the component reads from a warm
 		// cache — one request, not a second one on mount.
 		expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -40,14 +40,12 @@ describe("players route", () => {
 				.mockResolvedValue({ ok: false, status: 500, json: async () => ({}) }),
 		);
 
-		renderPlayersRoute();
+		const { getByText, getByRole } = renderPlayersRoute();
 
 		await waitFor(() => {
-			expect(screen.getByText("Could not load players")).toBeInTheDocument();
+			expect(getByText("Could not load players")).toBeInTheDocument();
 		});
-		expect(
-			screen.getByRole("button", { name: "Try again" }),
-		).toBeInTheDocument();
+		expect(getByRole("button", { name: "Try again" })).toBeInTheDocument();
 	});
 
 	it("renders an empty state when the result set is genuinely empty", async () => {
@@ -60,12 +58,12 @@ describe("players route", () => {
 			}),
 		);
 
-		renderPlayersRoute();
+		const { getByText } = renderPlayersRoute();
 
 		await waitFor(() => {
-			expect(screen.getByText("No players found")).toBeInTheDocument();
+			expect(getByText("No players found")).toBeInTheDocument();
 		});
-		expect(screen.getByText("No players are available.")).toBeInTheDocument();
+		expect(getByText("No players are available.")).toBeInTheDocument();
 	});
 
 	it("renders a page-out-of-range state distinct from a genuinely empty result", async () => {
@@ -78,13 +76,13 @@ describe("players route", () => {
 			}),
 		);
 
-		renderPlayersRoute(["/players?page=999"]);
+		const { getByText, getByRole } = renderPlayersRoute(["/players?page=999"]);
 
 		await waitFor(() => {
-			expect(screen.getByText("Page not found")).toBeInTheDocument();
+			expect(getByText("Page not found")).toBeInTheDocument();
 		});
 		expect(
-			screen.getByRole("button", { name: "Go to first page" }),
+			getByRole("button", { name: "Go to first page" }),
 		).toBeInTheDocument();
 	});
 
@@ -98,13 +96,13 @@ describe("players route", () => {
 		});
 		vi.stubGlobal("fetch", fetchMock);
 
-		renderPlayersRoute();
+		const { getByText, getByLabelText } = renderPlayersRoute();
 		await waitFor(() => {
-			expect(screen.getByText("Erling Haaland")).toBeInTheDocument();
+			expect(getByText("Erling Haaland")).toBeInTheDocument();
 		});
 		expect(fetchMock).toHaveBeenCalledTimes(1);
 
-		fireEvent.change(screen.getByLabelText("Search players by name"), {
+		fireEvent.change(getByLabelText("Search players by name"), {
 			target: { value: "Haaland" },
 		});
 
@@ -130,7 +128,7 @@ describe("players route", () => {
 		// Mantine's Select popover doesn't reliably open under jsdom (no real
 		// layout to position against), so this drives the param via the URL
 		// instead — the click-to-open path is covered by real browser verification.
-		renderPlayersRoute(["/players?position=Goalkeeper"]);
+		const { getByRole } = renderPlayersRoute(["/players?position=Goalkeeper"]);
 
 		await waitFor(() => {
 			expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -138,9 +136,9 @@ describe("players route", () => {
 		const requestedUrl = (fetchMock.mock.calls.at(-1) as [string])[0];
 		expect(requestedUrl).toContain("position=Goalkeeper");
 
-		expect(
-			screen.getByRole("combobox", { name: "Filter by position" }),
-		).toHaveValue("Goalkeeper");
+		expect(getByRole("combobox", { name: "Filter by position" })).toHaveValue(
+			"Goalkeeper",
+		);
 	});
 
 	it("refetches the requested page when pagination changes", async () => {
@@ -152,12 +150,12 @@ describe("players route", () => {
 		});
 		vi.stubGlobal("fetch", fetchMock);
 
-		renderPlayersRoute();
+		const { getByText, getByRole } = renderPlayersRoute();
 		await waitFor(() => {
-			expect(screen.getByText("Erling Haaland")).toBeInTheDocument();
+			expect(getByText("Erling Haaland")).toBeInTheDocument();
 		});
 
-		fireEvent.click(screen.getByRole("button", { name: "2" }));
+		fireEvent.click(getByRole("button", { name: "2" }));
 
 		await waitFor(() => {
 			expect(fetchMock).toHaveBeenCalledTimes(2);
