@@ -127,27 +127,26 @@ Before writing logic that looks like it might already exist elsewhere in the rep
 
 Real example: `error instanceof Error ? error.message : String(error)` appeared verbatim in both `ingest-competitions.ts` and `ingest-seasons.ts`'s catch blocks — extracted into `apps/ingestion/src/to-error-message.ts`'s `toErrorMessage()`, with its own test file, on the second occurrence.
 
-## `void`-prefix a promise only when it's bound to a synchronous callback type
+## Prefer `await` in an `async` handler over `void`-ing a promise
 
-Prefer `await` in an `async` function over `void`-prefixing a fire-and-forget promise — it keeps a place for a future `.catch` and reads as "not blocking on this" rather than "ignored." But when the function is passed directly as a prop typed to return `void` synchronously (Mantine's `onChange`/`onClick`, and other DOM/UI-library event handlers), making it `async` trips `nursery.noMisusedPromises` ("this function returns a Promise, but no return value was expected") — verified empirically against Biome 2.5.7, which exposes no option to relax this check. `void` is the only one of `noFloatingPromises`'s five accepted forms that also satisfies `noMisusedPromises` in that position, so it stays.
+`biome.json`'s `nursery.noFloatingPromises` accepts five ways to handle a Promise-valued statement: `.then(ok, err)`, `.catch(err)`, `await`, `return`, or `void`. `void` is the easiest one to reach for in a synchronous-looking event handler, but it throws away the only place a future error handler would attach, and it reads as "intentionally ignored" when the actual intent is usually "fire and don't block on the result." Making the handler `async` and `await`-ing the call instead satisfies the same rule through a different accepted form, with better semantics for no extra cost — including when the handler is passed directly as a JSX event-handler prop (`onChange`, `onClick`): verified against real Mantine `Select`/`Pagination`/`Button` usage in `-players-page.tsx` that `nursery.noMisusedPromises` does not flag an `async` function assigned to a prop typed `(...) => void` through a generic component interface (`SelectProps<Value>.onChange`) — both `bunx biome check` and `tsc -b` pass clean. (A standalone non-JSX repro of the same shape — a plain typed callback parameter, not a JSX attribute — does trip `noMisusedPromises`; the rule's type inference apparently doesn't trace through JSX prop assignment the same way. Don't assume this rule will catch an accidental async handler on a JSX callback prop — review for it instead.)
 
 ```ts
-// Not bound to a callback type — prefer async/await
-useEffect(() => {
-  const timeoutId = setTimeout(async () => {
-    await navigate({
-      search: (previous) => ({ ...previous, search: nextSearch, page: 1 }),
-    });
-  }, SEARCH_DEBOUNCE_MS);
-  return (): void => clearTimeout(timeoutId);
-}, [navigate]);
-
-// Bound to a synchronous callback prop (Mantine's onChange: (page: number) => void) —
-// making this async would fail noMisusedPromises, so void stays
+// Avoid
 const handlePageChange = useCallback(
   (page: number): void => {
     void navigate({ search: (previous) => ({ ...previous, page }) });
   },
   [navigate],
 );
+
+// Prefer
+const handlePageChange = useCallback(
+  async (page: number): Promise<void> => {
+    await navigate({ search: (previous) => ({ ...previous, page }) });
+  },
+  [navigate],
+);
 ```
+
+This is a judgment call, not a Biome rule — Biome accepts `void` as a valid way to satisfy `noFloatingPromises` and has no option to disallow it specifically, so nothing enforces this beyond following the convention.

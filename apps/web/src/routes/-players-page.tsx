@@ -78,8 +78,8 @@ export const PlayersPage = (): ReactElement => {
 	);
 
 	const handlePositionChange = useCallback(
-		(value: string | null): void => {
-			void navigate({
+		async (value: string | null): Promise<void> => {
+			await navigate({
 				search: (previous) => ({
 					...previous,
 					position: value === null ? undefined : (value as PlayerPosition),
@@ -91,8 +91,8 @@ export const PlayersPage = (): ReactElement => {
 	);
 
 	const handlePageChange = useCallback(
-		(page: number): void => {
-			void navigate({ search: (previous) => ({ ...previous, page }) });
+		async (page: number): Promise<void> => {
+			await navigate({ search: (previous) => ({ ...previous, page }) });
 		},
 		[navigate],
 	);
@@ -104,8 +104,8 @@ export const PlayersPage = (): ReactElement => {
 	// (the API has no upper bound on `page`) — these need different messaging.
 	const isPageOutOfRange = players.length === 0 && meta.total > 0;
 
-	const handleClearFilters = useCallback((): void => {
-		void navigate({
+	const handleClearFilters = useCallback(async (): Promise<void> => {
+		await navigate({
 			search: (previous) => ({
 				...previous,
 				search: undefined,
@@ -115,8 +115,8 @@ export const PlayersPage = (): ReactElement => {
 		});
 	}, [navigate]);
 
-	const handleGoToFirstPage = useCallback((): void => {
-		void navigate({ search: (previous) => ({ ...previous, page: 1 }) });
+	const handleGoToFirstPage = useCallback(async (): Promise<void> => {
+		await navigate({ search: (previous) => ({ ...previous, page: 1 }) });
 	}, [navigate]);
 
 	return (
