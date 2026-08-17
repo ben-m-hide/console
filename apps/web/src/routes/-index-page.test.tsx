@@ -5,13 +5,9 @@ import {
 	LOADING_FALLBACK_TEXT,
 	renderWithProviders,
 } from "@/test/render-with-providers";
+import { SAMPLE_COMPETITIONS } from "@/test/route-fixtures";
 
 import { IndexPage } from "./-index-page";
-
-const SAMPLE_COMPETITIONS = [
-	{ id: 1, sportmonksId: 8, name: "Premier League", country: "England" },
-	{ id: 2, sportmonksId: 82, name: "Bundesliga", country: "Germany" },
-];
 
 const renderIndexPage = (): ReturnType<typeof renderWithProviders> =>
 	renderWithProviders(<IndexPage />);

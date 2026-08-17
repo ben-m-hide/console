@@ -1,42 +1,10 @@
-import {
-	createMemoryHistory,
-	createRouter,
-	RouterProvider,
-} from "@tanstack/react-router";
-import { render, screen, waitFor } from "@testing-library/react";
-import type { FC } from "react";
+import { screen, waitFor } from "@testing-library/react";
 
-import {
-	createTestQueryClient,
-	TestProviders,
-} from "@/test/render-with-providers";
+import { renderRouteTree } from "@/test/render-route";
+import { SAMPLE_COMPETITIONS } from "@/test/route-fixtures";
 
-import { routeTree } from "../routeTree.gen";
-
-const SAMPLE_COMPETITIONS = [
-	{ id: 1, sportmonksId: 8, name: "Premier League", country: "England" },
-];
-
-// Drives the real route tree, not the page component directly, so the loader
-// actually runs — that's what proves the query client reaches it via router
-// context, invisible to a component-level test.
-const renderRoute = (): ReturnType<typeof render> => {
-	const queryClient = createTestQueryClient();
-	const router = createRouter({
-		routeTree,
-		context: { queryClient },
-		history: createMemoryHistory({ initialEntries: ["/"] }),
-	});
-
-	// Both providers are required: the loader reads the client from router
-	// context, useSuspenseQuery from React context.
-	const RoutedApp: FC = () => (
-		<TestProviders queryClient={queryClient}>
-			<RouterProvider router={router} />
-		</TestProviders>
-	);
-	return render(<RoutedApp />);
-};
+const renderRoute = (): ReturnType<typeof renderRouteTree> =>
+	renderRouteTree(["/"]);
 
 describe("index route", () => {
 	afterEach(() => {
