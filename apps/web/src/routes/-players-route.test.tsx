@@ -1,70 +1,11 @@
-import {
-	createMemoryHistory,
-	createRouter,
-	RouterProvider,
-} from "@tanstack/react-router";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type { FC } from "react";
+import { fireEvent, screen, waitFor } from "@testing-library/react";
 
-import {
-	createTestQueryClient,
-	TestProviders,
-} from "@/test/render-with-providers";
+import { renderRouteTree } from "@/test/render-route";
+import { SAMPLE_PLAYERS, samplePlayersResponse } from "@/test/route-fixtures";
 
-import { routeTree } from "../routeTree.gen";
-import type { PlayerListMeta } from "./-queries/players";
-
-const SAMPLE_PLAYERS = [
-	{
-		id: 1,
-		sportmonksId: 101,
-		name: "Erling Haaland",
-		dateOfBirth: "2000-07-21",
-		nationality: "Norway",
-		position: "Attacker",
-	},
-	{
-		id: 2,
-		sportmonksId: 102,
-		name: "Alisson Becker",
-		dateOfBirth: "1992-10-02",
-		nationality: "Brazil",
-		position: "Goalkeeper",
-	},
-];
-
-interface SamplePlayersResponse {
-	data: Array<unknown>;
-	meta: PlayerListMeta;
-}
-
-const samplePlayersResponse = (
-	players: Array<unknown>,
-	total: number,
-): SamplePlayersResponse => ({
-	data: players,
-	meta: { page: 1, pageSize: 25, total, totalPages: Math.ceil(total / 25) },
-});
-
-// Drives the real route tree, same rationale as -index-route.test.tsx — also
-// the only render path that gives getRouteApi("/players") a matched route.
 const renderPlayersRoute = (
 	initialEntries: Array<string> = ["/players"],
-): ReturnType<typeof render> => {
-	const queryClient = createTestQueryClient();
-	const router = createRouter({
-		routeTree,
-		context: { queryClient },
-		history: createMemoryHistory({ initialEntries }),
-	});
-
-	const RoutedApp: FC = () => (
-		<TestProviders queryClient={queryClient}>
-			<RouterProvider router={router} />
-		</TestProviders>
-	);
-	return render(<RoutedApp />);
-};
+): ReturnType<typeof renderRouteTree> => renderRouteTree(initialEntries);
 
 describe("players route", () => {
 	afterEach(() => {
