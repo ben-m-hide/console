@@ -4,7 +4,7 @@ import {
 	RouterProvider,
 } from "@tanstack/react-router";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import type { ReactElement } from "react";
+import type { FC } from "react";
 
 import {
 	createTestQueryClient,
@@ -59,7 +59,7 @@ const renderPlayersRoute = (
 		history: createMemoryHistory({ initialEntries }),
 	});
 
-	const RoutedApp = (): ReactElement => (
+	const RoutedApp: FC = () => (
 		<TestProviders queryClient={queryClient}>
 			<RouterProvider router={router} />
 		</TestProviders>

@@ -54,3 +54,39 @@ return <List items={visible} onSelect={handleSelect} />;
 This convention would become largely redundant. React's guidance for new code is to let the compiler handle memoization, using the hooks only for precise control. This project does **not** use React Compiler today — there is no compiler plugin in `apps/web/vite.config.ts`, verified 2026-08-16 — which is why the manual convention stands.
 
 If it is adopted later, note React's warning that removing existing memoization changes compilation output, so this should be revisited deliberately as a migration rather than by bulk-deleting hooks.
+
+## Type function components with `FC`
+
+Every function component gets an explicit `FC` type on its declaration: `FC<Props>` when it takes props, bare `FC` when it does not, `FC<PropsWithChildren>` (or `FC<PropsWithChildren<Props>>` alongside its own props) when it takes `children`. This is a deliberate against-the-grain choice — React's own TypeScript cheatsheet dropped the recommendation to use `FC` for newly-written components, mainly because it used to implicitly add a `children` prop even to components that didn't accept one. That implicit-`children` behavior was removed in the `@types/react` 18 typings, which is what makes adopting `FC` here safe: a bare `FC` no longer silently accepts `children`, so the original objection doesn't apply to the version this project is on. Verified empirically no conflict with `useExplicitReturnType`, `useNamingConvention`, `noNestedComponentDefinitions`, or `noReactPropAssignments` — a colon-typed variable declaration (`const Foo: FC<Props> = (props) => {...}`) already satisfies all of them, expression-body or block-body.
+
+```tsx
+// No props
+export const CompetitionsPending: FC = () => (
+  <Stack p="xl">
+    <Loader aria-label="Loading competitions" />
+  </Stack>
+);
+
+// Props, no children
+export const CompetitionsError: FC<ErrorComponentProps> = ({ error }) => {
+  return <Alert color="red">{error.message}</Alert>;
+};
+
+// Children, no other props
+export const TestErrorBoundaryWrapper: FC<PropsWithChildren> = ({
+  children,
+}) => <Fragment>{children}</Fragment>;
+
+// Children plus own props
+interface TestProvidersProps extends PropsWithChildren {
+  queryClient: QueryClient;
+}
+export const TestProviders: FC<TestProvidersProps> = ({
+  children,
+  queryClient,
+}) => (
+  <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+);
+```
+
+Class components (e.g. an error boundary that needs `getDerivedStateFromError`) are unaffected — this only applies to function components.

@@ -5,7 +5,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import type { ReactElement } from "react";
+import type { FC } from "react";
 
 import { theme } from "@/lib/theme";
 
@@ -22,7 +22,7 @@ interface RouterContext {
 // them out of the production bundle is the right default regardless.
 const isDevelopment = import.meta.env.MODE === "development";
 
-const RootComponent = (): ReactElement => (
+const RootComponent: FC = () => (
 	<MantineProvider theme={theme} defaultColorScheme="auto">
 		<Outlet />
 		{isDevelopment ? (

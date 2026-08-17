@@ -2,17 +2,17 @@ import { Alert, Button, Group, Loader, Stack, Title } from "@mantine/core";
 import { useQueryErrorResetBoundary } from "@tanstack/react-query";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { useRouter } from "@tanstack/react-router";
-import type { ReactElement } from "react";
+import type { FC } from "react";
 import { useCallback, useEffect } from "react";
 
-export const PlayersPending = (): ReactElement => (
+export const PlayersPending: FC = () => (
 	<Stack p="xl">
 		<Title order={1}>Players</Title>
 		<Loader aria-label="Loading players" />
 	</Stack>
 );
 
-export const PlayersError = ({ error }: ErrorComponentProps): ReactElement => {
+export const PlayersError: FC<ErrorComponentProps> = ({ error }) => {
 	const router = useRouter();
 	const { reset } = useQueryErrorResetBoundary();
 

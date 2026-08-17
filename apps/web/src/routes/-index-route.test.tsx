@@ -4,7 +4,7 @@ import {
 	RouterProvider,
 } from "@tanstack/react-router";
 import { render, screen, waitFor } from "@testing-library/react";
-import type { ReactElement } from "react";
+import type { FC } from "react";
 
 import {
 	createTestQueryClient,
@@ -33,7 +33,7 @@ const renderRoute = (): ReturnType<typeof render> => {
 	// but useSuspenseQuery in the component reads it from React context — both
 	// paths are required, and omitting the provider fails with
 	// "No QueryClient set" even though the loader itself succeeded.
-	const RoutedApp = (): ReactElement => (
+	const RoutedApp: FC = () => (
 		<TestProviders queryClient={queryClient}>
 			<RouterProvider router={router} />
 		</TestProviders>

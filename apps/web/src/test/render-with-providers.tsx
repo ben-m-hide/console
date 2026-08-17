@@ -2,7 +2,7 @@ import { MantineProvider } from "@mantine/core";
 import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
-import type { PropsWithChildren, ReactElement, ReactNode } from "react";
+import type { FC, PropsWithChildren, ReactElement, ReactNode } from "react";
 import { Component, Fragment, Suspense } from "react";
 
 import { createQueryClient } from "@/lib/query-client";
@@ -49,10 +49,10 @@ interface TestProvidersProps extends PropsWithChildren {
 // The app-level providers a rendered subtree needs, mirroring main.tsx's
 // nesting. Route tests compose this around their own RouterProvider; component
 // tests get it via renderWithProviders below.
-export const TestProviders = ({
+export const TestProviders: FC<TestProvidersProps> = ({
 	children,
 	queryClient,
-}: TestProvidersProps): ReactElement => (
+}) => (
 	<MantineProvider>
 		<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
 	</MantineProvider>
@@ -64,7 +64,7 @@ export const renderWithProviders = (
 	ui: ReactNode,
 ): ReturnType<typeof render> => {
 	const queryClient = createTestQueryClient();
-	const wrapper = ({ children }: PropsWithChildren): ReactElement => (
+	const wrapper: FC<PropsWithChildren> = ({ children }) => (
 		<TestProviders queryClient={queryClient}>
 			<TestErrorBoundary>
 				<Suspense fallback={<div>{LOADING_FALLBACK_TEXT}</div>}>

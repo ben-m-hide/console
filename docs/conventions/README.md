@@ -7,7 +7,7 @@ Each convention file is also mirrored by a thin trigger in [`.claude/rules/`](..
 | File                             | Covers                                                                                                                   | Auto-loaded for       |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------- |
 | [typescript.md](./typescript.md) | Naming inline types, explicit/human-readable names, named returns, loops vs. array methods, util reuse, where types live | `**/*.ts`, `**/*.tsx` |
-| [react.md](./react.md)           | `<Fragment>` over `<>`, memoizing by default with `useMemo`/`useCallback`                                                | `**/*.tsx`            |
+| [react.md](./react.md)           | `<Fragment>` over `<>`, memoizing by default with `useMemo`/`useCallback`, typing components with `FC`                   | `**/*.tsx`            |
 
 ## Adding one
 
