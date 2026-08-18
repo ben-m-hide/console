@@ -14,7 +14,7 @@
 	"dependencies": {
 		"@console-next/db": "workspace:*",
 		"@console-next/shared": "workspace:*",
-		"@hono/zod-openapi": "1.5.2",
+		"@hono/zod-openapi": "1.6.0",
 		"@scalar/hono-api-reference": "0.11.13",
 		"drizzle-orm": "0.45.2",
 		"hono": "4.13.1",
