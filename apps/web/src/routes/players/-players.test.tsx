@@ -1,7 +1,8 @@
 import { fireEvent, waitFor } from "@testing-library/react";
 
+import { samplePlayersResponse } from "@/test/data/route-fixtures";
+import { SAMPLE_PLAYERS } from "@/test/data/sample-data";
 import { renderRouteTree } from "@/test/render-route";
-import { SAMPLE_PLAYERS, samplePlayersResponse } from "@/test/route-fixtures";
 
 const renderPlayersRoute = (
 	initialEntries: Array<string> = ["/players"],

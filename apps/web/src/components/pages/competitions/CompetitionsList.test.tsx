@@ -2,11 +2,11 @@ import { waitFor } from "@testing-library/react";
 import axe from "axe-core";
 
 import { CompetitionsList } from "@/components/pages/competitions/CompetitionsList";
+import { SAMPLE_COMPETITIONS } from "@/test/data/sample-data";
 import {
 	LOADING_FALLBACK_TEXT,
 	renderWithProviders,
 } from "@/test/render-with-providers";
-import { SAMPLE_COMPETITIONS } from "@/test/route-fixtures";
 
 const renderCompetitionsList = (): ReturnType<typeof renderWithProviders> =>
 	renderWithProviders(<CompetitionsList />);

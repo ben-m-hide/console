@@ -1,7 +1,7 @@
 import { waitFor } from "@testing-library/react";
 
+import { SAMPLE_COMPETITIONS } from "@/test/data/sample-data";
 import { renderRouteTree } from "@/test/render-route";
-import { SAMPLE_COMPETITIONS } from "@/test/route-fixtures";
 
 const renderRoute = (): ReturnType<typeof renderRouteTree> =>
 	renderRouteTree(["/"]);

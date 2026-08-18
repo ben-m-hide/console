@@ -9,7 +9,12 @@ import bundlesize from "vite-plugin-bundlesize";
 export default defineConfig({
 	plugins: [
 		devtools(),
-		tanstackRouter({ target: "react", autoCodeSplitting: true }),
+		tanstackRouter({
+			target: "react",
+			autoCodeSplitting: true,
+			routesDirectory: "./src/routes",
+			generatedRouteTree: "./src/routeTree.gen.ts",
+		}),
 		react(),
 		bundlesize({
 			limits: [
@@ -34,10 +39,11 @@ export default defineConfig({
 		// Scoped to src/ so a future infra/**/*.test.ts (CDK assertions need a
 		// plain Node environment, not jsdom) doesn't get swept in here.
 		include: ["src/**/*.test.{ts,tsx}"],
+		exclude: ["src/routeTree.gen.ts", "node_modules/**"],
 		setupFiles: ["./src/test/setup.ts"],
 		coverage: {
 			provider: "v8",
-			exclude: ["src/routeTree.gen.ts"],
+			exclude: ["src/routeTree.gen.ts", "src/test/**", "**/*.d.ts"],
 			reporter: ["text", "json-summary", "json"],
 			reportOnFailure: true,
 		},
