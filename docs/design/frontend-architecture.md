@@ -30,7 +30,7 @@ So `features/` is a **community overlay** — influential (bulletproof-react, 35
 
 **The honest framing for any ADR: this is a convention question with no official answer.** Anyone calling `features/` "the standard" is generalising from React _without_ file-based routing.
 
-**The one thing the router does officially bless is route-folder colocation** via the `-` prefix — files excluded from the route tree but still importable, explicitly documented as "used to colocate logic in route folders". `apps/web` already does exactly this (`routes/-index-page.tsx`). **The project is already on the documented path.**
+**The one thing the router does officially bless is route-folder colocation** via the `-` prefix — files excluded from the route tree but still importable, explicitly documented as "used to colocate logic in route folders". `apps/web` already does exactly this (`routes/-queries/`, `routes/-index-page-states.tsx`) for route-scoped queries and state. **The project is already on the documented path.**
 
 ---
 
@@ -38,24 +38,38 @@ So `features/` is a **community overlay** — influential (bulletproof-react, 35
 
 ### Adopt now
 
-Keep what exists. Promote on the **second consumer**, per the existing rule in root `CLAUDE.md` — which happens to match both Swizec's production writeup and React's own colocation guidance.
+Two rules, not one. **Shared code** — genuine cross-route utilities/hooks/UI atoms — still promotes on the **second consumer**, per the existing rule in root `CLAUDE.md`. **A route's own page component does not wait for a second consumer** — it splits into `src/components/pages/<feature>/` immediately, so the route file stays thin (loader/`component`/`pendingComponent`/`errorComponent` wiring only) and the page component is unit-testable without the router. This is what `players/` and `competitions/` (formerly `-players-page.tsx`/`-index-page.tsx`) actually did; the trigger for #9 in the summary table below was superseded by this rule rather than firing on consumer count.
+
+Route folders use **folder + `index.tsx`**, not flat dot-notation — `routes/players/index.tsx`, not `routes/players.index.tsx`. Both are TanStack Router–valid; folder form was chosen so route-scoped colocated files (`-players.test.tsx`) sit next to the route they belong to instead of accumulating flat in `routes/`.
 
 ```
 src/
 ├── routes/                     # file-based route tree
 │   ├── __root.tsx
-│   ├── index.tsx               # Dashboard
-│   ├── compare.tsx
-│   ├── players.index.tsx
-│   ├── players.$playerId.tsx
-│   ├── -queries/               # excluded from route tree, importable
-│   │   └── players.ts          # queryOptions factories
-│   └── -players-page.tsx       # colocated components
-├── lib/                        # query-client.ts, theme.ts
+│   ├── index.tsx                    # Dashboard
+│   ├── -index-page-states.tsx       # colocated: loading/error state components
+│   ├── players/
+│   │   ├── index.tsx                # thin: wires PlayersList to the route
+│   │   └── -players.test.tsx        # colocated, route-level test
+│   └── -queries/                    # excluded from route tree, importable
+│       ├── competitions.ts          # queryOptions factories
+│       └── players.ts
+├── components/
+│   ├── pages/                  # one folder per route's page component
+│   │   ├── competitions/
+│   │   │   ├── CompetitionsList.tsx
+│   │   │   └── CompetitionsList.test.tsx
+│   │   └── players/
+│   │       ├── PlayersList.tsx
+│   │       └── PlayersList.test.tsx
+│   └── common/                 # genuinely shared, second-consumer-gated
+│       └── DevTools.tsx
+├── config/                     # environment.ts (MODE-based isDev())
+├── lib/                        # api/, query-client.ts, theme.ts
 └── main.tsx
 ```
 
-`src/components/` and `src/hooks/` appear **when a second consumer needs them** — matching what every official example does, rather than pre-creating empty directories.
+`src/hooks/` still appears **when a second consumer needs it** — matching what every official example does, rather than pre-creating an empty directory.
 
 ### Deferred, with triggers
 
@@ -98,7 +112,7 @@ export const playersQueryOptions = (params: PlayersParams) =>
     queryFn: ({ signal }) => fetchPlayers(params, signal),
   });
 
-// routes/players.index.tsx
+// routes/players/index.tsx
 export const Route = createFileRoute("/players/")({
   validateSearch: playerSearchSchema, // Zod 4 directly — no adapter
   loaderDeps: ({ search: { page, season } }) => ({ page, season }),
@@ -214,7 +228,7 @@ _(Reasoning from mechanism, not measurement.)_ **Resolving action: build the she
 
 ## 7. Testing
 
-Tests stay **beside their source** (`-index-page.test.tsx`) — already correct, and what Vitest defaults to.
+Tests stay **beside their source** — page components under `src/components/pages/<feature>/`, route wiring under `src/routes/` (e.g. `players/-players.test.tsx`) — already correct, and what Vitest defaults to.
 
 - **Unit/component**: Vitest + RTL + axe-core. `color-contrast` disabled (no jsdom layout engine), so **contrast is verified by design, not by test** — see [`frontend-ui-ux.md`](./frontend-ui-ux.md) §5.1.
 - **Routes**: `createMemoryHistory` per `how-to/test-file-based-routing.md`, with a per-test `QueryClient` via `createQueryClient({ defaultOptions: { queries: { retry: false } } })`.
@@ -234,20 +248,20 @@ Recorded here so the frontend's error strategy is not designed as if it were the
 
 Three states, not two. **"Trigger already met"** is the honest middle: the condition has fired but the work is unscheduled, which is different from "not yet needed" and must not hide inside the deferred column.
 
-| #   | Item                                            | State    | Trigger / note                                                                                                           |
-| --- | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
-| 1   | Route-folder colocation (`-` prefix)            | ✅ done  | Already correct                                                                                                          |
-| 2   | Tests beside source                             | ✅ done  | Already correct                                                                                                          |
-| 3   | Router context + provider rewiring              | ✅ done  | Landed 2026-08-16 — see `docs/plans/2026-08-15-router-query-context.md`                                                  |
-| 4   | Default `staleTime` (5 min)                     | ✅ done  | Landed with #3. Root error boundary + `notFoundComponent` deliberately split out as error-surface concerns — still to do |
-| 5   | `queryOptions()` factories, hierarchical keys   | ✅ done  | `routes/-queries/competitions.ts`, landed with #3                                                                        |
-| 6   | Search-param state                              | 🔔 fired | Players is build-order step 1 and needs pagination + filters. Sequence it in.                                            |
-| 7   | API client (hand-written wretch, not generated) | ✅ done  | Landed 2026-08-17 — see [ADR 0016](../adr/0016-wretch-for-api-client.md)                                                 |
-| 8   | `src/features/<domain>/`                        | 🔔 fired | The players branch is 3 routes on one entity — the stated trigger. Introduce for **that domain only**.                   |
-| 9   | `src/components/`, `src/hooks/`                 | ⏳ defer | Second consumer **of a given component or hook** (not of a type — §5 owns type promotion)                                |
-| 10  | First Zustand store                             | ⏳ defer | First client-only cross-route state. Navbar `opened` is the likely first.                                                |
-| 11  | Import-boundary enforcement                     | ⏳ defer | Lands with #8, but **only after** a deliberately-violating import proves Biome errors                                    |
-| 12  | Feature-Sliced Design                           | ❌ no    | Not this app                                                                                                             |
+| #   | Item                                            | State    | Trigger / note                                                                                                                                                           |
+| --- | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | Route-folder colocation (`-` prefix)            | ✅ done  | Already correct                                                                                                                                                          |
+| 2   | Tests beside source                             | ✅ done  | Already correct                                                                                                                                                          |
+| 3   | Router context + provider rewiring              | ✅ done  | Landed 2026-08-16 — see `docs/plans/2026-08-15-router-query-context.md`                                                                                                  |
+| 4   | Default `staleTime` (5 min)                     | ✅ done  | Landed with #3. Root error boundary + `notFoundComponent` deliberately split out as error-surface concerns — still to do                                                 |
+| 5   | `queryOptions()` factories, hierarchical keys   | ✅ done  | `routes/-queries/competitions.ts`, landed with #3                                                                                                                        |
+| 6   | Search-param state                              | 🔔 fired | Players is build-order step 1 and needs pagination + filters. Sequence it in.                                                                                            |
+| 7   | API client (hand-written wretch, not generated) | ✅ done  | Landed 2026-08-17 — see [ADR 0016](../adr/0016-wretch-for-api-client.md)                                                                                                 |
+| 8   | `src/features/<domain>/`                        | 🔔 fired | The players branch is 3 routes on one entity — the stated trigger. Introduce for **that domain only**.                                                                   |
+| 9   | `src/components/pages/<feature>/`               | ✅ done  | Superseded the second-consumer trigger — a route's page component always splits out, for testability. `src/components/common/`, `src/hooks/` still second-consumer-gated |
+| 10  | First Zustand store                             | ⏳ defer | First client-only cross-route state. Navbar `opened` is the likely first.                                                                                                |
+| 11  | Import-boundary enforcement                     | ⏳ defer | Lands with #8, but **only after** a deliberately-violating import proves Biome errors                                                                                    |
+| 12  | Feature-Sliced Design                           | ❌ no    | Not this app                                                                                                                                                             |
 
 ---
 
