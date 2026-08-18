@@ -15,11 +15,8 @@ import { getRouteApi } from "@tanstack/react-router";
 import type { ChangeEvent, FC } from "react";
 import { Fragment, useCallback, useEffect, useState } from "react";
 
-import {
-	PLAYER_POSITIONS,
-	type PlayerPosition,
-	playersQueryOptions,
-} from "@/routes/-queries/players";
+import { playersListQueryOptions } from "@/queries/players/players";
+import { PLAYER_POSITIONS, type PlayerPosition } from "@/routing/player";
 
 const routeApi = getRouteApi("/players/");
 
@@ -35,7 +32,7 @@ export const PlayersList: FC = () => {
 	const navigate = routeApi.useNavigate();
 
 	const { data: playersResponse } = useSuspenseQuery(
-		playersQueryOptions(search),
+		playersListQueryOptions(search),
 	);
 	const players = playersResponse.data;
 	const meta = playersResponse.meta;

@@ -70,20 +70,24 @@ console-next/
 
 Deployables live under `apps/` (`web`, `api`, `ingestion`), shared internal libraries under `packages/` (`db`, `e2e`, `shared`) — see `docs/adr/0011-apps-and-packages-workspace-restructure.md` for the convention and why it replaced the frontend-as-root-package layout.
 
-**Colocate route-scoped queries and state inside the route, not in a parallel `features/` tree; a route's own page component splits into `src/components/pages/<feature>/`.** TanStack Router's file-based routing gives the first kind of colocation for free: prefix a file or folder with `-` and the router excludes it from the route tree while still letting you import it normally. The second is a project convention, not a router feature — a route file stays thin (loader/`component` wiring only) and its rendered page component lives one level out so it's unit-testable without the router, immediately rather than gated behind a second consumer.
+**Colocate genuinely route-scoped files (tests) inside the route, not in a parallel `features/` tree; a route's own page component splits into `src/components/pages/<feature>/`, and its query options factory into `src/queries/<feature>/`.** TanStack Router's file-based routing gives the first kind of colocation for free: prefix a file or folder with `-` and the router excludes it from the route tree while still letting you import it normally. The other two are project conventions, not router features — a route file stays thin (loader/`component` wiring only), its rendered page component lives one level out so it's unit-testable without the router, and its query options factory lives in `src/queries/` since it's shared between the route's loader and the page component (and, since 2026-08-18, built on a generic `list()`/`listQueryOptions()` rather than each entity hand-rolling fetch+parse — see `docs/adr/0016-wretch-for-api-client.md`), not scoped to the route file alone.
 
 ```
 apps/web/src/routes/
-├── posts/
-│   ├── index.tsx           ← thin: wires PostsList to the route
-│   └── -posts.test.tsx     ← colocated, route-level test
-├── -queries/
-│   └── posts.ts            ← colocated, not a route
-└── -posts-page-states.tsx  ← colocated loading/error states
+└── posts/
+    ├── index.tsx           ← thin: wires PostsList + postsQueryOptions to the route
+    └── -index.test.tsx     ← colocated, route-level test
+
+apps/web/src/queries/posts/
+└── posts.ts                ← postsQueryOptions, built on queries/common/query-options.ts's listQueryOptions()
 
 apps/web/src/components/pages/posts/
 ├── PostsList.tsx
 └── PostsList.test.tsx
+
+apps/web/src/components/common/
+├── GenericPending.tsx      ← shared loading state, parameterized by title
+└── GenericError.tsx        ← shared error state, parameterized by title
 ```
 
 **Promote to shared space only once something is actually shared.** Start route-local; move to `src/lib/`, `src/hooks/`, or `src/components/common/` only when a second consumer needs it. A `../../../` relative import is the signal something's in the wrong place — it means reaching across route boundaries instead of using the `@/*` alias or promoting the code.
@@ -135,7 +139,7 @@ Root `package.json` no longer holds the frontend's own scripts directly — `dev
 - `vite-plugin-bundlesize` v0.3.0 silently ignores `**/*.css` limit entries — verified empirically (set to `1 kB` against a 5kB actual file, build still passed). Only JS chunks are enforced. Re-check this if the plugin gets a version bump.
 - `bun.lock`'s trailing commas are intentional (Bun's own JSONC-like lockfile format, chosen for cleaner diffs) — not a bug. `.vscode/settings.json` maps it to the `jsonc` language so editors stop flagging it as a JSON syntax error.
 - `apps/web/src/test/setup.ts` mocks `window.matchMedia` — jsdom doesn't implement it, and Mantine's color-scheme detection (`defaultColorScheme="auto"`) needs it to avoid throwing on mount in every test that renders `MantineProvider`.
-- A route's rendered page component lives in `src/components/pages/<feature>/` (e.g. `apps/web/src/components/pages/competitions/CompetitionsList.tsx`), not directly in the route file — `index.tsx` just imports and wires one up. Exporting a component straight from a route file breaks TanStack Router's `autoCodeSplitting` — it warned explicitly when we tried it. Route-scoped queries and state (not the page component itself) still colocate directly in `src/routes/` via the `-` prefix (e.g. `-queries/competitions.ts`, `-index-page-states.tsx`), which also keeps the router from treating those files as routes.
+- A route's rendered page component lives in `src/components/pages/<feature>/` (e.g. `apps/web/src/components/pages/competitions/CompetitionsList.tsx`), not directly in the route file — `index.tsx` just imports and wires one up. Exporting a component straight from a route file breaks TanStack Router's `autoCodeSplitting` — it warned explicitly when we tried it. Its query options factory similarly lives in `src/queries/<feature>/`, built on `src/queries/common/list.ts`'s generic `list()` and `src/queries/common/query-options.ts`'s generic `listQueryOptions()` — genuinely route-scoped files (tests) still colocate directly in `src/routes/` via the `-` prefix (e.g. `players/-index.test.tsx`), which also keeps the router from treating those files as routes.
 - `axe-core`'s `color-contrast` rule is explicitly disabled in tests, not just left to fail — jsdom has no layout engine (`Range#getClientRects` etc. are stubs, and this is true even with the `canvas` package installed, which only patches image/font metrics, not layout), so the check can never fully evaluate and would otherwise sit in `results.incomplete` forever. Real contrast checking needs a real browser; covered when Playwright E2E lands.
 - `bun audit --audit-level=high` in CI has no allowlist for an advisory with no available fix (e.g. a transitive dev-dependency) — Bun has no `.auditignore`-equivalent today. Until one exists, an unfixable high/critical advisory blocks every push/PR regardless of relevance; resolving it is a manual `bun audit --json` triage, not an automatic bypass.
 - `build.sourcemap: "hidden"` in `apps/web/vite.config.ts` only suppresses the `//# sourceMappingURL` comment — the `.js.map` files still get written into `apps/web/dist/` and are servable if nothing strips them post-build. There's deliberately no strip-or-upload step yet, since that's normally wired up alongside source map upload to an error tracker (see Deferred: Error tracking) once a deployment target exists — don't ship `dist/` as-is to anything public before that lands.

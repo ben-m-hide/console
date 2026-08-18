@@ -19,7 +19,7 @@ test("renders the homepage with no console errors", async ({
 	// CI runs the dev server only, no real API — without this stub the fetch
 	// fails and the resulting console error would fail the assertion below.
 	await page.route("**/api/v1/competitions", (route) =>
-		route.fulfill({ json: SAMPLE_COMPETITIONS }),
+		route.fulfill({ json: { data: SAMPLE_COMPETITIONS } }),
 	);
 
 	await page.goto("/");

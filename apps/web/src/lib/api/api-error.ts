@@ -5,8 +5,8 @@ export class ApiError extends Error {
 
 	// status/url are undefined, not defaulted like the reference project's `= 0`
 	// sentinel — a network failure (fetch itself throwing) genuinely has
-	// neither, and exactOptionalPropertyTypes elsewhere in this project treats
-	// "absent" and "a real falsy value" as distinct on purpose.
+	// neither, and treating "no status" as distinct from "status 0" is real
+	// modeling, not a TS-strictness artifact.
 	constructor(
 		message: string,
 		url: string | undefined,

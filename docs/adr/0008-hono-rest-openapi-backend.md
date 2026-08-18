@@ -47,7 +47,7 @@ Decided against moving `src/` into a `packages/console/` to "properly" symmetriz
 - `packages/api/src/index.ts` — one `OpenAPIHono` app, one `createRoute()`-defined `GET /health`, and `/doc` for the generated spec.
 - `packages/api/tsconfig.json`, referenced from the root `tsconfig.json` (`references`) — same reasoning as `infra/tsconfig.json`: otherwise `tsc -b --noEmit` silently skips it, repeating the exact decorative-declaration mistake the removed `.nvmrc`/`engines.node` turned out to be.
 - Root `package.json` gained `"workspaces": ["packages/*"]`. Confirmed (not assumed) how Bun lays out a workspace install: dependencies are **not** hoisted to the root `node_modules` — each workspace package gets its own `node_modules/` with symlinks into a shared `node_modules/.bun` store. One `bun.lock` for the whole repo either way.
-- `exactOptionalPropertyTypes` stays **on** for `packages/api` (unlike `infra/`, where it had to be scoped off against `aws-cdk-lib`'s own type gaps) — checked on the first route rather than assumed, and Hono/`@hono/zod-openapi`'s types satisfy it cleanly.
+- `exactOptionalPropertyTypes` stays **on** for `packages/api` (unlike `infra/`, where it had to be scoped off against `aws-cdk-lib`'s own type gaps) — checked on the first route rather than assumed, and Hono/`@hono/zod-openapi`'s types satisfy it cleanly. **Superseded 2026-08-18 by ADR 0017**: the flag is now off project-wide, unrelated to Hono's types — this compatibility finding stays true, it's just no longer what determines the setting.
 
 ## Consequences / known gaps, deliberately not resolved here
 

@@ -7,11 +7,12 @@ import queryStringAddon, {
 	type QueryStringAddon,
 } from "wretch/addons/queryString";
 
-import type { PathParams, QueryParams } from "@/lib/api/types/requests";
+import type { PathParams, QueryParams } from "@/lib/api/types";
 import {
 	buildPath,
 	cleanQueryParams,
 	getMessage,
+	getPathWithPrefix,
 	getStatus,
 	getUrl,
 	toApiErrorMessage,
@@ -80,12 +81,9 @@ export const getClient = ({
 		throw new Error("Call API.configure before attempting to make requests");
 	}
 
-	// If the path is absolute, replace the base URL.
-	const replace = path.startsWith("http://") || path.startsWith("https://");
-
 	return API.client
 		.options(signal ? { signal } : {})
-		.url(buildPath(path, pathParams), replace)
+		.url(buildPath(getPathWithPrefix(path), pathParams))
 		.headers(headers)
 		.query(cleanQueryParams(queryParams));
 };

@@ -14,5 +14,4 @@ bunx cdk synth      # from repo root — synthesize only
 
 ## Notes
 
-- `exactOptionalPropertyTypes` is deliberately **off** in `infra/tsconfig.json`, unlike everywhere else in the repo — `aws-cdk-lib`'s own `.d.ts` doesn't satisfy it (e.g. `Bucket` vs `IBucket`'s `isWebsite`), a library gap, not ours.
 - CSP `connect-src 'self'` in `hosting-stack.ts` is a deliberate placeholder, not the API's real origin yet — update it once the API is deployed (see `docs/adr/0008`, `TODO.md`).

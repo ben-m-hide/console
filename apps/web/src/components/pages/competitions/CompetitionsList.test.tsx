@@ -32,13 +32,13 @@ describe("CompetitionsList", () => {
 	});
 
 	it("suspends while the request is in flight", () => {
-		stubFetchResolving(SAMPLE_COMPETITIONS);
+		stubFetchResolving({ data: SAMPLE_COMPETITIONS });
 		const { getByText } = renderCompetitionsList();
 		expect(getByText(LOADING_FALLBACK_TEXT)).toBeInTheDocument();
 	});
 
 	it("renders the competitions returned by the API", async () => {
-		stubFetchResolving(SAMPLE_COMPETITIONS);
+		stubFetchResolving({ data: SAMPLE_COMPETITIONS });
 		const { getByText } = renderCompetitionsList();
 		await waitFor(() => {
 			expect(getByText("Premier League", { exact: false })).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe("CompetitionsList", () => {
 	});
 
 	it("has no accessibility violations", async () => {
-		stubFetchResolving(SAMPLE_COMPETITIONS);
+		stubFetchResolving({ data: SAMPLE_COMPETITIONS });
 		const { container, getByText } = renderCompetitionsList();
 		await waitFor(() => {
 			expect(getByText("Premier League", { exact: false })).toBeInTheDocument();

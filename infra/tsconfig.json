@@ -3,12 +3,7 @@
 	"compilerOptions": {
 		"tsBuildInfoFile": "./node_modules/.tmp/tsconfig.infra.tsbuildinfo",
 		"lib": ["ES2023"],
-		"types": ["node"],
-
-		// Deliberately overrides the base's exactOptionalPropertyTypes: true —
-		// aws-cdk-lib's own .d.ts (e.g. Bucket vs IBucket's `isWebsite`) isn't
-		// authored against it and fails to satisfy it, unrelated to our code.
-		"exactOptionalPropertyTypes": false
+		"types": ["node"]
 	},
 	"include": ["."]
 }

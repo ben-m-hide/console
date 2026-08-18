@@ -2,10 +2,13 @@ import { List, Stack, Title } from "@mantine/core";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 
-import { competitionsQueryOptions } from "@/routes/-queries/competitions";
+import { competitionsListQueryOptions } from "@/queries/competitions/competitions";
 
 export const CompetitionsList: FC = () => {
-	const { data: competitions } = useSuspenseQuery(competitionsQueryOptions);
+	const { data: competitionsResponse } = useSuspenseQuery(
+		competitionsListQueryOptions(),
+	);
+	const competitions = competitionsResponse.data;
 
 	return (
 		<Stack p="xl">
