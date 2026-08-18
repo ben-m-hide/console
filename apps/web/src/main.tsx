@@ -3,8 +3,8 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { API } from "@/lib/api/api-client";
-import { queryClient } from "@/lib/query-client";
+import { queryClient } from "@/lib";
+import { API } from "@/lib/api";
 
 import { routeTree } from "./routeTree.gen";
 
@@ -30,8 +30,6 @@ if (!rootElement) {
 	throw new Error("Root element #root not found");
 }
 
-// QueryClientProvider must wrap RouterProvider, not sit inside __root's
-// component: route loaders resolve before that tree renders.
 createRoot(rootElement).render(
 	<StrictMode>
 		<QueryClientProvider client={queryClient}>

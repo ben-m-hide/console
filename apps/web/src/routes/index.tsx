@@ -1,13 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { IndexPage } from "./-index-page";
+import { CompetitionsList } from "@/components/pages/competitions/CompetitionsList";
+
 import { CompetitionsError, CompetitionsPending } from "./-index-page-states";
 import { competitionsQueryOptions } from "./-queries/competitions";
 
 export const Route = createFileRoute("/")({
 	loader: ({ context: { queryClient } }) =>
 		queryClient.ensureQueryData(competitionsQueryOptions),
-	component: IndexPage,
+	component: CompetitionsList,
 	pendingComponent: CompetitionsPending,
 	errorComponent: CompetitionsError,
 });

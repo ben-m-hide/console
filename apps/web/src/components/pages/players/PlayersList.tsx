@@ -15,11 +15,13 @@ import { getRouteApi } from "@tanstack/react-router";
 import type { ChangeEvent, FC } from "react";
 import { Fragment, useCallback, useEffect, useState } from "react";
 
-import type { PlayerPosition } from "./-queries/players";
-import { PLAYER_POSITIONS, playersQueryOptions } from "./-queries/players";
+import {
+	PLAYER_POSITIONS,
+	type PlayerPosition,
+	playersQueryOptions,
+} from "@/routes/-queries/players";
 
-// getRouteApi avoids a circular import with players.tsx, which imports this component.
-const routeApi = getRouteApi("/players");
+const routeApi = getRouteApi("/players/");
 
 const POSITION_SELECT_DATA = PLAYER_POSITIONS.map((position) => ({
 	value: position,
@@ -28,12 +30,10 @@ const POSITION_SELECT_DATA = PLAYER_POSITIONS.map((position) => ({
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-export const PlayersPage: FC = () => {
+export const PlayersList: FC = () => {
 	const search = routeApi.useSearch();
 	const navigate = routeApi.useNavigate();
 
-	// loaderDeps re-triggers and resolves the loader before a param change
-	// re-renders this, so useSuspenseQuery always reads a warm cache — no flash.
 	const { data: playersResponse } = useSuspenseQuery(
 		playersQueryOptions(search),
 	);
@@ -42,7 +42,7 @@ export const PlayersPage: FC = () => {
 
 	const [searchDraft, setSearchDraft] = useState(search.search ?? "");
 
-	// Syncs the draft with back/forward navigation, not just typing.
+	// Syncs the draft with back/forward navigation.
 	useEffect(() => {
 		setSearchDraft(search.search ?? "");
 	}, [search.search]);
@@ -90,13 +90,6 @@ export const PlayersPage: FC = () => {
 		[navigate],
 	);
 
-	const hasActiveFilters =
-		search.search !== undefined || search.position !== undefined;
-	// data can be empty either because the result set genuinely has zero rows,
-	// or because the requested page is past the last page of a nonempty result
-	// (the API has no upper bound on `page`) — these need different messaging.
-	const isPageOutOfRange = players.length === 0 && meta.total > 0;
-
 	const handleClearFilters = useCallback(async (): Promise<void> => {
 		await navigate({
 			search: (previous) => ({
@@ -111,6 +104,10 @@ export const PlayersPage: FC = () => {
 	const handleGoToFirstPage = useCallback(async (): Promise<void> => {
 		await navigate({ search: (previous) => ({ ...previous, page: 1 }) });
 	}, [navigate]);
+
+	const hasActiveFilters =
+		search.search !== undefined || search.position !== undefined;
+	const isPageOutOfRange = players.length === 0 && meta.total > 0;
 
 	return (
 		<Stack p="xl">

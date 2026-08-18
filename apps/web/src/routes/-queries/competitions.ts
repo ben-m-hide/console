@@ -2,7 +2,7 @@ import type { Competition } from "@console-next/shared";
 import { CompetitionSchema } from "@console-next/shared";
 import { queryOptions } from "@tanstack/react-query";
 
-import { get } from "@/lib/api/api-client";
+import { get } from "@/lib/api";
 
 const fetchCompetitions = async (
 	signal: AbortSignal,

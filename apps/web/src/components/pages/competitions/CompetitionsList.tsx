@@ -2,12 +2,9 @@ import { List, Stack, Title } from "@mantine/core";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 
-import { competitionsQueryOptions } from "./-queries/competitions";
+import { competitionsQueryOptions } from "@/routes/-queries/competitions";
 
-// The loader has already resolved this query, so useSuspenseQuery reads a
-// warm cache — no flash. Loading/error states live in the route's
-// pendingComponent/errorComponent.
-export const IndexPage: FC = () => {
+export const CompetitionsList: FC = () => {
 	const { data: competitions } = useSuspenseQuery(competitionsQueryOptions);
 
 	return (

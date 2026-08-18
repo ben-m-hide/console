@@ -5,22 +5,12 @@ import { render } from "@testing-library/react";
 import type { FC, PropsWithChildren, ReactElement, ReactNode } from "react";
 import { Component, Fragment, Suspense } from "react";
 
-import { createQueryClient } from "@/lib/query-client";
-
-// Exported so a pending-state test can assert on the same string.
-export const LOADING_FALLBACK_TEXT = "Loading";
-
-// Retries are off: TanStack Query retries 3x with backoff by default, which
-// turns an error-state test into a timeout rather than a clean failure.
-export const createTestQueryClient = (): QueryClient =>
-	createQueryClient({ defaultOptions: { queries: { retry: false } } });
+import { createQueryClient } from "@/lib";
 
 interface ErrorBoundaryState {
 	message: string | null;
 }
 
-// useSuspenseQuery throws to the nearest boundary rather than returning an
-// error flag — the route's errorComponent plays this role in the app.
 export class TestErrorBoundary extends Component<
 	PropsWithChildren,
 	ErrorBoundaryState
@@ -40,11 +30,15 @@ export class TestErrorBoundary extends Component<
 	}
 }
 
+export const LOADING_FALLBACK_TEXT = "Loading";
+
+export const createTestQueryClient = (): QueryClient =>
+	createQueryClient({ defaultOptions: { queries: { retry: false } } });
+
 interface TestProvidersProps extends PropsWithChildren {
 	queryClient: QueryClient;
 }
 
-// Mirrors main.tsx's provider nesting.
 export const TestProviders: FC<TestProvidersProps> = ({
 	children,
 	queryClient,
@@ -54,8 +48,6 @@ export const TestProviders: FC<TestProvidersProps> = ({
 	</MantineProvider>
 );
 
-// For component-level tests: adds the Suspense and error boundaries that the
-// route would otherwise supply via pendingComponent/errorComponent.
 export const renderWithProviders = (
 	ui: ReactNode,
 ): ReturnType<typeof render> => {

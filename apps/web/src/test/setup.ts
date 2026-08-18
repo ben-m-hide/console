@@ -1,4 +1,4 @@
-import { API } from "@/lib/api/api-client";
+import { API } from "@/lib/api";
 
 import "@testing-library/jest-dom/vitest";
 
