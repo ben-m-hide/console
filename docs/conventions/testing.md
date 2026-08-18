@@ -6,11 +6,11 @@ Applies to Testing Library-based tests (`*.test.tsx`) in this repo.
 
 ```tsx
 // Avoid
-render(<IndexPage />);
+render(<CompetitionsList />);
 expect(screen.getByText("Premier League")).toBeInTheDocument();
 
 // Prefer
-const { getByText } = render(<IndexPage />);
+const { getByText } = render(<CompetitionsList />);
 expect(getByText("Premier League")).toBeInTheDocument();
 ```
 
@@ -26,7 +26,7 @@ expect(getByText(/Premier League/)).toBeInTheDocument();
 expect(getByText("Premier League")).toBeInTheDocument();
 ```
 
-When the target text is genuinely only part of a node's full text content (e.g. `-index-page.tsx` renders `{competition.name} — {competition.country}` as one node, `"Premier League — England"`), use RTL's own `{ exact: false }` option rather than reaching for a regex — same plain-string matcher, substring semantics made explicit instead of implicit in a pattern.
+When the target text is genuinely only part of a node's full text content (e.g. `CompetitionsList.tsx` renders `{competition.name} — {competition.country}` as one node, `"Premier League — England"`), use RTL's own `{ exact: false }` option rather than reaching for a regex — same plain-string matcher, substring semantics made explicit instead of implicit in a pattern.
 
 ```tsx
 // Avoid — regex to work around a partial match
