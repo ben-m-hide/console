@@ -1,13 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { PlayersPage } from "./-players-page";
-import { PlayersError, PlayersPending } from "./-players-page-states";
-import { PlayersSearchSchema, playersQueryOptions } from "./-queries/players";
+import { PlayersList } from "@/components/pages/players/PlayersList";
 
-export const Route = createFileRoute("/players")({
+import { PlayersError, PlayersPending } from "../-players-page-states";
+import { PlayersSearchSchema, playersQueryOptions } from "../-queries/players";
+
+export const Route = createFileRoute("/players/")({
 	validateSearch: PlayersSearchSchema,
-	// Renamed to avoid a search.search collision — the outer object is the
-	// route's search params, one of which is itself the text-search field.
 	loaderDeps: ({ search: routeSearch }) => ({
 		page: routeSearch.page,
 		pageSize: routeSearch.pageSize,
@@ -16,7 +15,7 @@ export const Route = createFileRoute("/players")({
 	}),
 	loader: ({ context: { queryClient }, deps }) =>
 		queryClient.ensureQueryData(playersQueryOptions(deps)),
-	component: PlayersPage,
+	component: PlayersList,
 	pendingComponent: PlayersPending,
 	errorComponent: PlayersError,
 });

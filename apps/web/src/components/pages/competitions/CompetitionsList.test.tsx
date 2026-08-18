@@ -1,16 +1,15 @@
 import { waitFor } from "@testing-library/react";
 import axe from "axe-core";
 
+import { CompetitionsList } from "@/components/pages/competitions/CompetitionsList";
 import {
 	LOADING_FALLBACK_TEXT,
 	renderWithProviders,
 } from "@/test/render-with-providers";
 import { SAMPLE_COMPETITIONS } from "@/test/route-fixtures";
 
-import { IndexPage } from "./-index-page";
-
-const renderIndexPage = (): ReturnType<typeof renderWithProviders> =>
-	renderWithProviders(<IndexPage />);
+const renderCompetitionsList = (): ReturnType<typeof renderWithProviders> =>
+	renderWithProviders(<CompetitionsList />);
 
 const stubFetchResolving = (body: unknown, ok = true): void => {
 	vi.stubGlobal(
@@ -27,20 +26,20 @@ const stubFetchResolving = (body: unknown, ok = true): void => {
 	);
 };
 
-describe("IndexPage", () => {
+describe("CompetitionsList", () => {
 	afterEach(() => {
 		vi.unstubAllGlobals();
 	});
 
 	it("suspends while the request is in flight", () => {
 		stubFetchResolving(SAMPLE_COMPETITIONS);
-		const { getByText } = renderIndexPage();
+		const { getByText } = renderCompetitionsList();
 		expect(getByText(LOADING_FALLBACK_TEXT)).toBeInTheDocument();
 	});
 
 	it("renders the competitions returned by the API", async () => {
 		stubFetchResolving(SAMPLE_COMPETITIONS);
-		const { getByText } = renderIndexPage();
+		const { getByText } = renderCompetitionsList();
 		await waitFor(() => {
 			expect(getByText("Premier League", { exact: false })).toBeInTheDocument();
 		});
@@ -52,7 +51,7 @@ describe("IndexPage", () => {
 			{ error: { code: 500, message: "Internal Server Error" } },
 			false,
 		);
-		const { getByRole } = renderIndexPage();
+		const { getByRole } = renderCompetitionsList();
 		await waitFor(() => {
 			expect(getByRole("alert")).toHaveTextContent("Internal Server Error");
 		});
@@ -60,7 +59,7 @@ describe("IndexPage", () => {
 
 	it("throws to the error boundary when the response does not match the schema", async () => {
 		stubFetchResolving([{ id: 1, name: "Premier League" }]);
-		const { getByRole } = renderIndexPage();
+		const { getByRole } = renderCompetitionsList();
 		await waitFor(() => {
 			expect(getByRole("alert")).toHaveTextContent(
 				"Response did not match the expected schema",
@@ -70,7 +69,7 @@ describe("IndexPage", () => {
 
 	it("has no accessibility violations", async () => {
 		stubFetchResolving(SAMPLE_COMPETITIONS);
-		const { container, getByText } = renderIndexPage();
+		const { container, getByText } = renderCompetitionsList();
 		await waitFor(() => {
 			expect(getByText("Premier League", { exact: false })).toBeInTheDocument();
 		});

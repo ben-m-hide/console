@@ -2,7 +2,7 @@ import { PlayerSchema } from "@console-next/shared";
 import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
 
-import { get } from "@/lib/api/api-client";
+import { get } from "@/lib/api";
 
 // Mirrors apps/api's default (build-players-query.ts); no shared package
 // exports it across the two runtimes.
