@@ -7,7 +7,6 @@ import queryStringAddon, {
 	type QueryStringAddon,
 } from "wretch/addons/queryString";
 
-import type { PathParams, QueryParams } from "@/lib/api/types";
 import {
 	buildPath,
 	cleanQueryParams,
@@ -15,8 +14,10 @@ import {
 	getPathWithPrefix,
 	getStatus,
 	getUrl,
+	type PathParams,
+	type QueryParams,
 	toApiErrorMessage,
-} from "@/lib/api/utils";
+} from "@/lib/api";
 
 import { ApiError } from "./api-error";
 

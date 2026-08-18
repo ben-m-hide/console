@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 
-import type { ListRequest } from "@/queries/common/list";
-import { list } from "@/queries/common/list";
+import type { ListRequest } from "./list";
+import { list } from "./list";
 
 type ListQueryOptionsRequest<T> = Omit<ListRequest<T>, "signal">;
 
