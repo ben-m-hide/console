@@ -61,7 +61,9 @@ src/
 │       └── players.ts
 ├── routing/                    # shared search/pagination schemas (routes' loaderDeps/validateSearch)
 │   ├── search.ts                    # ListSearchSchema, ListMetaSchema
-│   └── player.ts                    # PlayersSearchSchema (extends search.ts), PLAYER_POSITIONS
+│   └── player.ts                    # PlayersSearchSchema (extends search.ts)
+├── types/                      # domain-level types not tied to one route
+│   └── enums.ts                     # PlayerPosition (ADR 0018)
 ├── components/
 │   ├── pages/                  # one folder per route's page component
 │   │   ├── competitions/

@@ -2,7 +2,7 @@ import { List, Stack, Title } from "@mantine/core";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import type { FC } from "react";
 
-import { competitionsListQueryOptions } from "@/queries/competitions/competitions";
+import { competitionsListQueryOptions } from "@/queries";
 
 export const CompetitionsList: FC = () => {
 	const { data: competitionsResponse } = useSuspenseQuery(

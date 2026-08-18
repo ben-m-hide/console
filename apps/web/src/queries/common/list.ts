@@ -1,7 +1,7 @@
 import type { z } from "zod";
 
+import type { PathParams, QueryParams } from "@/lib/api";
 import { get } from "@/lib/api";
-import type { PathParams, QueryParams } from "@/lib/api/types";
 
 export interface ListRequest<T> {
 	path: string;

@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { GenericError } from "@/components/common/GenericError";
 import { GenericPending } from "@/components/common/GenericPending";
 import { CompetitionsList } from "@/components/pages/competitions/CompetitionsList";
-import { competitionsListQueryOptions } from "@/queries/competitions/competitions";
+import { competitionsListQueryOptions } from "@/queries";
 
 export const Route = createFileRoute("/")({
 	loader: ({ context: { queryClient } }) =>

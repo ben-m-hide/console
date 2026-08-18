@@ -1,5 +1,6 @@
 import {
 	Button,
+	type ComboboxData,
 	EmptyState,
 	Group,
 	Pagination,
@@ -13,17 +14,12 @@ import {
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import type { ChangeEvent, FC } from "react";
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 
-import { playersListQueryOptions } from "@/queries/players/players";
-import { PLAYER_POSITIONS, type PlayerPosition } from "@/routing/player";
+import { playersListQueryOptions } from "@/queries";
+import { PlayerPosition } from "@/types";
 
 const routeApi = getRouteApi("/players/");
-
-const POSITION_SELECT_DATA = PLAYER_POSITIONS.map((position) => ({
-	value: position,
-	label: position,
-}));
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -38,6 +34,15 @@ export const PlayersList: FC = () => {
 	const meta = playersResponse.meta;
 
 	const [searchDraft, setSearchDraft] = useState(search.search ?? "");
+
+	const playerPositionOptions = useMemo<ComboboxData<PlayerPosition>>(
+		() =>
+			Object.values(PlayerPosition).map((position) => ({
+				value: position,
+				label: position,
+			})),
+		[],
+	);
 
 	// Syncs the draft with back/forward navigation.
 	useEffect(() => {
@@ -119,7 +124,7 @@ export const PlayersList: FC = () => {
 				<Select
 					aria-label="Filter by position"
 					placeholder="All positions"
-					data={POSITION_SELECT_DATA}
+					data={playerPositionOptions}
 					value={search.position ?? null}
 					onChange={handlePositionChange}
 					clearable
