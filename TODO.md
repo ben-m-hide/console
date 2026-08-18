@@ -57,6 +57,8 @@ Task tracking for console-next, following the [todo-md](https://github.com/todo-
 
 - [ ] Set `connect-src` to the API's actual origin once it's deployed to Render — currently an explicit `'self'` placeholder (see ADR 0007/0008 cross-reference); will need updating again on the later AWS migration (ADR 0010)
 
+- [ ] Add `@tanstack/eslint-plugin-query`/`@tanstack/eslint-plugin-router` (minimal ESLint alongside Biome, scoped to `apps/web` only — Biome has no equivalent) — **blocked, confirmed 2026-08-18, not just assumed**: `@typescript-eslint/parser` (required to parse `.ts`/`.tsx` at all, not only for the two plugins' type-aware rules) throws at import time under `typescript@^7.0.2`, on both stable and canary releases. Tracked upstream: [typescript-eslint#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940), open, no ETA. TypeScript's own "side-by-side with 6.0" workaround was attempted and didn't resolve cleanly under Bun (self-referencing alias install — see ADR 0003's update). Revisit once #10940 lands; when it does, the router plugin's rules (`create-route-property-order`, `route-param-names`) are pure-AST and need nothing but a working parser — no type-aware setup required for those two.
+
 ## Frontend housekeeping & conventions (raised 2026-08-17, after the Players screen)
 
 Blocked on `feat/players-screen` merging, and the doc-touching items also blocked on `docs/sync-stale-docs` merging first (both touch `docs/design/frontend-ui-ux.md`/`frontend-architecture.md` — do this after, not in parallel, to avoid a third divergent copy).

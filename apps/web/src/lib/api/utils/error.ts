@@ -1,38 +1,26 @@
+import { z } from "zod";
+
+const ApiErrorSchema = z.object({
+	error: z.object({
+		message: z.string(),
+	}),
+});
+
 export const getMessage = (error: unknown): string =>
 	error instanceof Error ? error.message : String(error);
 
 export const getStatus = (error: unknown): number | undefined =>
-	typeof error === "object" &&
-	error !== null &&
-	"status" in error &&
-	typeof error.status === "number"
-		? error.status
-		: undefined;
+	z.object({ status: z.number() }).safeParse(error).data?.status;
 
 export const getUrl = (error: unknown): string | undefined =>
-	typeof error === "object" &&
-	error !== null &&
-	"url" in error &&
-	typeof error.url === "string"
-		? error.url
-		: undefined;
+	z.object({ url: z.string() }).safeParse(error).data?.url;
 
 export const toApiErrorMessage = (rawMessage: string): string => {
 	try {
-		const parsed: unknown = JSON.parse(rawMessage);
-		if (
-			typeof parsed === "object" &&
-			parsed !== null &&
-			"error" in parsed &&
-			typeof parsed.error === "object" &&
-			parsed.error !== null &&
-			"message" in parsed.error &&
-			typeof parsed.error.message === "string"
-		) {
-			return parsed.error.message;
-		}
+		const parsed = ApiErrorSchema.safeParse(JSON.parse(rawMessage));
+		if (parsed.success) return parsed.data.error.message;
 	} catch {
-		// Not JSON — a network failure or a non-JSON error body.
+		// Fall back to raw message if JSON parse fails
 	}
 	return rawMessage;
 };
