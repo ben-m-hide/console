@@ -35,7 +35,7 @@ Bun workspaces (`"workspaces": ["apps/*", "packages/*"]` in the root `package.js
 - Its own `package.json` and `tsconfig.json`.
 - A project reference added to the root `tsconfig.json`'s `references` array — otherwise `tsc -b --noEmit` silently skips it. (This bit us before, in a different form: the removed `.nvmrc`/`engines.node` pin was decorative for the same underlying reason — a declaration nothing actually checks.)
 - An entry in `release-please-config.json` / `.release-please-manifest.json` if it should get its own versioned changelog.
-- `exactOptionalPropertyTypes`: try leaving it on first (it's on by default in every `tsconfig.app.json`-style config here) and only scope it off if a third-party library's own types don't satisfy it — checked, not assumed, for both `infra/` (had to turn it off, `aws-cdk-lib`'s types) and `apps/api` (didn't, Hono's types are clean).
+- `exactOptionalPropertyTypes` is off in the shared `tsconfig.base.json` (see `docs/adr/0017-disable-exactoptionalpropertytypes.md`) — a new package extending it needs no override either way.
 
 ## Dependency pinning policy
 

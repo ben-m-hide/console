@@ -1,13 +1,18 @@
-import type { PathParams } from "@/lib/api/types/requests";
+import type { PathParams } from "@/lib/api/types";
 
-const pathPlaceholderPattern = /:(\w+)/g;
+const PATH_PLACEHOLDER_PATTERN = /:(\w+)/g;
+
+const API_VERSION_PREFIX = "/api/v1";
+
+export const getPathWithPrefix = (path: string = ""): string =>
+	`${API_VERSION_PREFIX}${!path || path.startsWith("/") ? "" : "/"}${path}`;
 
 export const buildPath = (
 	placeholderPath: string,
 	pathParams: PathParams,
 ): string => {
 	const path = placeholderPath.replace(
-		pathPlaceholderPattern,
+		PATH_PLACEHOLDER_PATTERN,
 		(_match, paramKey: string) => {
 			if (paramKey in pathParams) {
 				return String(pathParams[paramKey]);

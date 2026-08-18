@@ -6,9 +6,11 @@ import { asc, desc, eq } from "drizzle-orm";
 
 import { db } from "../db";
 
-// Bare array, not the paginated envelope /players uses: season count is
-// small and bounded (one row per competition-season) — no need to paginate.
-const SeasonListResponseSchema = z.array(SeasonSchema).openapi("SeasonList");
+// Envelope, not paginated — every list endpoint returns { data }, whether
+// or not it paginates. See PROJECT.md §4.
+const SeasonListResponseSchema = z
+	.object({ data: z.array(SeasonSchema) })
+	.openapi("SeasonListResponse");
 
 const SeasonListQuerySchema = z.object({
 	competition: z
@@ -50,6 +52,6 @@ export const registerSeasonsRoute = (app: OpenAPIHono): void => {
 			.where(where)
 			.orderBy(asc(seasons.competitionId), desc(seasons.startDate));
 
-		return c.json(rows);
+		return c.json({ data: rows });
 	});
 };

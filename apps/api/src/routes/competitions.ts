@@ -6,8 +6,8 @@ import { createRoute, z } from "@hono/zod-openapi";
 import { db } from "../db";
 
 const CompetitionListResponseSchema = z
-	.array(CompetitionSchema)
-	.openapi("CompetitionList");
+	.object({ data: z.array(CompetitionSchema) })
+	.openapi("CompetitionListResponse");
 
 export const competitionsRoute = createRoute({
 	method: "get",
@@ -25,6 +25,6 @@ export const competitionsRoute = createRoute({
 export const registerCompetitionsRoute = (app: OpenAPIHono): void => {
 	app.openapi(competitionsRoute, async (c) => {
 		const rows = await db.select().from(competitions);
-		return c.json(rows);
+		return c.json({ data: rows });
 	});
 };

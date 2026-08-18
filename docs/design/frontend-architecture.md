@@ -30,7 +30,7 @@ So `features/` is a **community overlay** — influential (bulletproof-react, 35
 
 **The honest framing for any ADR: this is a convention question with no official answer.** Anyone calling `features/` "the standard" is generalising from React _without_ file-based routing.
 
-**The one thing the router does officially bless is route-folder colocation** via the `-` prefix — files excluded from the route tree but still importable, explicitly documented as "used to colocate logic in route folders". `apps/web` already does exactly this (`routes/-queries/`, `routes/-index-page-states.tsx`) for route-scoped queries and state. **The project is already on the documented path.**
+**The one thing the router does officially bless is route-folder colocation** via the `-` prefix — files excluded from the route tree but still importable, explicitly documented as "used to colocate logic in route folders". `apps/web` already does exactly this (`players/-players.test.tsx`) for route-scoped tests. Query options factories moved out to `src/queries/` (below) once they stopped being route-scoped — a generic `list()`/`listQueryOptions()` shared across entities isn't "logic that belongs to one route folder" anymore. **The project is still on the documented path for what actually is route-scoped.**
 
 ---
 
@@ -46,14 +46,22 @@ Route folders use **folder + `index.tsx`**, not flat dot-notation — `routes/pl
 src/
 ├── routes/                     # file-based route tree
 │   ├── __root.tsx
-│   ├── index.tsx                    # Dashboard
-│   ├── -index-page-states.tsx       # colocated: loading/error state components
+│   ├── index.tsx                    # Dashboard — wires CompetitionsList to the route
 │   ├── players/
 │   │   ├── index.tsx                # thin: wires PlayersList to the route
-│   │   └── -players.test.tsx        # colocated, route-level test
-│   └── -queries/                    # excluded from route tree, importable
-│       ├── competitions.ts          # queryOptions factories
+│   │   └── -index.test.tsx          # colocated, route-level test
+│   └── -index.test.tsx
+├── queries/                    # generic list()/listQueryOptions(), one folder per entity
+│   ├── common/
+│   │   ├── list.ts                  # generic fetch+parse, any entity's schema
+│   │   └── query-options.ts         # generic queryOptions() factory over list()
+│   ├── competitions/
+│   │   └── competitions.ts
+│   └── players/
 │       └── players.ts
+├── routing/                    # shared search/pagination schemas (routes' loaderDeps/validateSearch)
+│   ├── search.ts                    # ListSearchSchema, ListMetaSchema
+│   └── player.ts                    # PlayersSearchSchema (extends search.ts), PLAYER_POSITIONS
 ├── components/
 │   ├── pages/                  # one folder per route's page component
 │   │   ├── competitions/
@@ -63,11 +71,15 @@ src/
 │   │       ├── PlayersList.tsx
 │   │       └── PlayersList.test.tsx
 │   └── common/                 # genuinely shared, second-consumer-gated
-│       └── DevTools.tsx
+│       ├── DevTools.tsx
+│       ├── GenericPending.tsx       # loading state, parameterized by title
+│       └── GenericError.tsx         # error state, parameterized by title
 ├── config/                     # environment.ts (MODE-based isDev())
-├── lib/                        # api/, query-client.ts, theme.ts
+├── lib/                        # api/ (client, types/), query-client.ts, theme.ts
 └── main.tsx
 ```
+
+`GenericPending`/`GenericError` (superseding the earlier per-screen `-index-page-states.tsx`/`-players-page-states.tsx`) and the generic `list()`/`listQueryOptions()` pair moved query options out of `routes/-queries/` once a second entity made the fetch+parse duplication real and identical across screens — see `docs/adr/0016-wretch-for-api-client.md` for why this stays two small functions, not a generic CRUD/entity-map engine. Both live in `queries/common/`, not `lib/api/` — `list()` does `safeParse` against a Zod schema, which ADR 0016 scopes out of `lib/api/`'s pure-transport layer; `lib/api/` builds the request (base URL, `/api/v1` version prefix, headers, error mapping) and hands back an unvalidated body.
 
 `src/hooks/` still appears **when a second consumer needs it** — matching what every official example does, rather than pre-creating an empty directory.
 
@@ -105,7 +117,7 @@ This never made the shipped index screen wrong — plain `useQuery` worked, and 
 ### Per-route pattern
 
 ```tsx
-// routes/-queries/players.ts
+// queries/players/players.ts
 export const playersQueryOptions = (params: PlayersParams) =>
   queryOptions({
     queryKey: ["players", params],
@@ -124,7 +136,7 @@ export const Route = createFileRoute("/players/")({
 });
 ```
 
-**Adopt now: `queryOptions()` factories with hierarchical keys** (`["players", "list", filters]` / `["players", "detail", id]`), colocated in `routes/-queries/`. Highest value-to-cost item available — it is the single definition shared between a loader and a component, and it is already justified at one query.
+**Adopt now: `queryOptions()` factories**, built on `src/queries/common/query-options.ts`'s generic `listQueryOptions()`, one file per entity under `src/queries/<entity>/`. Highest value-to-cost item available — it is the single definition shared between a loader and a component, and it is already justified at one query. **Correction 2026-08-18**: the original plan here was hierarchical, human-chosen keys (`["players", "list", filters]` / `["players", "detail", id]`); the generic factory that shipped instead derives `queryKey` from the request itself (`[path, pathParams, queryParams]`). Callers pass a bare resource path (`"players"`, not `"/api/v1/players"` — `lib/api`'s `getPathWithPrefix` adds the version prefix), so `queryKey[0]` is still the plain entity name and `invalidateQueries({ queryKey: ["players"] })` matches every `players` query regardless of filters — prefix invalidation works. What it still can't do is express a key shaped differently from the request, e.g. gotcha #9's `["players", "compare", { ids, season }]` for `/players/compare`, which isn't a `path`/`pathParams`/`queryParams` shape at all. Revisit if that need becomes real.
 
 | Screen                | Pattern                                                                                         |
 | --------------------- | ----------------------------------------------------------------------------------------------- |
@@ -206,7 +218,7 @@ Promotion tiers, matching `docs/conventions/typescript.md`:
 
 ## 6. API client
 
-**Done.** `apps/web/src/lib/api/` — `api-error.ts` (`ApiError` class, `isApiError` guard), `api-client.ts` (an `ApiClass` singleton exported as `API`, `configure()` + `getClient()`/`get<T>()`), `types/requests.ts` (`Param`/`PathParams`/`QueryParams`), `utils/{error,params,path}.ts`. Used by both `-queries/competitions.ts` and `-queries/players.ts`. See [ADR 0016](../adr/0016-wretch-for-api-client.md) for the full trade-off: hand-written, not generated from the OpenAPI document — 4 endpoints don't clear the bar where generation's payoff (not hand-typing shapes) beats what `packages/shared`'s existing Zod schemas already provide for free. Response validation is unchanged — `safeParse` immediately after `get()` resolves.
+**Done.** `apps/web/src/lib/api/` — `api-error.ts` (`ApiError` class, `isApiError` guard), `api-client.ts` (an `ApiClass` singleton exported as `API`, `configure()` + `getClient()`/`get<T>()`), `types/requests.ts` (`Param`/`PathParams`/`QueryParams`), `utils/{error,params,path}.ts`. Used by both `queries/competitions/competitions.ts` and `queries/players/players.ts`, via the shared `list()` helper. See [ADR 0016](../adr/0016-wretch-for-api-client.md) for the full trade-off: hand-written, not generated from the OpenAPI document — 4 endpoints don't clear the bar where generation's payoff (not hand-typing shapes) beats what `packages/shared`'s existing Zod schemas already provide for free. Response validation is unchanged — `safeParse` immediately after `get()` resolves.
 
 **Trigger: the third endpoint, or the first time base-URL or error handling is copy-pasted.** Building the Players screen crossed this; this work closed it.
 
@@ -228,7 +240,7 @@ _(Reasoning from mechanism, not measurement.)_ **Resolving action: build the she
 
 ## 7. Testing
 
-Tests stay **beside their source** — page components under `src/components/pages/<feature>/`, route wiring under `src/routes/` (e.g. `players/-players.test.tsx`) — already correct, and what Vitest defaults to.
+Tests stay **beside their source** — page components under `src/components/pages/<feature>/`, route wiring under `src/routes/` (e.g. `players/-index.test.tsx`) — already correct, and what Vitest defaults to.
 
 - **Unit/component**: Vitest + RTL + axe-core. `color-contrast` disabled (no jsdom layout engine), so **contrast is verified by design, not by test** — see [`frontend-ui-ux.md`](./frontend-ui-ux.md) §5.1.
 - **Routes**: `createMemoryHistory` per `how-to/test-file-based-routing.md`, with a per-test `QueryClient` via `createQueryClient({ defaultOptions: { queries: { retry: false } } })`.
@@ -248,20 +260,20 @@ Recorded here so the frontend's error strategy is not designed as if it were the
 
 Three states, not two. **"Trigger already met"** is the honest middle: the condition has fired but the work is unscheduled, which is different from "not yet needed" and must not hide inside the deferred column.
 
-| #   | Item                                            | State    | Trigger / note                                                                                                                                                           |
-| --- | ----------------------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1   | Route-folder colocation (`-` prefix)            | ✅ done  | Already correct                                                                                                                                                          |
-| 2   | Tests beside source                             | ✅ done  | Already correct                                                                                                                                                          |
-| 3   | Router context + provider rewiring              | ✅ done  | Landed 2026-08-16 — see `docs/plans/2026-08-15-router-query-context.md`                                                                                                  |
-| 4   | Default `staleTime` (5 min)                     | ✅ done  | Landed with #3. Root error boundary + `notFoundComponent` deliberately split out as error-surface concerns — still to do                                                 |
-| 5   | `queryOptions()` factories, hierarchical keys   | ✅ done  | `routes/-queries/competitions.ts`, landed with #3                                                                                                                        |
-| 6   | Search-param state                              | 🔔 fired | Players is build-order step 1 and needs pagination + filters. Sequence it in.                                                                                            |
-| 7   | API client (hand-written wretch, not generated) | ✅ done  | Landed 2026-08-17 — see [ADR 0016](../adr/0016-wretch-for-api-client.md)                                                                                                 |
-| 8   | `src/features/<domain>/`                        | 🔔 fired | The players branch is 3 routes on one entity — the stated trigger. Introduce for **that domain only**.                                                                   |
-| 9   | `src/components/pages/<feature>/`               | ✅ done  | Superseded the second-consumer trigger — a route's page component always splits out, for testability. `src/components/common/`, `src/hooks/` still second-consumer-gated |
-| 10  | First Zustand store                             | ⏳ defer | First client-only cross-route state. Navbar `opened` is the likely first.                                                                                                |
-| 11  | Import-boundary enforcement                     | ⏳ defer | Lands with #8, but **only after** a deliberately-violating import proves Biome errors                                                                                    |
-| 12  | Feature-Sliced Design                           | ❌ no    | Not this app                                                                                                                                                             |
+| #   | Item                                             | State    | Trigger / note                                                                                                                                                                                                                                 |
+| --- | ------------------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Route-folder colocation (`-` prefix)             | ✅ done  | Already correct                                                                                                                                                                                                                                |
+| 2   | Tests beside source                              | ✅ done  | Already correct                                                                                                                                                                                                                                |
+| 3   | Router context + provider rewiring               | ✅ done  | Landed 2026-08-16 — see `docs/plans/2026-08-15-router-query-context.md`                                                                                                                                                                        |
+| 4   | Default `staleTime` (5 min)                      | ✅ done  | Landed with #3. Root error boundary + `notFoundComponent` deliberately split out as error-surface concerns — still to do                                                                                                                       |
+| 5   | `queryOptions()` factories, request-derived keys | ✅ done  | `queries/competitions/competitions.ts`, landed with #3; generalized into `queries/common/list.ts` + `queries/common/query-options.ts`'s `listQueryOptions()` 2026-08-18; see §2's correction note — keys are request-derived, not hierarchical |
+| 6   | Search-param state                               | 🔔 fired | Players is build-order step 1 and needs pagination + filters. Sequence it in.                                                                                                                                                                  |
+| 7   | API client (hand-written wretch, not generated)  | ✅ done  | Landed 2026-08-17 — see [ADR 0016](../adr/0016-wretch-for-api-client.md)                                                                                                                                                                       |
+| 8   | `src/features/<domain>/`                         | 🔔 fired | The players branch is 3 routes on one entity — the stated trigger. Introduce for **that domain only**.                                                                                                                                         |
+| 9   | `src/components/pages/<feature>/`                | ✅ done  | Superseded the second-consumer trigger — a route's page component always splits out, for testability. `src/components/common/`, `src/hooks/` still second-consumer-gated                                                                       |
+| 10  | First Zustand store                              | ⏳ defer | First client-only cross-route state. Navbar `opened` is the likely first.                                                                                                                                                                      |
+| 11  | Import-boundary enforcement                      | ⏳ defer | Lands with #8, but **only after** a deliberately-violating import proves Biome errors                                                                                                                                                          |
+| 12  | Feature-Sliced Design                            | ❌ no    | Not this app                                                                                                                                                                                                                                   |
 
 ---
 

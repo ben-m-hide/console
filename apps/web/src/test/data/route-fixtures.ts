@@ -1,8 +1,8 @@
-import type { PlayerListMeta } from "@/routes/-queries/players";
+import type { ListMetaParams } from "@/routing/search";
 
 interface SamplePlayersResponse {
 	data: Array<unknown>;
-	meta: PlayerListMeta;
+	meta: ListMetaParams;
 }
 
 export const samplePlayersResponse = (

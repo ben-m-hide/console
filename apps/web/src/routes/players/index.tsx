@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { GenericError } from "@/components/common/GenericError";
+import { GenericPending } from "@/components/common/GenericPending";
 import { PlayersList } from "@/components/pages/players/PlayersList";
-
-import { PlayersError, PlayersPending } from "../-players-page-states";
-import { PlayersSearchSchema, playersQueryOptions } from "../-queries/players";
+import { playersListQueryOptions } from "@/queries/players/players";
+import { PlayersSearchSchema } from "@/routing/player";
 
 export const Route = createFileRoute("/players/")({
 	validateSearch: PlayersSearchSchema,
@@ -14,8 +15,8 @@ export const Route = createFileRoute("/players/")({
 		position: routeSearch.position,
 	}),
 	loader: ({ context: { queryClient }, deps }) =>
-		queryClient.ensureQueryData(playersQueryOptions(deps)),
+		queryClient.ensureQueryData(playersListQueryOptions(deps)),
 	component: PlayersList,
-	pendingComponent: PlayersPending,
-	errorComponent: PlayersError,
+	pendingComponent: () => <GenericPending title="Players" />,
+	errorComponent: ({ error }) => <GenericError error={error} title="Players" />,
 });

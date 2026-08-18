@@ -1,4 +1,4 @@
-import type { QueryParams } from "@/lib/api/types/requests";
+import type { QueryParams } from "@/lib/api/types";
 
 export const cleanQueryParams = (
 	params: QueryParams,

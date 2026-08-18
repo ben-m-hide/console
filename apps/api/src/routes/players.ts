@@ -22,8 +22,8 @@ const PlayerPageMetaSchema = z
 	})
 	.openapi("PlayerPageMeta");
 
-// Envelope, not a bare array like /competitions: pagination needs `total`.
-// See PROJECT.md §4 for which shape applies when.
+// Envelope with pagination meta — every list endpoint returns { data }, but
+// this one also needs `total` for pagination. See PROJECT.md §4.
 const PlayerListResponseSchema = z
 	.object({
 		data: z.array(PlayerSchema),

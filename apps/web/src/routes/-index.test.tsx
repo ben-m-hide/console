@@ -15,7 +15,7 @@ describe("index route", () => {
 		const fetchMock = vi.fn().mockResolvedValue({
 			ok: true,
 			status: 200,
-			json: async () => SAMPLE_COMPETITIONS,
+			json: async () => ({ data: SAMPLE_COMPETITIONS }),
 		});
 		vi.stubGlobal("fetch", fetchMock);
 

@@ -109,7 +109,7 @@
 			}
 		},
 		{
-			"includes": ["apps/web/src/routes/-queries/**"],
+			"includes": ["apps/web/src/queries/**"],
 			"linter": {
 				"rules": {
 					"nursery": {
