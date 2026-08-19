@@ -7,7 +7,7 @@ This is a monorepo — the surface depends on which part changed, not one repo-w
 
 ## Pick the surface
 
-- **`apps/web` change** → drive it via `apps/web/.claude/skills/run-console` (Playwright against the real dev server, not a unit test import).
+- **`apps/web` change** → drive it via `apps/web/.claude/skills/run-web` (Playwright against the real dev server, not a unit test import).
 - **`apps/api` change** → drive it via `apps/api/.claude/skills/run-api`'s `smoke.sh` (real HTTP requests against the running server).
 - **`apps/ingestion` change** → run the real script against Sportmonks + the `local-dev` Neon branch (see `apps/ingestion/CLAUDE.md`); confirm via a live DB query, not just a clean exit code.
 - **`.github/workflows/*.yml` change** → the surface is GitHub Actions itself, not the YAML. You can't "run" a workflow file locally in a way that proves anything. Push it (or find the PR that already did), then read what actually happened:
