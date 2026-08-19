@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { integer, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
 import { seasons } from "./season";
@@ -20,3 +21,22 @@ export const fixtures = pgTable("fixtures", {
 	homeScore: integer(),
 	awayScore: integer(),
 });
+
+export const fixturesRelations = relations(fixtures, ({ one }) => ({
+	season: one(seasons, {
+		fields: [fixtures.seasonId],
+		references: [seasons.id],
+	}),
+	// relationName pairs each side with team.ts's matching homeFixtures/
+	// awayFixtures many() — see the comment there.
+	homeTeam: one(teams, {
+		fields: [fixtures.homeTeamId],
+		references: [teams.id],
+		relationName: "homeTeam",
+	}),
+	awayTeam: one(teams, {
+		fields: [fixtures.awayTeamId],
+		references: [teams.id],
+		relationName: "awayTeam",
+	}),
+}));

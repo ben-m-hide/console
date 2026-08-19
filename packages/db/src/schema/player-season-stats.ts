@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
 	doublePrecision,
 	index,
@@ -39,4 +40,22 @@ export const playerSeasonStats = pgTable(
 		unique().on(table.playerId, table.teamId, table.seasonId),
 		index().on(table.playerId, table.seasonId),
 	],
+);
+
+export const playerSeasonStatsRelations = relations(
+	playerSeasonStats,
+	({ one }) => ({
+		player: one(players, {
+			fields: [playerSeasonStats.playerId],
+			references: [players.id],
+		}),
+		team: one(teams, {
+			fields: [playerSeasonStats.teamId],
+			references: [teams.id],
+		}),
+		season: one(seasons, {
+			fields: [playerSeasonStats.seasonId],
+			references: [seasons.id],
+		}),
+	}),
 );
