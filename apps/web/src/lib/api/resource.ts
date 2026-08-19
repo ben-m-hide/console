@@ -1,6 +1,8 @@
 import { type z } from "zod";
 
-import { get, HttpMethod, type PathParams, type QueryParams } from "@/lib/api";
+import { get } from "./api-client";
+import { HttpMethod } from "./types/http-method";
+import { type PathParams, type QueryParams } from "./types/requests";
 
 interface BaseRequest<T> {
 	path: string;

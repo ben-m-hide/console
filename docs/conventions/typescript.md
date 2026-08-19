@@ -19,6 +19,34 @@ interface IngestionFailure {
 failed: Array<IngestionFailure>;
 ```
 
+This applies to a function's return type too, not just field/parameter positions — a multi-property return shape gets a named interface at the function signature, not an inline object type after the `):`. A hook's return value is not exempt just because only that hook produces it: naming it still makes the shape greppable and gives a consumer (`ReturnType<typeof useX>`, a prop type built from it) something to reference.
+
+```ts
+// Avoid
+export const useServerDataTable = <Data, Search, FilterFields>(
+  params: UseServerDataTableParams<Search, FilterFields>,
+): {
+  state: Partial<TableState<Data>>;
+  onPaginationChange: (updater: Updater<PaginationState>) => Promise<void>;
+  // ...four more properties
+} => {
+  /* ... */
+};
+
+// Prefer
+interface UseServerDataTableReturn<Data extends Record<string, unknown>> {
+  state: Partial<TableState<Data>>;
+  onPaginationChange: (updater: Updater<PaginationState>) => Promise<void>;
+  // ...four more properties
+}
+
+export const useServerDataTable = <Data, Search, FilterFields>(
+  params: UseServerDataTableParams<Search, FilterFields>,
+): UseServerDataTableReturn<Data> => {
+  /* ... */
+};
+```
+
 ## Reference a field's type directly, not via indexed access on its parent
 
 Once a field's type is already named (an interface property, a schema-derived type), reference that name directly at every other use site — don't reach for `ParentType["fieldName"]` as a shorthand. It reads as an extra indirection the reader has to resolve (look up `ParentType`, find `fieldName`, infer the actual type) for no benefit over just importing and using the field's own type name.

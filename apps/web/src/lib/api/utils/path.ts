@@ -1,4 +1,4 @@
-import { type PathParams } from "@/lib/api";
+import { type PathParams } from "../types/requests";
 
 const PATH_PLACEHOLDER_PATTERN = /:(\w+)/g;
 
