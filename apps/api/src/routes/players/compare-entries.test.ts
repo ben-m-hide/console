@@ -3,7 +3,7 @@ import {
 	type PeerStats,
 	type PlayerCompareRow,
 	resolvePlayerRows,
-} from "./build-player-compare-entries";
+} from "./compare-entries";
 
 const attackerRow = (
 	overrides: Partial<PlayerCompareRow> = {},

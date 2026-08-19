@@ -1,5 +1,7 @@
 import { rateLimiter } from "hono-rate-limiter";
 
+import { errorEnvelope } from "./error-envelope";
+
 // PROJECT.md §9 asks for a guard against hammering /players/compare without
 // giving numbers — 100/15min matches the library's own documented default.
 // In-memory store is correct while only one instance exists (no Render
@@ -12,6 +14,5 @@ export const publicApiRateLimiter = rateLimiter({
 	// Clients sharing an IP (NAT, corporate networks) share a limit — accepted
 	// since there's no per-user identity to key on instead.
 	keyGenerator: (c) => c.req.header("x-forwarded-for") ?? "",
-	handler: (c) =>
-		c.json({ error: { code: 429, message: "Too many requests" } }, 429),
+	handler: (c) => c.json(errorEnvelope(429, "Too many requests"), 429),
 });

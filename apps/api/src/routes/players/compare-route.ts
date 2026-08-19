@@ -1,15 +1,14 @@
-import { playerSeasonStats, players, teams } from "@console-next/db/schema";
 import { createRoute, type OpenAPIHono, z } from "@hono/zod-openapi";
-import { and, eq, gte, inArray } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 
-import { db } from "../db";
+import { db } from "../../db";
 import {
-	buildCompareEntries,
-	MINIMUM_MINUTES_FOR_PEER_GROUP,
-	type PeerStats,
-	resolvePlayerRows,
-} from "./build-player-compare-entries";
+	POSITIVE_INTEGER_PATTERN,
+	positiveIntegerParamMessage,
+} from "../../lib/positive-integer-param";
+import { buildCompareEntries, resolvePlayerRows } from "./compare-entries";
+import { fetchPeerGroupsByPosition, fetchRequestedRows } from "./compare-fetch";
+import { parseCompareQuery } from "./compare-query";
 
 const PlayerCompareStatsSchema = z
 	.object({
@@ -23,7 +22,7 @@ const PlayerCompareStatsSchema = z
 	})
 	.openapi("PlayerCompareStats");
 
-// See percentileOf in build-player-compare-entries.ts for the exact semantics.
+// See percentileOf in compare-entries.ts for the exact semantics.
 const PlayerComparePercentilesSchema = z
 	.object({
 		goalsPer90: z.number().min(0).max(100).nullable(),
@@ -62,7 +61,7 @@ const PlayerCompareQuerySchema = z.object({
 		}),
 	season: z
 		.string()
-		.regex(/^\d+$/, "season must be a positive integer")
+		.regex(POSITIVE_INTEGER_PATTERN, positiveIntegerParamMessage("season"))
 		.openapi({
 			param: { name: "season", in: "query" },
 			example: "1",
@@ -87,32 +86,9 @@ export const playersCompareRoute = createRoute({
 export const registerPlayersCompareRoute = (app: OpenAPIHono): void => {
 	app.openapi(playersCompareRoute, async (c) => {
 		const { ids, season } = c.req.valid("query");
-		const playerIds: Array<number> = ids.split(",").map(Number);
-		const seasonId = Number(season);
+		const { playerIds, seasonId } = parseCompareQuery(ids, season);
 
-		const requestedRows = await db
-			.select({
-				playerId: playerSeasonStats.playerId,
-				minutesPlayed: playerSeasonStats.minutesPlayed,
-				goals: playerSeasonStats.goals,
-				assists: playerSeasonStats.assists,
-				xg: playerSeasonStats.xg,
-				goalsPer90: playerSeasonStats.goalsPer90,
-				assistsPer90: playerSeasonStats.assistsPer90,
-				xgPer90: playerSeasonStats.xgPer90,
-				name: players.name,
-				position: players.position,
-				team: teams.name,
-			})
-			.from(playerSeasonStats)
-			.innerJoin(players, eq(playerSeasonStats.playerId, players.id))
-			.innerJoin(teams, eq(playerSeasonStats.teamId, teams.id))
-			.where(
-				and(
-					eq(playerSeasonStats.seasonId, seasonId),
-					inArray(playerSeasonStats.playerId, playerIds),
-				),
-			);
+		const requestedRows = await fetchRequestedRows(db, seasonId, playerIds);
 
 		const { rowByPlayerId, missingPlayerIds } = resolvePlayerRows(
 			playerIds,
@@ -127,28 +103,11 @@ export const registerPlayersCompareRoute = (app: OpenAPIHono): void => {
 		const positions = [
 			...new Set([...rowByPlayerId.values()].map((row) => row.position)),
 		];
-		const peersByPosition = new Map<string, Array<PeerStats>>();
-		for (const position of positions) {
-			const peers = await db
-				.select({
-					goalsPer90: playerSeasonStats.goalsPer90,
-					assistsPer90: playerSeasonStats.assistsPer90,
-					xgPer90: playerSeasonStats.xgPer90,
-				})
-				.from(playerSeasonStats)
-				.innerJoin(players, eq(playerSeasonStats.playerId, players.id))
-				.where(
-					and(
-						eq(playerSeasonStats.seasonId, seasonId),
-						eq(players.position, position),
-						gte(
-							playerSeasonStats.minutesPlayed,
-							MINIMUM_MINUTES_FOR_PEER_GROUP,
-						),
-					),
-				);
-			peersByPosition.set(position, peers);
-		}
+		const peersByPosition = await fetchPeerGroupsByPosition(
+			db,
+			seasonId,
+			positions,
+		);
 
 		const entries = buildCompareEntries(
 			playerIds,
