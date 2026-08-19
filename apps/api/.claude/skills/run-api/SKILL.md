@@ -5,7 +5,7 @@ description: Build, run, and smoke-test the console-next backend (apps/api, a Ho
 
 Hono API, no separate build step (Bun runs the TypeScript directly). Drive it via `.claude/skills/run-api/smoke.sh` — launches the dev server in the background, waits for readiness, hits every route, shuts down cleanly.
 
-All paths below are relative to `apps/api/` (this unit — a sibling `run-console` skill covers the frontend at the repo root).
+All paths below are relative to `apps/api/` (this unit — a sibling `run-web` skill in `apps/web/.claude/skills/` covers the frontend).
 
 ## Prerequisites / Setup
 
