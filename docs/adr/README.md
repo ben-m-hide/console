@@ -22,6 +22,7 @@ One record per significant, hard-to-reverse, non-obvious decision — not every 
 | [0016](./0016-wretch-for-api-client.md)                       | wretch for the API-client transport layer, hand-written not generated                 | Accepted — built                                               |
 | [0017](./0017-disable-exactoptionalpropertytypes.md)          | Disable `exactOptionalPropertyTypes` repo-wide                                        | Accepted — built                                               |
 | [0018](./0018-disable-erasablesyntaxonly.md)                  | Disable `erasableSyntaxOnly`, allow TS `enum`                                         | Accepted — built                                               |
+| [0019](./0019-shared-envelope-schemas.md)                     | Hand-written envelope schemas in `packages/shared`, additive to ADR 0013              | Accepted — built and verified                                  |
 
 ## Adding one
 

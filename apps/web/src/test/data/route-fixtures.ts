@@ -1,8 +1,8 @@
-import { type ListMetaParams } from "@/search-params";
+import { type PaginationMeta } from "@console-next/shared";
 
 interface SamplePlayersResponse {
 	data: Array<unknown>;
-	meta: ListMetaParams;
+	meta: PaginationMeta;
 }
 
 export const samplePlayersResponse = (

@@ -19,15 +19,6 @@ export const ListSearchSchema = z.object({
 
 export type ListSearchParams = z.infer<typeof ListSearchSchema>;
 
-export const ListMetaSchema = z.object({
-	page: z.number().int().positive(),
-	pageSize: z.number().int().positive(),
-	total: z.number().int().nonnegative(),
-	totalPages: z.number().int().nonnegative(),
-});
-
-export type ListMetaParams = z.infer<typeof ListMetaSchema>;
-
 // `fieldEnum`'s members must match the MRT column `accessorKey`s a route's
 // table will sort by — that coupling is implicit, same as before this was
 // extracted, just shared across every route that needs sortable columns now.

@@ -1,5 +1,8 @@
 import { players } from "@console-next/db/schema";
-import { PlayerSchema } from "@console-next/shared";
+import {
+	PlayerSchema,
+	paginatedListResponseSchema,
+} from "@console-next/shared";
 import { createRoute, type OpenAPIHono, z } from "@hono/zod-openapi";
 import { asc, count } from "drizzle-orm";
 
@@ -13,23 +16,10 @@ import {
 	resolveSort,
 } from "./list-query";
 
-const PlayerPageMetaSchema = z
-	.object({
-		page: z.number().int().positive(),
-		pageSize: z.number().int().positive(),
-		total: z.number().int().nonnegative(),
-		totalPages: z.number().int().nonnegative(),
-	})
-	.openapi("PlayerPageMeta");
-
 // Envelope with pagination meta — every list endpoint returns { data }, but
 // this one also needs `total` for pagination. See PROJECT.md §4.
-const PlayerListResponseSchema = z
-	.object({
-		data: z.array(PlayerSchema),
-		meta: PlayerPageMetaSchema,
-	})
-	.openapi("PlayerListResponse");
+const PlayerListResponseSchema =
+	paginatedListResponseSchema(PlayerSchema).openapi("PlayerListResponse");
 
 const PlayerListQuerySchema = z.object({
 	search: z

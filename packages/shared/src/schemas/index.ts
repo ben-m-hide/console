@@ -1,5 +1,6 @@
 export * from "./ball-position.gen";
 export * from "./competition.gen";
+export * from "./envelope";
 export * from "./fixture.gen";
 export * from "./match-event.gen";
 export * from "./player.gen";

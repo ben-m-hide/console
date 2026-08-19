@@ -1,3 +1,4 @@
+import { type PaginationMeta } from "@console-next/shared";
 import { Button, EmptyState } from "@mantine/core";
 import {
 	type MRT_ColumnDef as ColumnDef,
@@ -12,7 +13,6 @@ import {
 	type ServerDataTableSearch,
 	useServerDataTable,
 } from "@/hooks/DataTable/useServerDataTable";
-import { type ListMetaParams } from "@/search-params";
 
 export type { ColumnDef, TableOptions };
 
@@ -39,7 +39,7 @@ interface DataTableProps<
 > extends Omit<TableOptions<Data>, ManagedOptionKeys> {
 	columns: Array<ColumnDef<Data>>;
 	data: Array<Data>;
-	meta: ListMetaParams;
+	meta: PaginationMeta;
 	search: Search;
 	setSearch: (updater: (previous: Search) => Search) => Promise<void>;
 	filterFields: FilterFields;

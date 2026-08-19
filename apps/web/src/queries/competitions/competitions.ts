@@ -1,11 +1,8 @@
-import { CompetitionSchema } from "@console-next/shared";
-import { z } from "zod";
+import { CompetitionSchema, listResponseSchema } from "@console-next/shared";
 
 import { listQueryOptions } from "@/queries/common";
 
-const CompetitionListResponseSchema = z.object({
-	data: z.array(CompetitionSchema),
-});
+const CompetitionListResponseSchema = listResponseSchema(CompetitionSchema);
 
 export const competitionsListQueryOptions = () =>
 	listQueryOptions({

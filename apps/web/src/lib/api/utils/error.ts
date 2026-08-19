@@ -1,10 +1,5 @@
+import { ErrorEnvelopeSchema } from "@console-next/shared";
 import { z } from "zod";
-
-const ApiErrorSchema = z.object({
-	error: z.object({
-		message: z.string(),
-	}),
-});
 
 export const getMessage = (error: unknown): string =>
 	error instanceof Error ? error.message : String(error);
@@ -17,7 +12,7 @@ export const getUrl = (error: unknown): string | undefined =>
 
 export const toApiErrorMessage = (rawMessage: string): string => {
 	try {
-		const parsed = ApiErrorSchema.safeParse(JSON.parse(rawMessage));
+		const parsed = ErrorEnvelopeSchema.safeParse(JSON.parse(rawMessage));
 		if (parsed.success) return parsed.data.error.message;
 	} catch {
 		// Fall back to raw message if JSON parse fails
