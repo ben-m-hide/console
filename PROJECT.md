@@ -132,7 +132,7 @@ All routes live under `/api/v1/...`, not bare `/api/...` — versioning from day
 
 ## 5. Frontend (`apps/web`)
 
-**Routing (two screens):**
+**Routing:** this section predates the full seven-screen decomposition — `docs/design/frontend-ui-ux.md` §1 is the current source of truth for the screen list and build order (Dashboard, Players, Player detail, Compare, Competitions, Competition detail, Match report). The two routes below are the ones this section's visualization notes are actually about — still open, not yet built:
 
 - `/matches/:fixtureId` — Match Report (shot map, passing network, xG flow, average positions)
 - `/compare` — Player Comparison (search/select players, stat table, radar chart)
@@ -148,7 +148,7 @@ All routes live under `/api/v1/...`, not bare `/api/...` — versioning from day
 - `<XgFlowChart data={xgFlow} />` — this one _is_ a reasonable place for a charting library (Recharts, already available) since it's a standard line/area chart, not a pitch overlay
 - `<RadarChart data={comparisonStats} />` — Recharts also covers this well
 
-**Styling library:** not yet decided — open task below. Options: Tailwind, Chakra (what you already use at work), or a lighter custom approach. Worth a deliberate choice given this is a portfolio piece where visual identity matters, rather than defaulting silently.
+**Styling library:** Mantine — see `docs/adr/0006-mantine-over-tailwind-shadcn.md` for the comparison against Tailwind and Chakra.
 
 ---
 
@@ -210,7 +210,7 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 
 ## 10. Open decisions (deliberately left for build time)
 
-- Frontend styling approach (Tailwind vs Chakra vs custom)
+- ~~Frontend styling approach (Tailwind vs Chakra vs custom)~~ **Decided:** Mantine — see `docs/adr/0006-mantine-over-tailwind-shadcn.md`.
 - Exact ingestion schedule interval
 - Whether `apps/ingestion` deploys as its own Render service or a scheduled command within `apps/api`'s image
 - **Phase 1 schema assumptions, unconfirmed — reconcile against the Drizzle schema in Phase 2:** `id`/`sportmonksId`/FK fields as `number().int().positive()` (serial-style); field names camelCase (Drizzle's usual camelCase-JS/snake_case-DB mapping); dates as ISO strings (`z.iso.date()`/`z.iso.datetime()` — these are JSON-boundary schemas, not raw DB row shapes); `type`/`status`/`outcome`/`bodyPart`/`situation`/`position` as plain `string()`, not enums (no confirmed value list yet); `player_season_stats` per-90 fields assumed to be `goalsPer90`/`assistsPer90`/`xgPer90`/`xaPer90` (the 4 base stats §2 names) since the exact list isn't spelled out there
@@ -281,12 +281,13 @@ Right-sized for a solo portfolio project — not enterprise SRE, but the habits 
 
 ### Phase 6 — Frontend
 
-- [ ] Decide styling approach (see §10)
+- [x] Decide styling approach (see §10) — Mantine, `docs/adr/0006-mantine-over-tailwind-shadcn.md`
 - [x] Set up TanStack Query + typed API client using `packages/shared` — done 2026-08-15 for the query half: the index page makes a real `useQuery` call to `GET /api/v1/competitions`, validated against `packages/shared`'s `CompetitionSchema` (that package's first `apps/web` consumer). **Deliberately no "typed API client" abstraction yet** — one consumer, one read endpoint; per root `CLAUDE.md`'s promotion rule, the fetch stays inline in the component until a second consumer needs it. A generic data-fetching module (CRUD helpers, related-entity fetching, suspense/infinite loading) was explicitly considered and sequenced _after_ the frontend UI/UX design session, so its shape is driven by real screen requirements rather than guessed against endpoints that don't exist (`apps/api` has zero create/update/delete routes today). See `docs/plans/2026-08-15-wire-frontend-to-api.md`.
+- [x] Build Players screen (`/players`) — done 2026-08-17 through 2026-08-19: server-side search/position filter/sort/pagination against `GET /api/v1/players`, `mantine-react-table`-backed `DataTable`, in-table loading state (`useQuery` + `keepPreviousData`, no full-page pending swap), viewport-fit layout, inline empty/error states. Not the same task as "Build player search/select UI" below — that's Compare's player-picker, still open. See `docs/design/frontend-architecture.md` §3 gotcha #1 and `docs/design/frontend-ui-ux.md` §1 for the full history.
 - [ ] Build `<Pitch>` base component, viewBox matched to the real pitch aspect ratio confirmed in Phase 3
 - [ ] Build `<BallHeatmap>` (and/or `<BallTrail>`) overlay component, rendering `ballPositions` from `/report` (§4/§5) — not computing aggregates client-side if the endpoint ships pre-binned data
 - [ ] Build Match Report page, wire to `/api/v1/fixtures/:id/report`
-- [ ] Build player search/select UI
+- [ ] Build player search/select UI for Compare — reuses `GET /api/v1/players` (same endpoint the Players screen above already consumes) but is a distinct picker component, not satisfied by the Players screen itself
 - [ ] Build `<RadarChart>` and stat table for comparison
 - [ ] Build Player Comparison page, wire to `/api/v1/players/compare`
 - [ ] Add loading/error/empty states to every data-driven component
