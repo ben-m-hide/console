@@ -1,14 +1,13 @@
 import { playerSeasonStats, players, teams } from "@console-next/db/schema";
-import type { OpenAPIHono } from "@hono/zod-openapi";
-import { createRoute, z } from "@hono/zod-openapi";
+import { createRoute, type OpenAPIHono, z } from "@hono/zod-openapi";
 import { and, eq, gte, inArray } from "drizzle-orm";
 import { HTTPException } from "hono/http-exception";
 
 import { db } from "../db";
-import type { PeerStats } from "./build-player-compare-entries";
 import {
 	buildCompareEntries,
 	MINIMUM_MINUTES_FOR_PEER_GROUP,
+	type PeerStats,
 	resolvePlayerRows,
 } from "./build-player-compare-entries";
 

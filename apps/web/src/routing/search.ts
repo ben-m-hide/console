@@ -1,8 +1,15 @@
 import { z } from "zod";
 
+import { SortDirection } from "@/types";
+
 // Mirrors apps/api's default (build-players-query.ts); no shared package
 // exports it across the two runtimes, so it must stay in sync by hand.
 export const DEFAULT_PAGE_SIZE = 25;
+
+interface SortableSearchSchema<FieldEnum extends Record<string, string>> {
+	sort: z.ZodCatch<z.ZodOptional<z.ZodEnum<FieldEnum>>>;
+	sortDirection: z.ZodCatch<z.ZodOptional<z.ZodEnum<typeof SortDirection>>>;
+}
 
 export const ListSearchSchema = z.object({
 	page: z.number().int().positive().catch(1),
@@ -10,7 +17,6 @@ export const ListSearchSchema = z.object({
 	search: z.string().min(1).optional().catch(undefined),
 });
 
-// "SearchParams" collides with TanStack Router's own "search params" concept.
 export type ListSearchParams = z.infer<typeof ListSearchSchema>;
 
 export const ListMetaSchema = z.object({
@@ -21,3 +27,15 @@ export const ListMetaSchema = z.object({
 });
 
 export type ListMetaParams = z.infer<typeof ListMetaSchema>;
+
+// `fieldEnum`'s members must match the MRT column `accessorKey`s a route's
+// table will sort by — that coupling is implicit, same as before this was
+// extracted, just shared across every route that needs sortable columns now.
+export const createSortableSearchSchema = <
+	FieldEnum extends Record<string, string>,
+>(
+	fieldEnum: FieldEnum,
+): SortableSearchSchema<FieldEnum> => ({
+	sort: z.enum(fieldEnum).optional().catch(undefined),
+	sortDirection: z.enum(SortDirection).optional().catch(undefined),
+});

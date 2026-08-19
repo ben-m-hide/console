@@ -1,6 +1,6 @@
 import { PlayerSchema } from "@console-next/shared";
 
-import type { SportmonksPlayerRaw } from "./sportmonks-types";
+import { type SportmonksPlayerRaw } from "./sportmonks-types";
 
 // id is DB-generated (identity column) — see normalize-competition.ts for the
 // same reasoning.

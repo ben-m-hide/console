@@ -5,3 +5,15 @@ export enum PlayerPosition {
 	Goalkeeper = "Goalkeeper",
 	Midfielder = "Midfielder",
 }
+
+export enum PlayerField {
+	Name = "name",
+	Position = "position",
+	Nationality = "nationality",
+	DateOfBirth = "dateOfBirth",
+}
+
+export enum SortDirection {
+	Asc = "asc",
+	Desc = "desc",
+}

@@ -8,14 +8,10 @@ import { PlayersSearchSchema } from "@/routing";
 
 export const Route = createFileRoute("/players/")({
 	validateSearch: PlayersSearchSchema,
-	loaderDeps: ({ search: routeSearch }) => ({
-		page: routeSearch.page,
-		pageSize: routeSearch.pageSize,
-		search: routeSearch.search,
-		position: routeSearch.position,
-	}),
-	loader: ({ context: { queryClient }, deps }) =>
-		queryClient.ensureQueryData(playersListQueryOptions(deps)),
+	loader: ({ context: { queryClient }, location }) =>
+		queryClient.ensureQueryData(
+			playersListQueryOptions(PlayersSearchSchema.parse(location.search)),
+		),
 	component: PlayersList,
 	pendingComponent: () => <GenericPending title="Players" />,
 	errorComponent: ({ error }) => <GenericError error={error} title="Players" />,

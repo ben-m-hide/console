@@ -1,4 +1,4 @@
-import type { SQL } from "bun";
+import { type SQL } from "bun";
 
 import { type BunSQLDatabase, drizzle } from "drizzle-orm/bun-sql";
 

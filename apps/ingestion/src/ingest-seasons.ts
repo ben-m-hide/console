@@ -1,10 +1,9 @@
-import type { Db } from "@console-next/db";
+import { type Db } from "@console-next/db";
 import { competitions, seasons } from "@console-next/db/schema";
 import { sql } from "drizzle-orm";
 
-import type { IngestionFailure } from "./ingest-result";
-import type { InsertableSeason } from "./normalize-season";
-import { normalizeSeason } from "./normalize-season";
+import { type IngestionFailure } from "./ingest-result";
+import { type InsertableSeason, normalizeSeason } from "./normalize-season";
 import { fetchSeasons } from "./sportmonks-client";
 import { toErrorMessage } from "./to-error-message";
 

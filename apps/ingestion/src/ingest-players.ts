@@ -1,11 +1,10 @@
-import type { Db } from "@console-next/db";
+import { type Db } from "@console-next/db";
 import { players } from "@console-next/db/schema";
 import { sql } from "drizzle-orm";
 
-import type { IngestionFailure } from "./ingest-result";
-import type { InsertablePlayer } from "./normalize-player";
-import { normalizePlayer } from "./normalize-player";
-import type { SportmonksPlayerRaw } from "./sportmonks-types";
+import { type IngestionFailure } from "./ingest-result";
+import { type InsertablePlayer, normalizePlayer } from "./normalize-player";
+import { type SportmonksPlayerRaw } from "./sportmonks-types";
 import { toErrorMessage } from "./to-error-message";
 
 export interface IngestPlayersResult {

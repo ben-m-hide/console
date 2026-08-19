@@ -1,9 +1,7 @@
-import type {
-	PeerStats,
-	PlayerCompareRow,
-} from "./build-player-compare-entries";
 import {
 	buildCompareEntries,
+	type PeerStats,
+	type PlayerCompareRow,
 	resolvePlayerRows,
 } from "./build-player-compare-entries";
 

@@ -1,9 +1,7 @@
 import { players } from "@console-next/db/schema";
 import { PlayerSchema } from "@console-next/shared";
-import type { OpenAPIHono } from "@hono/zod-openapi";
-import { createRoute, z } from "@hono/zod-openapi";
-import type { SQL } from "drizzle-orm";
-import { and, asc, count, eq, ilike } from "drizzle-orm";
+import { createRoute, type OpenAPIHono, z } from "@hono/zod-openapi";
+import { and, asc, count, eq, ilike, type SQL } from "drizzle-orm";
 
 import { db } from "../db";
 import {
@@ -11,6 +9,7 @@ import {
 	DEFAULT_PAGE_SIZE,
 	MAX_PAGE_SIZE,
 	resolvePagination,
+	resolveSort,
 } from "./build-players-query";
 
 const PlayerPageMetaSchema = z
@@ -64,6 +63,22 @@ const PlayerListQuerySchema = z.object({
 			param: { name: "pageSize", in: "query" },
 			example: String(DEFAULT_PAGE_SIZE),
 		}),
+	sort: z
+		.string()
+		.min(1)
+		.optional()
+		.openapi({
+			param: { name: "sort", in: "query" },
+			example: "name",
+		}),
+	order: z
+		.string()
+		.min(1)
+		.optional()
+		.openapi({
+			param: { name: "order", in: "query" },
+			example: "asc",
+		}),
 });
 
 export const playersRoute = createRoute({
@@ -75,15 +90,17 @@ export const playersRoute = createRoute({
 			content: {
 				"application/json": { schema: PlayerListResponseSchema },
 			},
-			description: `Paginated player list. pageSize is capped at ${MAX_PAGE_SIZE}.`,
+			description: `Paginated, sortable player list. pageSize is capped at ${MAX_PAGE_SIZE}. sort defaults to name; unrecognized values fall back to it.`,
 		},
 	},
 });
 
 export const registerPlayersRoute = (app: OpenAPIHono): void => {
 	app.openapi(playersRoute, async (c) => {
-		const { search, position, page, pageSize } = c.req.valid("query");
+		const { search, position, page, pageSize, sort, order } =
+			c.req.valid("query");
 		const pagination = resolvePagination(page, pageSize);
+		const { column, orderBy } = resolveSort(sort, order);
 
 		const filters: Array<SQL> = [];
 		if (search !== undefined) {
@@ -98,9 +115,10 @@ export const registerPlayersRoute = (app: OpenAPIHono): void => {
 			.select()
 			.from(players)
 			.where(where)
-			// name alone is not a total order — without the id tiebreak, rows can
-			// shift between pages and the client sees duplicates and gaps.
-			.orderBy(asc(players.name), asc(players.id))
+			// id tiebreak is a total order regardless of the requested sort column
+			// — without it, rows can shift between pages and the client sees
+			// duplicates and gaps.
+			.orderBy(orderBy(column), asc(players.id))
 			.limit(pagination.pageSize)
 			.offset(pagination.offset);
 

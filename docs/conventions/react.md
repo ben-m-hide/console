@@ -55,6 +55,26 @@ This convention would become largely redundant. React's guidance for new code is
 
 If it is adopted later, note React's warning that removing existing memoization changes compilation output, so this should be revisited deliberately as a migration rather than by bulk-deleting hooks.
 
+## Destructure a hook's return value at the call site
+
+Don't bind a hook's return object to a single variable and access fields off it (`dataTable.onSortingChange`). Destructure immediately, same as a prop object — it names every value the consumer actually uses, and shorthand (`useConsistentObjectDefinitions`) keeps re-passing them concise.
+
+```tsx
+// Avoid
+const dataTable = useServerDataTable({ search, setSearch, filterFields });
+const table = useMantineReactTable({
+  onSortingChange: dataTable.onSortingChange,
+});
+
+// Prefer
+const { state, onSortingChange, onColumnFiltersChange } = useServerDataTable({
+  search,
+  setSearch,
+  filterFields,
+});
+const table = useMantineReactTable({ onSortingChange, onColumnFiltersChange });
+```
+
 ## Type function components with `FC`
 
 Every function component gets an explicit `FC` type on its declaration: `FC<Props>` when it takes props, bare `FC` when it does not, `FC<PropsWithChildren>` (or `FC<PropsWithChildren<Props>>` alongside its own props) when it takes `children`. This is a deliberate against-the-grain choice — React's own TypeScript cheatsheet dropped the recommendation to use `FC` for newly-written components, mainly because it used to implicitly add a `children` prop even to components that didn't accept one. That implicit-`children` behavior was removed in the `@types/react` 18 typings, which is what makes adopting `FC` here safe: a bare `FC` no longer silently accepts `children`, so the original objection doesn't apply to the version this project is on. Verified empirically no conflict with `useExplicitReturnType`, `useNamingConvention`, `noNestedComponentDefinitions`, or `noReactPropAssignments` — a colon-typed variable declaration (`const Foo: FC<Props> = (props) => {...}`) already satisfies all of them, expression-body or block-body.

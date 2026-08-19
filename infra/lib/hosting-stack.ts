@@ -1,5 +1,4 @@
-import type { StackProps } from "aws-cdk-lib";
-import { Duration, RemovalPolicy, Stack } from "aws-cdk-lib";
+import { Duration, RemovalPolicy, Stack, type StackProps } from "aws-cdk-lib";
 import {
 	Distribution,
 	HeadersFrameOption,
@@ -9,7 +8,7 @@ import {
 } from "aws-cdk-lib/aws-cloudfront";
 import { S3BucketOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
 import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
-import type { Construct } from "constructs";
+import { type Construct } from "constructs";
 
 export class HostingStack extends Stack {
 	constructor(scope: Construct, id: string, props?: StackProps) {

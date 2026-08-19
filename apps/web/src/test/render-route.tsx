@@ -4,7 +4,7 @@ import {
 	RouterProvider,
 } from "@tanstack/react-router";
 import { render } from "@testing-library/react";
-import type { FC } from "react";
+import { type FC } from "react";
 
 import { routeTree } from "@/routeTree.gen";
 

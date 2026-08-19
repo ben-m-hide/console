@@ -1,9 +1,7 @@
 import { Alert, Button, Group, Stack, Title } from "@mantine/core";
 import { useQueryErrorResetBoundary } from "@tanstack/react-query";
-import type { ErrorComponentProps } from "@tanstack/react-router";
-import { useRouter } from "@tanstack/react-router";
-import type { FC } from "react";
-import { useCallback, useEffect } from "react";
+import { type ErrorComponentProps, useRouter } from "@tanstack/react-router";
+import { type FC, useCallback, useEffect } from "react";
 
 interface GenericErrorProps extends Omit<ErrorComponentProps, "reset"> {
 	title: string;
