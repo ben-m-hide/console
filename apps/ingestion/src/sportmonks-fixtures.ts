@@ -1,11 +1,11 @@
 // Real captured Sportmonks API sample data, for tests only — kept out of
 // sportmonks-types.ts (types only there), same useNamingConvention exemption.
-import type {
-	SportmonksFixtureRaw,
-	SportmonksPlayerRaw,
-	SportmonksPlayerStatisticRaw,
-	SportmonksSeasonRaw,
-	SportmonksTeamRaw,
+import {
+	type SportmonksFixtureRaw,
+	type SportmonksPlayerRaw,
+	type SportmonksPlayerStatisticRaw,
+	type SportmonksSeasonRaw,
+	type SportmonksTeamRaw,
 } from "./sportmonks-types";
 
 // Real captured shape: id 23614, league_id 8

@@ -1,5 +1,5 @@
 import { Loader, Stack, Title } from "@mantine/core";
-import type { FC } from "react";
+import { type FC } from "react";
 
 interface GenericPendingProps {
 	title: string;

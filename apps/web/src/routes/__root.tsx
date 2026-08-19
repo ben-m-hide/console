@@ -1,7 +1,7 @@
 import { MantineProvider } from "@mantine/core";
-import type { QueryClient } from "@tanstack/react-query";
+import { type QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
-import type { FC } from "react";
+import { type FC } from "react";
 
 import { Devtools } from "@/components/common/DevTools";
 import { isDev } from "@/config";

@@ -5,7 +5,7 @@ import {
 import { FormDevtoolsPanel } from "@tanstack/react-form-devtools";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
-import type { FC } from "react";
+import { type FC } from "react";
 
 const plugins: Array<TanStackDevtoolsReactPlugin> = [
 	{ name: "TanStack Query", render: <ReactQueryDevtoolsPanel /> },

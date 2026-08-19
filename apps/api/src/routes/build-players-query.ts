@@ -1,3 +1,6 @@
+import { players } from "@console-next/db/schema";
+import { type AnyColumn, asc, desc, type SQL } from "drizzle-orm";
+
 export const DEFAULT_PAGE_SIZE = 25;
 export const MAX_PAGE_SIZE = 50;
 
@@ -64,4 +67,32 @@ export const buildPageMeta = (
 		totalPages: Math.ceil(total / pagination.pageSize),
 	};
 	return meta;
+};
+
+export interface PlayersSort {
+	column: AnyColumn;
+	orderBy: (column: AnyColumn) => SQL;
+}
+
+// Whitelisted, not a raw column-name lookup — an unrecognized or absent
+// value clamps to the pre-existing default (name asc) rather than erroring,
+// same "degrade to something sane" philosophy as resolvePagination.
+const SORTABLE_COLUMNS = {
+	name: players.name,
+	position: players.position,
+	nationality: players.nationality,
+	dateOfBirth: players.dateOfBirth,
+} as const;
+
+export const resolveSort = (
+	rawSort: string | undefined,
+	rawOrder: string | undefined,
+): PlayersSort => {
+	const column =
+		rawSort !== undefined && rawSort in SORTABLE_COLUMNS
+			? SORTABLE_COLUMNS[rawSort as keyof typeof SORTABLE_COLUMNS]
+			: SORTABLE_COLUMNS.name;
+	const orderBy = rawOrder === "desc" ? desc : asc;
+	const sort: PlayersSort = { column, orderBy };
+	return sort;
 };

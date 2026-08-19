@@ -9,6 +9,8 @@ import { API } from "@/lib/api";
 import { routeTree } from "./routeTree.gen";
 
 import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
+import "mantine-react-table/styles.css";
 import "./index.css";
 
 API.configure({

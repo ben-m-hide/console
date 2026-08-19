@@ -1,8 +1,12 @@
+import { players } from "@console-next/db/schema";
+import { asc, desc } from "drizzle-orm";
+
 import {
 	buildPageMeta,
 	DEFAULT_PAGE_SIZE,
 	MAX_PAGE_SIZE,
 	resolvePagination,
+	resolveSort,
 } from "./build-players-query";
 
 describe("resolvePagination", () => {
@@ -52,6 +56,34 @@ describe("resolvePagination", () => {
 			pageSize: 25,
 			offset: 0,
 		});
+	});
+});
+
+describe("resolveSort", () => {
+	it("defaults to name asc when both params are absent", () => {
+		expect(resolveSort(undefined, undefined)).toEqual({
+			column: players.name,
+			orderBy: asc,
+		});
+	});
+
+	it("resolves a recognized column", () => {
+		expect(resolveSort("position", undefined).column).toBe(players.position);
+	});
+
+	it("falls back to name for an unrecognized column rather than throwing", () => {
+		expect(resolveSort("sportmonksId", undefined).column).toBe(players.name);
+	});
+
+	it("resolves desc order", () => {
+		expect(resolveSort("nationality", "desc")).toEqual({
+			column: players.nationality,
+			orderBy: desc,
+		});
+	});
+
+	it("falls back to asc for an unrecognized order value", () => {
+		expect(resolveSort("name", "banana").orderBy).toBe(asc);
 	});
 });
 

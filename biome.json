@@ -35,6 +35,13 @@
 						"syntax": "generic"
 					}
 				},
+				"useConsistentObjectDefinitions": "error",
+				"useImportType": {
+					"level": "error",
+					"options": {
+						"style": "inlineType"
+					}
+				},
 				"useNamingConvention": {
 					"level": "error",
 					"options": {

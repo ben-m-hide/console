@@ -1,10 +1,12 @@
-import type { Db } from "@console-next/db";
+import { type Db } from "@console-next/db";
 import { competitions } from "@console-next/db/schema";
 import { sql } from "drizzle-orm";
 
-import type { IngestionFailure } from "./ingest-result";
-import type { InsertableCompetition } from "./normalize-competition";
-import { normalizeCompetition } from "./normalize-competition";
+import { type IngestionFailure } from "./ingest-result";
+import {
+	type InsertableCompetition,
+	normalizeCompetition,
+} from "./normalize-competition";
 import { fetchLeagues } from "./sportmonks-client";
 import { toErrorMessage } from "./to-error-message";
 

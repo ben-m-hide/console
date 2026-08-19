@@ -2,8 +2,7 @@ import { PlayerSchema } from "@console-next/shared";
 import { z } from "zod";
 
 import { listQueryOptions } from "@/queries";
-import type { PlayersSearchParams } from "@/routing";
-import { ListMetaSchema } from "@/routing";
+import { ListMetaSchema, type PlayersSearchParams } from "@/routing";
 
 const PlayerListResponseSchema = z.object({
 	data: z.array(PlayerSchema),
@@ -18,6 +17,8 @@ export const playersListQueryOptions = (params: PlayersSearchParams) =>
 			pageSize: params.pageSize,
 			search: params.search,
 			position: params.position,
+			sort: params.sort,
+			order: params.sortDirection,
 		},
 		schema: PlayerListResponseSchema,
 	});

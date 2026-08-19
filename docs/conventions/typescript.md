@@ -1,6 +1,6 @@
 # TypeScript Conventions
 
-Applies to every `.ts`/`.tsx` file in this repo. Naming casing and array-type syntax (`Array<T>` over `T[]`, `useConsistentArrayType`) are already Biome-enforced (`biome.json`) — not repeated here; see `README.md` for which rules live where.
+Applies to every `.ts`/`.tsx` file in this repo. Naming casing, array-type syntax (`Array<T>` over `T[]`, `useConsistentArrayType`), object property shorthand (`{ foo }` over `{ foo: foo }`, `useConsistentObjectDefinitions`), and inline type imports merged with value imports from the same module (`import { type FC, useCallback } from "react"` over a separate `import type { FC } from "react"`, `useImportType` with `style: "inlineType"`) are already Biome-enforced (`biome.json`) — not repeated here; see `README.md` for which rules live where.
 
 ## Name inline object types
 

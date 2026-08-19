@@ -1,5 +1,5 @@
-import type { Hook } from "@hono/zod-openapi";
-import type { Env, ErrorHandler, NotFoundHandler } from "hono";
+import { type Hook } from "@hono/zod-openapi";
+import { type Env, type ErrorHandler, type NotFoundHandler } from "hono";
 import { HTTPException } from "hono/http-exception";
 
 // PROJECT.md §9: every error response uses this envelope, not Hono's raw

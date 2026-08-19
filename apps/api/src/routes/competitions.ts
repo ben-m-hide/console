@@ -1,7 +1,6 @@
 import { competitions } from "@console-next/db/schema";
 import { CompetitionSchema } from "@console-next/shared";
-import type { OpenAPIHono } from "@hono/zod-openapi";
-import { createRoute, z } from "@hono/zod-openapi";
+import { createRoute, type OpenAPIHono, z } from "@hono/zod-openapi";
 
 import { db } from "../db";
 

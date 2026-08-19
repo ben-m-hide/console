@@ -1,4 +1,4 @@
-import type { OpenAPIHono } from "@hono/zod-openapi";
+import { type OpenAPIHono } from "@hono/zod-openapi";
 
 import { registerCompetitionsRoute } from "./competitions";
 import { registerPlayersRoute } from "./players";

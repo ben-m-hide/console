@@ -1,4 +1,4 @@
-import type { ListMetaParams } from "@/routing";
+import { type ListMetaParams } from "@/routing";
 
 interface SamplePlayersResponse {
 	data: Array<unknown>;

@@ -14,9 +14,9 @@ import {
 	fetchSeasonTeams,
 	fetchTeamSquad,
 } from "./sportmonks-client";
-import type {
-	SportmonksFixtureRaw,
-	SportmonksPlayerRaw,
+import {
+	type SportmonksFixtureRaw,
+	type SportmonksPlayerRaw,
 } from "./sportmonks-types";
 import { toErrorMessage } from "./to-error-message";
 

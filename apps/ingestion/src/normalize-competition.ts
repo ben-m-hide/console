@@ -1,6 +1,6 @@
 import { CompetitionSchema } from "@console-next/shared";
 
-import type { SportmonksLeagueRaw } from "./sportmonks-types";
+import { type SportmonksLeagueRaw } from "./sportmonks-types";
 
 // id is DB-generated — CompetitionSchema requires it for full rows (API
 // responses), so this is the insert-time subset without it.

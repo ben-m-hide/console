@@ -1,9 +1,15 @@
 import { MantineProvider } from "@mantine/core";
-import type { QueryClient } from "@tanstack/react-query";
-import { QueryClientProvider } from "@tanstack/react-query";
+import { type QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
-import type { FC, PropsWithChildren, ReactElement, ReactNode } from "react";
-import { Component, Fragment, Suspense } from "react";
+import {
+	Component,
+	type FC,
+	Fragment,
+	type PropsWithChildren,
+	type ReactElement,
+	type ReactNode,
+	Suspense,
+} from "react";
 
 import { createQueryClient } from "@/lib";
 

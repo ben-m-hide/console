@@ -1,7 +1,6 @@
 import { seasons } from "@console-next/db/schema";
 import { SeasonSchema } from "@console-next/shared";
-import type { OpenAPIHono } from "@hono/zod-openapi";
-import { createRoute, z } from "@hono/zod-openapi";
+import { createRoute, type OpenAPIHono, z } from "@hono/zod-openapi";
 import { asc, desc, eq } from "drizzle-orm";
 
 import { db } from "../db";

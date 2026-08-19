@@ -1,11 +1,11 @@
-import type {
-	SportmonksFixtureRaw,
-	SportmonksLeagueRaw,
-	SportmonksPlayerRaw,
-	SportmonksSeasonFixturesRaw,
-	SportmonksSeasonRaw,
-	SportmonksSquadMemberRaw,
-	SportmonksTeamRaw,
+import {
+	type SportmonksFixtureRaw,
+	type SportmonksLeagueRaw,
+	type SportmonksPlayerRaw,
+	type SportmonksSeasonFixturesRaw,
+	type SportmonksSeasonRaw,
+	type SportmonksSquadMemberRaw,
+	type SportmonksTeamRaw,
 } from "./sportmonks-types";
 
 const SPORTMONKS_BASE_URL = "https://api.sportmonks.com/v3/football";

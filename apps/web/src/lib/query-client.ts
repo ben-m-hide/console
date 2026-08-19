@@ -1,5 +1,4 @@
-import type { QueryClientConfig } from "@tanstack/react-query";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, type QueryClientConfig } from "@tanstack/react-query";
 
 // Ingestion runs every few hours (PROJECT.md §4), so reads are highly
 // cacheable — Query's default staleTime of 0 would refetch on every mount

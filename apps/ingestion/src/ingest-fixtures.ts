@@ -1,11 +1,10 @@
-import type { Db } from "@console-next/db";
+import { type Db } from "@console-next/db";
 import { fixtures, seasons, teams } from "@console-next/db/schema";
 import { sql } from "drizzle-orm";
 
-import type { IngestionFailure } from "./ingest-result";
-import type { InsertableFixture } from "./normalize-fixture";
-import { normalizeFixture } from "./normalize-fixture";
-import type { SportmonksFixtureRaw } from "./sportmonks-types";
+import { type IngestionFailure } from "./ingest-result";
+import { type InsertableFixture, normalizeFixture } from "./normalize-fixture";
+import { type SportmonksFixtureRaw } from "./sportmonks-types";
 import { toErrorMessage } from "./to-error-message";
 
 export interface IngestFixturesResult {
