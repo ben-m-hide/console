@@ -7,19 +7,16 @@ import queryStringAddon, {
 	type QueryStringAddon,
 } from "wretch/addons/queryString";
 
+import { ApiError } from "./api-error";
+import { type PathParams, type QueryParams } from "./types/requests";
 import {
-	buildPath,
-	cleanQueryParams,
 	getMessage,
-	getPathWithPrefix,
 	getStatus,
 	getUrl,
-	type PathParams,
-	type QueryParams,
 	toApiErrorMessage,
-} from "@/lib/api";
-
-import { ApiError } from "./api-error";
+} from "./utils/error";
+import { cleanQueryParams } from "./utils/params";
+import { buildPath, getPathWithPrefix } from "./utils/path";
 
 type Client = QueryStringAddon &
 	Wretch<QueryStringAddon, unknown, undefined, WretchError>;

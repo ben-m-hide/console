@@ -4,7 +4,7 @@ import { GenericError } from "@/components/common/GenericError";
 import { GenericPending } from "@/components/common/GenericPending";
 import { PlayersList } from "@/components/pages/players/PlayersList";
 import { playersListQueryOptions } from "@/queries";
-import { PlayersSearchSchema } from "@/routing";
+import { PlayersSearchSchema } from "@/search-params";
 
 export const Route = createFileRoute("/players/")({
 	validateSearch: PlayersSearchSchema,

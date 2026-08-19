@@ -12,7 +12,7 @@ import {
 	type ServerDataTableSearch,
 	useServerDataTable,
 } from "@/hooks/DataTable/useServerDataTable";
-import { type ListMetaParams } from "@/routing";
+import { type ListMetaParams } from "@/search-params";
 
 export type { ColumnDef, TableOptions };
 
