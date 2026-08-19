@@ -1,7 +1,8 @@
 import { z } from "zod";
 
-import { createSortableSearchSchema, ListSearchSchema } from "@/routing/search";
 import { PlayerField, PlayerPosition } from "@/types";
+
+import { createSortableSearchSchema, ListSearchSchema } from "./search";
 
 export const PlayersSearchSchema = ListSearchSchema.extend({
 	position: z.enum(PlayerPosition).optional().catch(undefined),
