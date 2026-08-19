@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { integer, pgTable, timestamp } from "drizzle-orm/pg-core";
 
 import { players } from "./player";
@@ -22,3 +23,21 @@ export const squadMemberships = pgTable("squad_memberships", {
 	joinedAt: timestamp({ withTimezone: true }).notNull(),
 	leftAt: timestamp({ withTimezone: true }),
 });
+
+export const squadMembershipsRelations = relations(
+	squadMemberships,
+	({ one }) => ({
+		player: one(players, {
+			fields: [squadMemberships.playerId],
+			references: [players.id],
+		}),
+		team: one(teams, {
+			fields: [squadMemberships.teamId],
+			references: [teams.id],
+		}),
+		season: one(seasons, {
+			fields: [squadMemberships.seasonId],
+			references: [seasons.id],
+		}),
+	}),
+);
