@@ -59,11 +59,14 @@ src/
 │   │   └── competitions.ts
 │   └── players/
 │       └── players.ts
-├── routing/                    # shared search/pagination schemas (routes' loaderDeps/validateSearch)
+├── routing/                    # shared search/pagination schemas (routes' validateSearch — no loaderDeps, see gotcha #1)
 │   ├── search.ts                    # ListSearchSchema, ListMetaSchema
 │   └── player.ts                    # PlayersSearchSchema (extends search.ts)
 ├── types/                      # domain-level types not tied to one route
 │   └── enums.ts                     # PlayerPosition (ADR 0018)
+├── hooks/                      # cross-file (not yet cross-entity) shared hooks
+│   └── DataTable/
+│       └── useServerDataTable.ts    # MRT state <-> URL search-param sync
 ├── components/
 │   ├── pages/                  # one folder per route's page component
 │   │   ├── competitions/
@@ -75,7 +78,9 @@ src/
 │   └── common/                 # genuinely shared, second-consumer-gated
 │       ├── DevTools.tsx
 │       ├── GenericPending.tsx       # loading state, parameterized by title
-│       └── GenericError.tsx         # error state, parameterized by title
+│       ├── GenericError.tsx         # error state, parameterized by title
+│       └── DataTable/
+│           └── DataTable.tsx        # mantine-react-table wrapper, server-driven pagination/sort/filter
 ├── config/                     # environment.ts (MODE-based isDev())
 ├── lib/                        # api/ (client, types/), query-client.ts, theme.ts
 └── main.tsx
@@ -83,7 +88,7 @@ src/
 
 `GenericPending`/`GenericError` (superseding the earlier per-screen `-index-page-states.tsx`/`-players-page-states.tsx`) and the generic `list()`/`listQueryOptions()` pair moved query options out of `routes/-queries/` once a second entity made the fetch+parse duplication real and identical across screens — see `docs/adr/0016-wretch-for-api-client.md` for why this stays two small functions, not a generic CRUD/entity-map engine. Both live in `queries/common/`, not `lib/api/` — `list()` does `safeParse` against a Zod schema, which ADR 0016 scopes out of `lib/api/`'s pure-transport layer; `lib/api/` builds the request (base URL, `/api/v1` version prefix, headers, error mapping) and hands back an unvalidated body.
 
-`src/hooks/` still appears **when a second consumer needs it** — matching what every official example does, rather than pre-creating an empty directory.
+`src/hooks/` appears **when a second consumer needs it** — matching what every official example does, rather than pre-creating an empty directory. First real instance landed 2026-08-19: `src/hooks/DataTable/useServerDataTable.ts`, shared between `DataTable`'s pagination/sorting/filter-change handlers and the players route's URL search-param sync — not yet a second entity's consumer, but already a second _consumer_ within the one entity (the hook and `DataTable.tsx` itself both need it).
 
 ### Deferred, with triggers
 
@@ -119,35 +124,38 @@ This never made the shipped index screen wrong — plain `useQuery` worked, and 
 ### Per-route pattern
 
 ```tsx
-// queries/players/players.ts
-export const playersQueryOptions = (params: PlayersParams) =>
-  queryOptions({
-    queryKey: ["players", params],
-    queryFn: ({ signal }) => fetchPlayers(params, signal),
-  });
+// queries/players/players.ts — generic listQueryOptions() over players.ts's own list()
 
-// routes/players/index.tsx
+// routes/players/index.tsx — as actually shipped 2026-08-19; no loaderDeps, see gotcha #1
 export const Route = createFileRoute("/players/")({
-  validateSearch: playerSearchSchema, // Zod 4 directly — no adapter
-  loaderDeps: ({ search: { page, season } }) => ({ page, season }),
-  loader: ({ context: { queryClient }, deps }) =>
-    queryClient.ensureQueryData(playersQueryOptions(deps)),
-  component: PlayersPage,
-  pendingComponent: PlayersSkeleton,
-  errorComponent: PlayersError,
+  validateSearch: PlayersSearchSchema,
+  loader: ({ context: { queryClient }, location }) =>
+    queryClient.ensureQueryData(
+      playersListQueryOptions(PlayersSearchSchema.parse(location.search)),
+    ),
+  component: PlayersList,
+  pendingComponent: () => <GenericPending title="Players" />,
+  errorComponent: ({ error }) => <GenericError error={error} title="Players" />,
+});
+
+// components/pages/players/PlayersList.tsx — component owns reactivity independently
+const search = routeApi.useSearch();
+const { data: playersResponse, isFetching } = useQuery({
+  ...playersListQueryOptions(search),
+  placeholderData: keepPreviousData,
 });
 ```
 
 **Adopt now: `queryOptions()` factories**, built on `src/queries/common/query-options.ts`'s generic `listQueryOptions()`, one file per entity under `src/queries/<entity>/`. Highest value-to-cost item available — it is the single definition shared between a loader and a component, and it is already justified at one query. **Correction 2026-08-18**: the original plan here was hierarchical, human-chosen keys (`["players", "list", filters]` / `["players", "detail", id]`); the generic factory that shipped instead derives `queryKey` from the request itself (`[path, pathParams, queryParams]`). Callers pass a bare resource path (`"players"`, not `"/api/v1/players"` — `lib/api`'s `getPathWithPrefix` adds the version prefix), so `queryKey[0]` is still the plain entity name and `invalidateQueries({ queryKey: ["players"] })` matches every `players` query regardless of filters — prefix invalidation works. What it still can't do is express a key shaped differently from the request, e.g. gotcha #9's `["players", "compare", { ids, season }]` for `/players/compare`, which isn't a `path`/`pathParams`/`queryParams` shape at all. Revisit if that need becomes real.
 
-| Screen                | Pattern                                                                                         |
-| --------------------- | ----------------------------------------------------------------------------------------------- |
-| Dashboard             | loader + `ensureQueryData` for the summary; unawaited `prefetchQuery` for leaders               |
-| Players (paginated)   | `loaderDeps` + `useSuspenseQuery`, same as everything else; `pendingMs` governs — see gotcha #1 |
-| Player detail         | loader + `useSuspenseQuery`                                                                     |
-| Compare               | search params as source of truth; **one** query over the whole id list — see gotcha #9          |
-| Competitions / detail | loader awaits the competition; unawaited `prefetchQuery` for fixtures                           |
-| Match report          | loader awaits the header only; prefetch the rest unawaited                                      |
+| Screen                | Pattern                                                                                       |
+| --------------------- | --------------------------------------------------------------------------------------------- |
+| Dashboard             | loader + `ensureQueryData` for the summary; unawaited `prefetchQuery` for leaders             |
+| Players (paginated)   | No `loaderDeps`; component-owned `useQuery` + `keepPreviousData` — see gotcha #1's correction |
+| Player detail         | loader + `useSuspenseQuery`                                                                   |
+| Compare               | search params as source of truth; **one** query over the whole id list — see gotcha #9        |
+| Competitions / detail | loader awaits the competition; unawaited `prefetchQuery` for fixtures                         |
+| Match report          | loader awaits the header only; prefetch the rest unawaited                                    |
 
 ### Gotchas that must not be discovered during implementation
 
@@ -157,9 +165,11 @@ export const Route = createFileRoute("/players/")({
 
    **Known, accepted limitation, not yet mitigated:** if a loader-driven navigation _does_ exceed `pendingMs`, `pendingComponent` fully replaces the route's rendered tree — including the filters row — since `/players`' `pendingComponent` is a full-page swap, same as every other screen's. A user mid-keystroke on a slow connection would see the search input unmount and remount empty rather than keep typing into it. Fixing this properly means splitting the shell (title + filters, always mounted) from the results region (table/pagination, in a nested `Suspense`) — out of scope for the first paginated screen; revisit if real usage against a slower (hosted) API shows it firing in practice.
 
-   **Decision: keep `page` in `loaderDeps` and use `useSuspenseQuery`, same as every other screen** — one uniform pattern, and the default threshold already delivers what `keepPreviousData` was wanted for. Tune `pendingMs` upward if the API proves slow, and prefer a subtle inline `useRouterState({ select: (s) => s.isLoading })` spinner over a full skeleton. **Escape hatch, with a trigger:** if the players list measurably and consistently exceeds `pendingMs`, drop `page` from `loaderDeps` so the component owns pagination — at which point `useQuery` + `keepPreviousData` genuinely does work. That trade loses correct per-page preloading.
+   **Superseded 2026-08-19 — the decision below shipped, but the premise above is wrong, not just overtaken.** The claim that "the query key never changes while the component is mounted... swapping `useSuspenseQuery` → `useQuery` changes nothing" assumed the loader is the only thing that reads `search`. It isn't: `PlayersList` also calls `routeApi.useSearch()` directly, which is reactive independently of the loader. On a filter/sort/page change the component's own query key changes **while mounted**, so `useSuspenseQuery` throws immediately and the nearest Suspense boundary — the route's `pendingComponent`, a full-page swap — fires, exactly the "search input unmounts mid-keystroke" failure this gotcha already flagged as a known limitation in the loader-driven case. This was found empirically while root-causing a real bug (`onColumnFiltersChange` was silently resetting a deep-linked `page` back to 1 on mount — traced to MRT's own filter-state sync, not this mechanism, but the investigation is what surfaced the mount-time throw), then confirmed against TanStack Router/Query source. The **fix that shipped**: drop `loaderDeps` and `page`/filters/sort from it entirely, keep the loader as a one-time `ensureQueryData` warm-up on initial navigation only, and let the component own all subsequent reactivity via `useQuery` + `placeholderData: keepPreviousData` (not `useSuspenseQuery`) — the table body now stays mounted with an in-place progress bar (`state.showProgressBars: isFetching`) instead of a full-page pending swap. Verified live: rapid page/filter/sort changes show no flash, no unmount, network tab confirms one request per change. This is the same outcome the original "Decision" line below reached, but the mechanism and the reasoning that gets you there are different — the old prose is left in place, struck through in spirit, because it's a documented case of a plausible-sounding argument being wrong until traced through real usage, which is worth keeping as a record.
 
-2. **Loaders do not re-run on search-param change unless declared in `loaderDeps`.** Omit it and page 2 silently serves page 1's data.
+   **Decision (superseded, see above): ~~keep `page` in `loaderDeps` and use `useSuspenseQuery`, same as every other screen~~** — one uniform pattern, and the default threshold already delivers what `keepPreviousData` was wanted for. Tune `pendingMs` upward if the API proves slow, and prefer a subtle inline `useRouterState({ select: (s) => s.isLoading })` spinner over a full skeleton. ~~**Escape hatch, with a trigger:** if the players list measurably and consistently exceeds `pendingMs`, drop `page` from `loaderDeps` so the component owns pagination — at which point `useQuery` + `keepPreviousData` genuinely does work.~~ **This is what actually shipped — not on a measured-slowness trigger, but because the mount-time-throw mechanism above made it correctness-critical, not just an optimization.** That trade loses correct per-page preloading, which Players does not currently do (`defaultPreload` is still unset, gotcha #4).
+
+2. **Loaders do not re-run on search-param change unless declared in `loaderDeps`.** True for state the _loader_ owns. Players sidesteps this rather than hitting it: the loader only warms the initial `search`, and the component's own `useQuery` — not the loader — is what re-fetches on every subsequent change, so there's no loader-owned page-2-serves-page-1 case to trigger here. Still real for a screen that keeps pagination in `loaderDeps`.
 3. **Never return the whole `search` object from `loaderDeps`** — documented as a common mistake. A client-only toggle would refetch the server.
 4. **`defaultPreload` is `false` by default** — nothing prefetches on hover until set.
 5. **`defaultPreloadStaleTime: 0`** is required when Query owns the cache, or Router's 30 s preload window and Query's `staleTime` disagree.
@@ -269,10 +279,10 @@ Three states, not two. **"Trigger already met"** is the honest middle: the condi
 | 3   | Router context + provider rewiring               | ✅ done  | Landed 2026-08-16 — see `docs/plans/2026-08-15-router-query-context.md`                                                                                                                                                                        |
 | 4   | Default `staleTime` (5 min)                      | ✅ done  | Landed with #3. Root error boundary + `notFoundComponent` deliberately split out as error-surface concerns — still to do                                                                                                                       |
 | 5   | `queryOptions()` factories, request-derived keys | ✅ done  | `queries/competitions/competitions.ts`, landed with #3; generalized into `queries/common/list.ts` + `queries/common/query-options.ts`'s `listQueryOptions()` 2026-08-18; see §2's correction note — keys are request-derived, not hierarchical |
-| 6   | Search-param state                               | 🔔 fired | Players is build-order step 1 and needs pagination + filters. Sequence it in.                                                                                                                                                                  |
+| 6   | Search-param state                               | ✅ done  | Landed with the Players screen, 2026-08-17 through 2026-08-19 — `PlayersSearchSchema`, page/search/position/sort all in the URL                                                                                                                |
 | 7   | API client (hand-written wretch, not generated)  | ✅ done  | Landed 2026-08-17 — see [ADR 0016](../adr/0016-wretch-for-api-client.md)                                                                                                                                                                       |
 | 8   | `src/features/<domain>/`                         | 🔔 fired | The players branch is 3 routes on one entity — the stated trigger. Introduce for **that domain only**.                                                                                                                                         |
-| 9   | `src/components/pages/<feature>/`                | ✅ done  | Superseded the second-consumer trigger — a route's page component always splits out, for testability. `src/components/common/`, `src/hooks/` still second-consumer-gated                                                                       |
+| 9   | `src/components/pages/<feature>/`                | ✅ done  | Superseded the second-consumer trigger — a route's page component always splits out, for testability. `src/components/common/` still second-consumer-gated; `src/hooks/` trigger fired 2026-08-19, see §2                                      |
 | 10  | First Zustand store                              | ⏳ defer | First client-only cross-route state. Navbar `opened` is the likely first.                                                                                                                                                                      |
 | 11  | Import-boundary enforcement                      | ⏳ defer | Lands with #8, but **only after** a deliberately-violating import proves Biome errors                                                                                                                                                          |
 | 12  | Feature-Sliced Design                            | ❌ no    | Not this app                                                                                                                                                                                                                                   |
