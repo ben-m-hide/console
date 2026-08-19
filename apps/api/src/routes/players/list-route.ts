@@ -1,16 +1,17 @@
 import { players } from "@console-next/db/schema";
 import { PlayerSchema } from "@console-next/shared";
 import { createRoute, type OpenAPIHono, z } from "@hono/zod-openapi";
-import { and, asc, count, eq, ilike, type SQL } from "drizzle-orm";
+import { asc, count } from "drizzle-orm";
 
-import { db } from "../db";
+import { db } from "../../db";
 import {
 	buildPageMeta,
+	buildPlayerFilters,
 	DEFAULT_PAGE_SIZE,
 	MAX_PAGE_SIZE,
 	resolvePagination,
 	resolveSort,
-} from "./build-players-query";
+} from "./list-query";
 
 const PlayerPageMetaSchema = z
 	.object({
@@ -47,7 +48,7 @@ const PlayerListQuerySchema = z.object({
 			param: { name: "position", in: "query" },
 			example: "Midfielder",
 		}),
-	// Plain optional strings — see parsePositiveInteger in build-players-query.ts
+	// Plain optional strings — see parsePositiveInteger in list-query.ts
 	// for why not z.coerce.number().catch().
 	page: z
 		.string()
@@ -81,7 +82,7 @@ const PlayerListQuerySchema = z.object({
 		}),
 });
 
-export const playersRoute = createRoute({
+export const playersListRoute = createRoute({
 	method: "get",
 	path: "/api/v1/players",
 	request: { query: PlayerListQuerySchema },
@@ -95,21 +96,13 @@ export const playersRoute = createRoute({
 	},
 });
 
-export const registerPlayersRoute = (app: OpenAPIHono): void => {
-	app.openapi(playersRoute, async (c) => {
+export const registerPlayersListRoute = (app: OpenAPIHono): void => {
+	app.openapi(playersListRoute, async (c) => {
 		const { search, position, page, pageSize, sort, order } =
 			c.req.valid("query");
 		const pagination = resolvePagination(page, pageSize);
 		const { column, orderBy } = resolveSort(sort, order);
-
-		const filters: Array<SQL> = [];
-		if (search !== undefined) {
-			filters.push(ilike(players.name, `%${search}%`));
-		}
-		if (position !== undefined) {
-			filters.push(eq(players.position, position));
-		}
-		const where = filters.length > 0 ? and(...filters) : undefined;
+		const where = buildPlayerFilters(search, position);
 
 		const rows = await db
 			.select()

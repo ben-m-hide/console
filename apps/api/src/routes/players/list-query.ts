@@ -1,5 +1,13 @@
 import { players } from "@console-next/db/schema";
-import { type AnyColumn, asc, desc, type SQL } from "drizzle-orm";
+import {
+	type AnyColumn,
+	and,
+	asc,
+	desc,
+	eq,
+	ilike,
+	type SQL,
+} from "drizzle-orm";
 
 export const DEFAULT_PAGE_SIZE = 25;
 export const MAX_PAGE_SIZE = 50;
@@ -95,4 +103,20 @@ export const resolveSort = (
 	const orderBy = rawOrder === "desc" ? desc : asc;
 	const sort: PlayersSort = { column, orderBy };
 	return sort;
+};
+
+// Undefined, not an empty array, when there's nothing to filter on — passed
+// straight into drizzle's `.where()`, which treats undefined as "no filter."
+export const buildPlayerFilters = (
+	search: string | undefined,
+	position: string | undefined,
+): SQL | undefined => {
+	const filters: Array<SQL> = [];
+	if (search !== undefined) {
+		filters.push(ilike(players.name, `%${search}%`));
+	}
+	if (position !== undefined) {
+		filters.push(eq(players.position, position));
+	}
+	return filters.length > 0 ? and(...filters) : undefined;
 };

@@ -2,8 +2,8 @@ import { z } from "zod";
 
 import { SortDirection } from "@/types";
 
-// Mirrors apps/api's default (build-players-query.ts); no shared package
-// exports it across the two runtimes, so it must stay in sync by hand.
+// Mirrors apps/api's default (routes/players/list-query.ts); no shared
+// package exports it across the two runtimes, so it must stay in sync by hand.
 export const DEFAULT_PAGE_SIZE = 25;
 
 interface SortableSearchSchema<FieldEnum extends Record<string, string>> {

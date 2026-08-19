@@ -3,7 +3,11 @@ import { SeasonSchema } from "@console-next/shared";
 import { createRoute, type OpenAPIHono, z } from "@hono/zod-openapi";
 import { asc, desc, eq } from "drizzle-orm";
 
-import { db } from "../db";
+import { db } from "../../db";
+import {
+	POSITIVE_INTEGER_PATTERN,
+	positiveIntegerParamMessage,
+} from "../../lib/positive-integer-param";
 
 // Envelope, not paginated — every list endpoint returns { data }, whether
 // or not it paginates. See PROJECT.md §4.
@@ -14,7 +18,7 @@ const SeasonListResponseSchema = z
 const SeasonListQuerySchema = z.object({
 	competition: z
 		.string()
-		.regex(/^\d+$/, "competition must be a positive integer")
+		.regex(POSITIVE_INTEGER_PATTERN, positiveIntegerParamMessage("competition"))
 		.optional()
 		.openapi({
 			param: { name: "competition", in: "query" },
@@ -22,7 +26,7 @@ const SeasonListQuerySchema = z.object({
 		}),
 });
 
-export const seasonsRoute = createRoute({
+export const seasonsListRoute = createRoute({
 	method: "get",
 	path: "/api/v1/seasons",
 	request: { query: SeasonListQuerySchema },
@@ -37,8 +41,8 @@ export const seasonsRoute = createRoute({
 	},
 });
 
-export const registerSeasonsRoute = (app: OpenAPIHono): void => {
-	app.openapi(seasonsRoute, async (c) => {
+export const registerSeasonsListRoute = (app: OpenAPIHono): void => {
+	app.openapi(seasonsListRoute, async (c) => {
 		const { competition } = c.req.valid("query");
 		const where =
 			competition === undefined

@@ -3,11 +3,12 @@ import { asc, desc } from "drizzle-orm";
 
 import {
 	buildPageMeta,
+	buildPlayerFilters,
 	DEFAULT_PAGE_SIZE,
 	MAX_PAGE_SIZE,
 	resolvePagination,
 	resolveSort,
-} from "./build-players-query";
+} from "./list-query";
 
 describe("resolvePagination", () => {
 	it("defaults when params are absent", () => {
@@ -84,6 +85,24 @@ describe("resolveSort", () => {
 
 	it("falls back to asc for an unrecognized order value", () => {
 		expect(resolveSort("name", "banana").orderBy).toBe(asc);
+	});
+});
+
+describe("buildPlayerFilters", () => {
+	it("returns undefined when neither search nor position is given", () => {
+		expect(buildPlayerFilters(undefined, undefined)).toBeUndefined();
+	});
+
+	it("returns a filter when only search is given", () => {
+		expect(buildPlayerFilters("Saka", undefined)).toBeDefined();
+	});
+
+	it("returns a filter when only position is given", () => {
+		expect(buildPlayerFilters(undefined, "Midfielder")).toBeDefined();
+	});
+
+	it("returns a combined filter when both are given", () => {
+		expect(buildPlayerFilters("Saka", "Midfielder")).toBeDefined();
 	});
 });
 
