@@ -1,12 +1,12 @@
 import { competitions } from "@console-next/db/schema";
-import { CompetitionSchema } from "@console-next/shared";
-import { createRoute, type OpenAPIHono, z } from "@hono/zod-openapi";
+import { CompetitionSchema, listResponseSchema } from "@console-next/shared";
+import { createRoute, type OpenAPIHono } from "@hono/zod-openapi";
 
 import { db } from "../../db";
 
-const CompetitionListResponseSchema = z
-	.object({ data: z.array(CompetitionSchema) })
-	.openapi("CompetitionListResponse");
+const CompetitionListResponseSchema = listResponseSchema(
+	CompetitionSchema,
+).openapi("CompetitionListResponse");
 
 export const competitionsListRoute = createRoute({
 	method: "get",

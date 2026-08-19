@@ -1,6 +1,6 @@
+import { type PaginationMeta } from "@console-next/shared";
 import { type MRT_ColumnDef } from "mantine-react-table";
 
-import { type ListMetaParams } from "@/search-params";
 import { renderWithProviders } from "@/test/render-with-providers";
 
 import { DataTable } from "./DataTable";
@@ -22,7 +22,7 @@ const columns: Array<MRT_ColumnDef<TestRow>> = [
 
 const filterFields = { name: "search" } as const;
 
-const baseMeta: ListMetaParams = {
+const baseMeta: PaginationMeta = {
 	page: 1,
 	pageSize: 25,
 	total: 0,
@@ -31,7 +31,7 @@ const baseMeta: ListMetaParams = {
 
 const renderDataTable = (overrides: {
 	data?: Array<TestRow>;
-	meta?: ListMetaParams;
+	meta?: PaginationMeta;
 	search?: TestSearch;
 }): ReturnType<typeof renderWithProviders> =>
 	renderWithProviders(

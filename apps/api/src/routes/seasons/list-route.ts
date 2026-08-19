@@ -1,5 +1,5 @@
 import { seasons } from "@console-next/db/schema";
-import { SeasonSchema } from "@console-next/shared";
+import { listResponseSchema, SeasonSchema } from "@console-next/shared";
 import { createRoute, type OpenAPIHono, z } from "@hono/zod-openapi";
 import { asc, desc, eq } from "drizzle-orm";
 
@@ -11,9 +11,8 @@ import {
 
 // Envelope, not paginated — every list endpoint returns { data }, whether
 // or not it paginates. See PROJECT.md §4.
-const SeasonListResponseSchema = z
-	.object({ data: z.array(SeasonSchema) })
-	.openapi("SeasonListResponse");
+const SeasonListResponseSchema =
+	listResponseSchema(SeasonSchema).openapi("SeasonListResponse");
 
 const SeasonListQuerySchema = z.object({
 	competition: z
