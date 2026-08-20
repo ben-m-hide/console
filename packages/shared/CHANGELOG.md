@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/ben-m-hide/console/compare/shared-v1.1.0...shared-v1.2.0) (2026-08-20)
+
+
+### Features
+
+* **shared:** add hand-written envelope schema tier, retire duplicates ([3f65039](https://github.com/ben-m-hide/console/commit/3f6503994fc3931b76472e3825f1c2cac50fed7f))
+
 ## [1.1.0](https://github.com/ben-m-hide/console/compare/shared-v1.0.0...shared-v1.1.0) (2026-08-14)
 
 

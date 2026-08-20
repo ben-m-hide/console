@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/ben-m-hide/console/compare/db-v1.0.0...db-v1.1.0) (2026-08-20)
+
+
+### Features
+
+* **db:** define the Drizzle relation graph across core entities ([53cb6db](https://github.com/ben-m-hide/console/commit/53cb6db478061574b99236c6a62c74cf8df27a80))
+* **web:** server-driven players DataTable (sort/filter/pagination, MRT) ([8c67f3a](https://github.com/ben-m-hide/console/commit/8c67f3accfb67c41a00131ff2b83d4437d247e1e))
+
 ## 1.0.0 (2026-08-14)
 
 
