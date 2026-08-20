@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.3.0](https://github.com/ben-m-hide/console/compare/console-next-v1.2.0...console-next-v1.3.0) (2026-08-20)
+
+
+### Features
+
+* **api:** add paginated /players and /seasons routes ([485290a](https://github.com/ben-m-hide/console/commit/485290adc0d07e087621337dc811a0ceab092531))
+* **api:** redirect / to the API reference and guard /doc in CI ([759e3c1](https://github.com/ben-m-hide/console/commit/759e3c11c2a71a0f050f52c3e9b0563bf8ebff7d))
+* **db:** define the Drizzle relation graph across core entities ([53cb6db](https://github.com/ben-m-hide/console/commit/53cb6db478061574b99236c6a62c74cf8df27a80))
+* **shared:** add hand-written envelope schema tier, retire duplicates ([3f65039](https://github.com/ben-m-hide/console/commit/3f6503994fc3931b76472e3825f1c2cac50fed7f))
+* **web:** add the /players screen ([3fedfe5](https://github.com/ben-m-hide/console/commit/3fedfe522aadaaeac4e12ee4b0d51265d30e9a9c))
+* **web:** add web-code-review and web-architecture-review skills ([e1e24c2](https://github.com/ben-m-hide/console/commit/e1e24c23250bd0317d6bc6f076f5a4b55c694bdd))
+* **web:** adopt wretch as the API-client transport layer ([b55d8ab](https://github.com/ben-m-hide/console/commit/b55d8ab09cfeabb76071f8e4ad0afcb79b881214))
+* **web:** fetch competitions from the API on the index page ([6416fb2](https://github.com/ben-m-hide/console/commit/6416fb22a4832e974d5ec0dd56174f428015e8a8))
+* **web:** root error boundary + notFoundComponent ([f1ce1dc](https://github.com/ben-m-hide/console/commit/f1ce1dc605a0e6bef71e4cfefd1f8062e5e5112d))
+* **web:** server-driven players DataTable (sort/filter/pagination, MRT) ([8c67f3a](https://github.com/ben-m-hide/console/commit/8c67f3accfb67c41a00131ff2b83d4437d247e1e))
+
+
+### Bug Fixes
+
+* **api:** include scripts/ in the TypeScript project ([1ca725f](https://github.com/ben-m-hide/console/commit/1ca725f6346c97a9ef73d001878e892a49e46722))
+* **web:** convert all void navigate() sites to async/await ([b416e99](https://github.com/ben-m-hide/console/commit/b416e99dfec5cfd82dfb46bb4440fdec48b4b405))
+* **web:** name the players-route test's inline meta type ([a09add8](https://github.com/ben-m-hide/console/commit/a09add8ab45c4afebb162acb2b5c507cff191d65))
+
 ## [1.2.0](https://github.com/ben-m-hide/console/compare/console-next-v1.1.0...console-next-v1.2.0) (2026-08-14)
 
 

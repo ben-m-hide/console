@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/ben-m-hide/console/compare/ingestion-v1.1.0...ingestion-v1.2.0) (2026-08-20)
+
+
+### Features
+
+* **web:** server-driven players DataTable (sort/filter/pagination, MRT) ([8c67f3a](https://github.com/ben-m-hide/console/commit/8c67f3accfb67c41a00131ff2b83d4437d247e1e))
+
 ## [1.1.0](https://github.com/ben-m-hide/console/compare/ingestion-v1.0.0...ingestion-v1.1.0) (2026-08-14)
 
 
