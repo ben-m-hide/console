@@ -49,7 +49,7 @@ jobs:
       # there is expected, not a gap.
       - name: "Report apps/web Coverage"
         if: always()
-        uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2.12.2
+        uses: davelosert/vitest-coverage-report-action@c4bbc33a89b7ace0e63d35f1f7d4bcee31155a73 # v2.13.0
         with:
           name: "apps/web"
           json-summary-path: "./apps/web/coverage/coverage-summary.json"
@@ -58,7 +58,7 @@ jobs:
 
       - name: "Report apps/api Coverage"
         if: always()
-        uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2.12.2
+        uses: davelosert/vitest-coverage-report-action@c4bbc33a89b7ace0e63d35f1f7d4bcee31155a73 # v2.13.0
         with:
           name: "apps/api"
           json-summary-path: "./apps/api/coverage/coverage-summary.json"
@@ -67,7 +67,7 @@ jobs:
 
       - name: "Report apps/ingestion Coverage"
         if: always()
-        uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2.12.2
+        uses: davelosert/vitest-coverage-report-action@c4bbc33a89b7ace0e63d35f1f7d4bcee31155a73 # v2.13.0
         with:
           name: "apps/ingestion"
           json-summary-path: "./apps/ingestion/coverage/coverage-summary.json"
@@ -76,7 +76,7 @@ jobs:
 
       - name: "Report packages/shared Coverage"
         if: always()
-        uses: davelosert/vitest-coverage-report-action@8b157684c6a6b259b97d45e72b44242865c0f6a5 # v2.12.2
+        uses: davelosert/vitest-coverage-report-action@c4bbc33a89b7ace0e63d35f1f7d4bcee31155a73 # v2.13.0
         with:
           name: "packages/shared"
           json-summary-path: "./packages/shared/coverage/coverage-summary.json"
